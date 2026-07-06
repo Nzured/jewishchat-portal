@@ -19,7 +19,10 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@public/*": ["./public/*"],
+      "@components/*": ["./src/components/*"],
+      "@configs/*": ["./src/configs/*"]
     }
   },
   "include": [
@@ -29,6 +32,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "src/app/external/reports/[report]"  ],
   "exclude": ["node_modules"]
 }

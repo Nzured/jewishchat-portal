@@ -1,0 +1,83 @@
+"use client";
+
+import * as React from "react";
+import { FilterItem, FilterOption } from "@/types/Search";
+
+interface SearchFilterContextType {
+  filters: FilterItem[];
+  appliedFilters: FilterItem[];
+  setFilters: React.Dispatch<React.SetStateAction<FilterItem[]>>;
+  resetFilters: (items: FilterItem[]) => void;
+  updateFilterValue: (key: string, value: string | string[] | null) => void;
+  updateFilterOptions: (key: string, options: FilterOption[]) => void;
+  updateSearchValue: (key: string, searchValue: string) => void;
+  applyFilters: () => void;
+  clearFilter: (key: string) => void;
+}
+
+const SearchFilterContext = React.createContext<SearchFilterContextType | undefined>(undefined);
+
+export function SearchFilterProvider({
+  children,
+  initialFilters,
+}: {
+  children: React.ReactNode;
+  initialFilters?: FilterItem[];
+}) {
+  const [filters, setFilters] = React.useState<FilterItem[]>(initialFilters ?? []);
+  const [appliedFilters, setAppliedFilters] = React.useState<FilterItem[]>(initialFilters ?? []);
+
+  const resetFilters = React.useCallback((items: FilterItem[]) => {
+    setFilters(items);
+    setAppliedFilters(items);
+  }, []);
+
+  const updateFilterValue = React.useCallback((key: string, value: string | string[] | null) => {
+    setFilters((prev) => prev.map((item) => (item.key === key ? { ...item, value } : item)));
+  }, []);
+
+  const updateFilterOptions = React.useCallback((key: string, options: FilterOption[]) => {
+    setFilters((prev) => prev.map((item) => (item.key === key ? { ...item, options } : item)));
+  }, []);
+
+  const updateSearchValue = React.useCallback((key: string, searchValue: string) => {
+    setFilters((prev) => prev.map((item) => (item.key === key ? { ...item, searchValue } : item)));
+  }, []);
+
+  const applyFilters = React.useCallback(() => {
+    setAppliedFilters(filters);
+  }, [filters]);
+
+  const clearFilter = React.useCallback((key: string) => {
+    const clear = (item: FilterItem) =>
+      item.key === key ? { ...item, value: null, searchValue: "" } : item;
+    setFilters((prev) => prev.map(clear));
+    setAppliedFilters((prev) => prev.map(clear));
+  }, []);
+
+  return (
+    <SearchFilterContext.Provider
+      value={{
+        filters,
+        appliedFilters,
+        setFilters,
+        resetFilters,
+        updateFilterValue,
+        updateFilterOptions,
+        updateSearchValue,
+        applyFilters,
+        clearFilter,
+      }}
+    >
+      {children}
+    </SearchFilterContext.Provider>
+  );
+}
+
+export function useSearchFilter() {
+  const context = React.useContext(SearchFilterContext);
+  if (context === undefined) {
+    throw new Error("useSearchFilter must be used within a SearchFilterProvider");
+  }
+  return context;
+}
