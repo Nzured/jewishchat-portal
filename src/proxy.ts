@@ -3,7 +3,7 @@ import { getHomePathForUserType } from "@/lib/auth";
 import { UserType } from "@/types/User";
 import { ACCESS_TOKEN_COOKIE, USER_TYPE_COOKIE } from "./configs/const";
 
-const AUTH_PATHS = ["/login", "/signup"];
+const AUTH_PATHS = ["/login", "/signup", "/forgot-password"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

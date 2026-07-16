@@ -1,17 +1,14 @@
 import { AppShell } from "@/components/layout/app/AppShell";
-import { SearchFilterProvider } from "@/contexts/SearchFilterContext";
 import { UserType } from "@/types/User";
 
-export default function ExternalLayout({
+export default function InternalLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <SearchFilterProvider>
-      <AppShell title="JewishChat" userType={UserType.EXTERNAL}>
-        {children}
-      </AppShell>
-    </SearchFilterProvider>
+    <AppShell title="Internal Portal" userType={UserType.INTERNAL}>
+      {children}
+    </AppShell>
   );
 }

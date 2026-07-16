@@ -4,7 +4,9 @@ import * as React from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { SelectDropdown } from "@/components/ui/SelectDropdown";
+import { Skeleton } from "@/components/ui/Skeleton";
 import {
   Table,
   TableBody,
@@ -55,6 +57,10 @@ interface DataTableProps<T> {
   cardData?: T[];
   /** Mobile-only "load more" trigger, used instead of numbered pagination. */
   infiniteScroll?: DataTableInfiniteScroll;
+  /** Shows skeleton rows/cards instead of `data` while fetching. */
+  loading?: boolean;
+  /** Number of skeleton rows to render while `loading`. Defaults to the page size, or 5. */
+  skeletonRowCount?: number;
 }
 
 function getPageNumbers(current: number, totalPages: number) {
@@ -192,13 +198,16 @@ function DataTable<T>({
   renderCard,
   cardData,
   infiniteScroll,
+  loading = false,
+  skeletonRowCount,
 }: DataTableProps<T>) {
   const rowIds = React.useMemo(
-    () => data.map((row, index) => getRowId(row, index)),
+    () => data?.map((row, index) => getRowId(row, index)),
     [data, getRowId],
   );
   const selectedSet = React.useMemo(() => new Set(selectedIds), [selectedIds]);
   const allSelected = rowIds.length > 0 && rowIds.every((id) => selectedSet.has(id));
+  const skeletonRows = skeletonRowCount ?? pagination?.pageSize ?? 5;
 
   const toggleAll = (checked: boolean) => {
     if (!onSelectedIdsChange) return;
@@ -218,9 +227,19 @@ function DataTable<T>({
     <div data-slot="data-table" className={cn("flex flex-col gap-3", className)}>
       {cardView && (
         <div className="flex flex-col gap-3 md:hidden">
-          {cardView.rows.length === 0 ? (
-            <div className="rounded-xl border border-surface-line bg-surface-card py-10 text-center text-sm text-ink-3">
-              {emptyState}
+          {loading ? (
+            Array.from({ length: skeletonRows }).map((_, index) => (
+              <div
+                key={index}
+                className="flex flex-col gap-2 rounded-xl border border-surface-line bg-surface-card p-4"
+              >
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-1/3" />
+              </div>
+            ))
+          ) : cardView.rows.length === 0 ? (
+            <div className="rounded-xl border border-surface-line bg-surface-card">
+              <EmptyState message={emptyState} className="py-10" />
             </div>
           ) : (
             cardView.rows.map((row, index) => (
@@ -229,7 +248,7 @@ function DataTable<T>({
               </React.Fragment>
             ))
           )}
-          {infiniteScroll && cardView.rows.length > 0 && (
+          {infiniteScroll && !loading && cardView.rows.length > 0 && (
             <DataTableInfiniteScrollSentinel
               hasMore={infiniteScroll.hasMore}
               onLoadMore={infiniteScroll.onLoadMore}
@@ -265,13 +284,25 @@ function DataTable<T>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.length === 0 ? (
+            {loading ? (
+              Array.from({ length: skeletonRows }).map((_, rowIndex) => (
+                <TableRow key={`skeleton-${rowIndex}`} className="hover:bg-transparent">
+                  {selectable && (
+                    <TableCell>
+                      <Skeleton className="size-4" />
+                    </TableCell>
+                  )}
+                  {columns.map((column) => (
+                    <TableCell key={column.id} className={column.cellClassName}>
+                      <Skeleton className="h-4 w-full max-w-32" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : data.length === 0 ? (
               <TableRow className="hover:bg-transparent">
-                <TableCell
-                  colSpan={columns.length + (selectable ? 1 : 0)}
-                  className="py-10 text-center text-sm text-ink-3"
-                >
-                  {emptyState}
+                <TableCell colSpan={columns.length + (selectable ? 1 : 0)}>
+                  <EmptyState message={emptyState} className="py-10" />
                 </TableCell>
               </TableRow>
             ) : (
@@ -305,7 +336,7 @@ function DataTable<T>({
           </TableBody>
         </Table>
 
-        {pagination && (
+        {pagination && !loading && (
           <div className="border-t border-surface-line">
             <DataTablePaginationControls pagination={pagination} />
           </div>

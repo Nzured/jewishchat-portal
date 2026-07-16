@@ -1,37 +1,80 @@
-import { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  AxiosRequestConfig,
+  InternalAxiosRequestConfig,
+} from "axios";
 import { trackPromise } from "react-promise-tracker";
+import { REFRESH_TOKEN_ENDPOINT } from "@/configs/const";
+import { clearAuthSession, getAccessToken, getRefreshToken, updateAccessToken } from "@/lib/auth";
+import type { LoginData } from "@/services/auth/auth.types";
+import { ApiResponse } from "@/types/Common";
 
-const getToken = (): string | null => {
-  if (typeof window === "undefined") return null;
+const handleUnauthorized = () => {
+  if (typeof window === "undefined") return;
+
+  clearAuthSession();
+  window.location.href = "/login";
+};
+
+let refreshPromise: Promise<string | null> | null = null;
+
+const refreshAccessToken = async (): Promise<string | null> => {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return null;
 
   try {
-    const authData = localStorage.getItem("auth");
-    if (!authData) return null;
-
-    const parsed = JSON.parse(authData) as { accessToken?: string };
-    return typeof parsed.accessToken === "string" ? parsed.accessToken : null;
+    const response = await axios.post<ApiResponse<LoginData>>(
+      `${process.env.NEXT_PUBLIC_API_URL || "/api"}${REFRESH_TOKEN_ENDPOINT}`,
+      { refreshToken },
+    );
+    const { accessToken, refreshToken: newRefreshToken } = response.data.data;
+    updateAccessToken(accessToken, newRefreshToken);
+    return accessToken;
   } catch {
     return null;
   }
 };
 
-const handleUnauthorized = () => {
-  if (typeof window === "undefined") return;
+interface RetriableConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
-  localStorage.removeItem("auth");
-  window.location.href = "/login";
+const TRACKED_METHODS = ["get", "post", "put", "patch", "delete"] as const;
+
+// Index of the AxiosRequestConfig argument for each convenience method's
+// (url, config) or (url, data, config) signature.
+const CONFIG_ARG_INDEX: Record<(typeof TRACKED_METHODS)[number], number> = {
+  get: 1,
+  delete: 1,
+  post: 2,
+  put: 2,
+  patch: 2,
 };
 
 export const setupInterceptors = (
   instance: AxiosInstance,
   errorHandler: (error: AxiosError) => Promise<never>,
 ) => {
-  const originalRequest = instance.request.bind(instance);
-  instance.request = (<T = unknown>(config: AxiosRequestConfig) =>
-    trackPromise(originalRequest<T>(config))) as typeof instance.request;
+  // axios.create() binds get/post/put/patch/delete to its own internal
+  // Axios instance, not to `instance` itself, so they never go through
+  // `instance.request` — wrapping that alone silently tracks nothing.
+  // Each convenience method has to be wrapped directly instead. Only
+  // requests that opt in via `{ globalLoader: true }` feed the tracker
+  // that drives the full-screen GlobalLoader overlay.
+  type MethodFn = (...args: unknown[]) => Promise<unknown>;
+  const untypedInstance = instance as unknown as Record<string, MethodFn>;
+  TRACKED_METHODS.forEach((method) => {
+    const original = untypedInstance[method].bind(instance);
+    untypedInstance[method] = (...args: unknown[]) => {
+      const config = args[CONFIG_ARG_INDEX[method]] as AxiosRequestConfig | undefined;
+      const promise = original(...args);
+      return config?.globalLoader ? trackPromise(promise, "global") : promise;
+    };
+  });
 
   instance.interceptors.request.use((config) => {
-    const token = getToken();
+    const token = getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -39,12 +82,30 @@ export const setupInterceptors = (
   });
 
   instance.interceptors.response.use(
-    (response) => response,
-    (error: AxiosError) => {
+    (response) => response.data,
+    async (error: AxiosError) => {
+      const config = error.config as RetriableConfig | undefined;
+
       if (error.response?.status === 401) {
-        handleUnauthorized();
+        if (config && !config._retry) {
+          config._retry = true;
+
+          // Dedup concurrent 401s so only one refresh request is in flight.
+          refreshPromise ??= refreshAccessToken().finally(() => {
+            refreshPromise = null;
+          });
+
+          const newAccessToken = await refreshPromise;
+          if (newAccessToken) {
+            config.headers.Authorization = `Bearer ${newAccessToken}`;
+            return instance.request(config);
+          }
+        }
+        // TO DO
+        // handleUnauthorized();
         return Promise.reject(error);
       }
+
       return errorHandler(error);
     },
   );

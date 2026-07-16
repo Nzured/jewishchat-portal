@@ -52,11 +52,13 @@ export function TransitionLink({
         }),
     );
 
-    void transition.finished.finally(() => {
-      if (direction) {
-        document.documentElement.classList.remove(`nav-${direction}`);
-      }
-    });
+    transition.finished
+      .catch(() => {})
+      .finally(() => {
+        if (direction) {
+          document.documentElement.classList.remove(`nav-${direction}`);
+        }
+      });
   };
 
   return (

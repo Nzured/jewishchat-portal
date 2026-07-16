@@ -1,7 +1,6 @@
 "use client";
 
 import { Bell, Menu } from "lucide-react";
-import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import {
   Popover,
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/Popover";
 import { Separator } from "@/components/ui/Separator";
 import { Typography } from "@/components/ui/Typography";
+import { UserMenu } from "./UserMenu";
 
 export interface AppNotification {
   id: string;
@@ -76,7 +76,7 @@ export function Navbar({ title = "", notifications = [], onMenuClick }: NavbarPr
           </PopoverContent>
         </Popover>
         <Separator orientation="vertical" className="bg-surface-line" />
-        <Avatar name="John Doe" variant="circle" />
+        <UserMenu />
       </div>
     </header>
   );

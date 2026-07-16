@@ -7,8 +7,12 @@ export const PASSWORD_REQUIREMENTS = [
 
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+export const RESEND_OTP_COOLDOWN_SECONDS = 120;
+
 export const ACCESS_TOKEN_COOKIE = "accessToken";
 export const USER_TYPE_COOKIE = "userType";
+
+export const REFRESH_TOKEN_ENDPOINT = "/api/v1/auth/refresh-token";
 
 export const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 
@@ -16,3 +20,6 @@ export const DEFAULT_PAGE = 1;
 export const DEFAULT_PAGE_SIZE = 10;
 export const NOT_APPLICABLE = "N/A";
 export const URL = "https://www.jewishchat.com/";
+export const NAME_PART_ONE = "Jewish";
+export const NAME_PART_TWO = "Chat";
+export const GROUP_SERVICE = "/group-service/api/v1/admin/groups";

@@ -1,15 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Link } from "@/components/ui/Link";
 import { OtpInput } from "@/components/ui/OtpInput";
 import { Typography } from "@/components/ui/Typography";
+import { RESEND_OTP_COOLDOWN_SECONDS } from "@/configs/const";
+import { useAuth } from "@/contexts/AuthContext";
+import { UserType } from "@/types/User";
 
 interface EmailVerificationTabProps {
   email?: string;
   onChangeEmailClick?: () => void;
-  onVerified?: () => void;
+  onVerified?: (userType: UserType) => void;
+}
+
+function formatCooldown(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${minutes}:${secs.toString().padStart(2, "0")}`;
 }
 
 export default function EmailVerificationTab({
@@ -17,36 +26,58 @@ export default function EmailVerificationTab({
   onChangeEmailClick,
   onVerified,
 }: EmailVerificationTabProps) {
+  const { verifyEmail, resendOtp } = useAuth();
   const [otp, setOtp] = useState<string>("");
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [isVerified, setIsVerified] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
+  const [resendCooldown, setResendCooldown] = useState<number>(
+    email ? RESEND_OTP_COOLDOWN_SECONDS : 0,
+  );
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timeout = setTimeout(() => setResendCooldown((prev) => prev - 1), 1000);
+    return () => clearTimeout(timeout);
+  }, [resendCooldown]);
 
   const handleOtpChange = (val: string) => {
     setOtp(val);
     setHasError(false);
 
     if (val.length === 6) {
-      setIsVerifying(true);
-      setTimeout(() => {
-        setIsVerifying(false);
-        if (val === "123456") {
-          setIsVerified(true);
-          setTimeout(() => {
-            if (onVerified) onVerified();
-          }, 500);
-        } else {
-          setHasError(true);
-        }
-      }, 1500);
+      void handleVerify(val);
+    }
+  };
+
+  const handleVerify = async (code: string) => {
+    if (!email) return;
+
+    setIsVerifying(true);
+    try {
+      const userType = await verifyEmail({ email, otp: code });
+      if (userType) {
+        setIsVerified(true);
+        setTimeout(() => onVerified?.(userType), 500);
+      } else {
+        setHasError(true);
+      }
+    } catch (error) {
+      console.error(error);
+      setHasError(true);
+    } finally {
+      setIsVerifying(false);
     }
   };
 
   const handleResend = () => {
+    if (!email || resendCooldown > 0) return;
+
     setOtp("");
     setHasError(false);
     setIsVerified(false);
-    alert("Verification code resent!");
+    setResendCooldown(RESEND_OTP_COOLDOWN_SECONDS);
+    resendOtp(email).catch((error) => console.error(error));
   };
 
   return (
@@ -101,16 +132,16 @@ export default function EmailVerificationTab({
         </div>
       )}
 
-      {/* Footer / Resend details */}
       <div className="flex flex-col gap-2.5 mt-2">
         <Typography variant="p" className="text-sm text-ink-3">
           Didn&apos;t get a code?{" "}
           <button
             type="button"
             onClick={handleResend}
-            className="font-medium text-brand-green underline underline-offset-4 hover:text-brand-deep cursor-pointer"
+            disabled={resendCooldown > 0}
+            className="font-medium text-brand-green underline underline-offset-4 hover:text-brand-deep cursor-pointer disabled:cursor-not-allowed disabled:text-ink-4 disabled:no-underline disabled:hover:text-ink-4"
           >
-            Resend
+            {resendCooldown > 0 ? `Resend in ${formatCooldown(resendCooldown)}` : "Resend"}
           </button>
         </Typography>
         <Typography variant="p" className="text-sm text-ink-4">

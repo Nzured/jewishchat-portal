@@ -5,6 +5,7 @@ import AuthIllustration from "@/components/layout/auth/AuthIllustration";
 import { Tabs } from "@/components/ui/Tabs";
 import { TabsHeader } from "@/components/ui/TabsHeader";
 import { cn } from "@/lib/utils";
+import { UserType } from "@/types/User";
 import EmailVerificationTab from "./_components/EmailVerificationTab";
 import Form from "./_components/Form";
 import OtpVerificationSuccess from "./_components/OtpVerificationSuccess";
@@ -18,8 +19,8 @@ export default function SignupPage() {
   const [activeTab, setActiveTab] = useState("details");
   const [email, setEmail] = useState("");
   const [isVerified, setIsVerified] = useState(false);
+  const [userType, setUserType] = useState<UserType | null>(null);
   const [containerHeight, setContainerHeight] = useState<number | "auto">("auto");
-
   const detailsRef = useRef<HTMLDivElement>(null);
   const verifyRef = useRef<HTMLDivElement>(null);
 
@@ -66,8 +67,8 @@ export default function SignupPage() {
               >
                 <div ref={detailsRef} className="w-1/2 flex-shrink-0 pr-4">
                   <Form
-                    onSuccess={(data) => {
-                      setEmail(data.email || "");
+                    onSuccess={(email) => {
+                      setEmail(email);
                       setActiveTab("verify");
                     }}
                   />
@@ -82,9 +83,13 @@ export default function SignupPage() {
                     )}
                   >
                     <EmailVerificationTab
+                      key={email}
                       email={email}
                       onChangeEmailClick={() => setActiveTab("details")}
-                      onVerified={() => setIsVerified(true)}
+                      onVerified={(verifiedUserType) => {
+                        setUserType(verifiedUserType);
+                        setIsVerified(true);
+                      }}
                     />
                   </div>
                   <div
@@ -95,7 +100,7 @@ export default function SignupPage() {
                         : "opacity-100 translate-x-0 relative",
                     )}
                   >
-                    {isVerified && <OtpVerificationSuccess />}
+                    {isVerified && userType && <OtpVerificationSuccess userType={userType} />}
                   </div>
                 </div>
               </div>

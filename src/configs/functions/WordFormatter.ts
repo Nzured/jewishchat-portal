@@ -1,7 +1,9 @@
+import { NOT_APPLICABLE } from "../const";
+
 export const wordFormatter = (str: string | null | undefined): string => {
   //this outputs string values like "FY_3", like "Fy 3"
   if (!str || typeof str !== "string") {
-    return "";
+    return NOT_APPLICABLE;
   }
 
   const words = str.split("_");
@@ -19,7 +21,7 @@ export const wordFormatter = (str: string | null | undefined): string => {
 export const dashRemover = (str: string | null | undefined): string => {
   //this outputs string values like "FY_3", like "FY 3"
   if (!str || typeof str !== "string") {
-    return "";
+    return NOT_APPLICABLE;
   }
 
   const words = str.split("_");

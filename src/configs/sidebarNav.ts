@@ -4,26 +4,26 @@ import { UserType } from "@/types/User";
 
 const ADMIN_NAV_SECTIONS: SidebarNavSection[] = [
   {
-    items: [{ label: "Dashboard", href: "/external", icon: LayoutGrid }],
+    items: [{ label: "Dashboard", href: "/internal", icon: LayoutGrid }],
   },
   {
     label: "Users",
     items: [
-      { label: "User Management", href: "/external/users", icon: Users },
-      { label: "Role Management", href: "/external/roles", icon: UserCog },
+      { label: "User Management", href: "/internal/users", icon: Users },
+      { label: "Role Management", href: "/internal/roles", icon: UserCog },
     ],
   },
   {
     label: "Manage",
     items: [
-      { label: "Group Management", href: "/external/groups", icon: MessageSquare },
-      { label: "Report Management", href: "/external/reports", icon: Flag },
-      { label: "Category Management", href: "/external/categories", icon: Tag },
+      { label: "Group Management", href: "/internal/groups", icon: MessageSquare },
+      { label: "Report Management", href: "/internal/reports", icon: Flag },
+      { label: "Category Management", href: "/internal/categories", icon: Tag },
     ],
   },
   {
     label: "System",
-    items: [{ label: "Bulk Update", href: "/external/bulk-update", icon: Upload }],
+    items: [{ label: "Bulk Update", href: "/internal/bulk-update", icon: Upload }],
   },
 ];
 
