@@ -66,8 +66,8 @@ const columns: DataTableColumn<UserGroupEntry>[] = [
     ),
   },
   {
-    id: "views",
-    header: "Views",
+    id: "members",
+    header: "Members",
     headerClassName: "text-right",
     cellClassName: "text-right",
     cell: (row) => (
@@ -79,6 +79,15 @@ const columns: DataTableColumn<UserGroupEntry>[] = [
 ];
 
 export default function UserGroupsSection({ groups }: UserGroupsSectionProps) {
+  const entries: UserGroupEntry[] = groups.map((group) => ({
+    id: group.id,
+    groupName: group.groupName,
+    path: group.path,
+    category: group.mainCategory,
+    status: group.status,
+    views: group.memborCount,
+  }));
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -90,7 +99,7 @@ export default function UserGroupsSection({ groups }: UserGroupsSectionProps) {
         </Typography>
       </CardHeader>
 
-      <DataTable columns={columns} data={groups} getRowId={(row) => row.id} />
+      <DataTable columns={columns} data={entries} getRowId={(row) => row.id} />
     </Card>
   );
 }
