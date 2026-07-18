@@ -16,7 +16,6 @@ export interface UserRef {
 }
 
 export interface User extends UserTableData {
-  id: number | string;
   uuid: string;
   emailVerified: boolean;
   permissions: string[];
@@ -24,6 +23,7 @@ export interface User extends UserTableData {
   // lastActive: string;
   // addedGroups: Group[];
   userType: UserType;
+  roles: string[];
 }
 
 export interface UserTableData {

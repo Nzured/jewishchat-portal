@@ -27,6 +27,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
     const response = await axios.post<ApiResponse<LoginData>>(
       `${process.env.NEXT_PUBLIC_API_URL || "/api"}${REFRESH_TOKEN_ENDPOINT}`,
       { refreshToken },
+      { headers: { Authorization: `Bearer ${getAccessToken() ?? ""}` } },
     );
     const { accessToken, refreshToken: newRefreshToken } = response.data.data;
     updateAccessToken(accessToken, newRefreshToken);
@@ -100,9 +101,10 @@ export const setupInterceptors = (
             config.headers.Authorization = `Bearer ${newAccessToken}`;
             return instance.request(config);
           }
+
+          handleUnauthorized();
+          return Promise.reject(error);
         }
-        // TO DO
-        // handleUnauthorized();
         return Promise.reject(error);
       }
 

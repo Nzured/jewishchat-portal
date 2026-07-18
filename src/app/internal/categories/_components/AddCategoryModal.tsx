@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { Globe, Link, Pencil, Plus, X } from "lucide-react";
+import { useForm, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/Field";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import {
   Modal,
@@ -18,19 +19,20 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Typography } from "@/components/ui/Typography";
 import { URL } from "@/configs/const";
 import { Category } from "@/types/Category";
+import { useCategories } from "../_context/CategoryContext";
 import { DEFAULT_ICON_NAMES } from "./categoryIcons";
 import { IconPicker } from "./IconPicker";
 
 const DEFAULT_ICON_NAME: string = DEFAULT_ICON_NAMES[0];
 
+interface CategoryFormValues {
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+}
+
 interface AddCategoryModalProps {
-  onSubmit: (category: {
-    id?: string;
-    name: string;
-    slug: string;
-    description: string;
-    icon: string;
-  }) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
   category?: Category | null;
@@ -44,42 +46,64 @@ function slugify(value: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-export function AddCategoryModal({ onSubmit, open, setOpen, category }: AddCategoryModalProps) {
+function defaultValuesFor(category?: Category | null): CategoryFormValues {
+  return {
+    name: category?.name ?? "",
+    slug: category?.slug ?? "",
+    description: category?.description ?? "",
+    icon: category?.icon ?? DEFAULT_ICON_NAME,
+  };
+}
+
+export function AddCategoryModal({ open, setOpen, category }: AddCategoryModalProps) {
   const isEditing = category != null;
+  const [slugEdited, setSlugEdited] = React.useState(isEditing);
+  const { createCategory, updateCategory } = useCategories();
 
-  const [name, setName] = React.useState(category?.name ?? "");
-  const [slug, setSlug] = React.useState(category?.slug ?? "");
-  const [slugEdited, setSlugEdited] = React.useState(category != null);
-  const [description, setDescription] = React.useState(category?.description ?? "");
-  const [iconName, setIconName] = React.useState(category?.icon ?? DEFAULT_ICON_NAME);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    setValue,
+    formState: { errors },
+  } = useForm<CategoryFormValues>({
+    defaultValues: defaultValuesFor(category),
+    mode: "onChange",
+  });
 
-  // Reset/populate the form when the dialog transitions to open, following React's
-  // guidance for adjusting state in response to prop changes: do it synchronously
-  // during render (guarded against a tracked previous value) rather than in an effect.
+  const slug = useWatch({ control, name: "slug" });
+  const icon = useWatch({ control, name: "icon" });
+
   const [prevOpen, setPrevOpen] = React.useState(open);
   if (open !== prevOpen) {
     setPrevOpen(open);
     if (open) {
-      setName(category?.name ?? "");
-      setSlug(category?.slug ?? "");
-      setSlugEdited(category != null);
-      setDescription(category?.description ?? "");
-      setIconName(category?.icon ?? DEFAULT_ICON_NAME);
+      setSlugEdited(isEditing);
+      reset(defaultValuesFor(category));
     }
   }
 
-  const handleNameChange = (value: string) => {
-    setName(value);
-    if (!slugEdited) setSlug(slugify(value));
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+    if (!next) reset(defaultValuesFor(null));
   };
 
-  const handleSubmit = () => {
-    onSubmit({ id: category?.id, name, slug, description, icon: iconName });
-    setOpen(false);
+  const onValid = async (values: CategoryFormValues) => {
+    try {
+      if (isEditing) {
+        await updateCategory(category.id, values);
+      } else {
+        await createCategory(values);
+      }
+      handleOpenChange(false);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
-    <Modal open={open} onOpenChange={setOpen}>
+    <Modal open={open} onOpenChange={handleOpenChange}>
       <ModalContent variant="primary" className="max-w-xl">
         <ModalHeader icon={isEditing ? <Pencil /> : <Plus />}>
           <ModalTitle>{isEditing ? "Edit Category" : "Create Category"}</ModalTitle>
@@ -90,41 +114,52 @@ export function AddCategoryModal({ onSubmit, open, setOpen, category }: AddCateg
           </ModalDescription>
         </ModalHeader>
 
-        <FieldGroup className="gap-4 mt-2">
-          <Field>
-            <FieldLabel required>Category Name</FieldLabel>
-            <Input
-              value={name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              placeholder="Category Name"
-            />
-          </Field>
-          <Field>
-            <FieldLabel required>Slug</FieldLabel>
-            <Input
-              value={slug}
-              onChange={(e) => {
-                setSlugEdited(true);
-                setSlug(slugify(e.target.value));
-              }}
-              placeholder="category-slug"
-              leftIcon={<Link />}
-            />
-            <FieldDescription icon={<Globe />}>{URL + slug + "...."}</FieldDescription>
-          </Field>
-          <Field>
-            <FieldLabel>Description</FieldLabel>
-            <Textarea
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              placeholder="What this category is for...."
-            />
-          </Field>
-          <Field>
-            <FieldLabel required>Category Icon</FieldLabel>
-            <IconPicker value={iconName} onChange={setIconName} />
-          </Field>
-        </FieldGroup>
+        <form id="add-category-form" onSubmit={(e) => void handleSubmit(onValid)(e)}>
+          <FieldGroup className="gap-4 mt-2">
+            <Field data-invalid={!!errors.name}>
+              <FieldLabel required>Category Name</FieldLabel>
+              <Input
+                placeholder="Category Name"
+                {...register("name", {
+                  required: "Category name is required",
+                  onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                    if (!slugEdited) {
+                      setValue("slug", slugify(e.target.value), { shouldValidate: true });
+                    }
+                  },
+                })}
+              />
+              <FieldError errors={[errors.name]} />
+            </Field>
+            <Field data-invalid={!!errors.slug}>
+              <FieldLabel required>Slug</FieldLabel>
+              <Input
+                placeholder="category-slug"
+                leftIcon={<Link />}
+                {...register("slug", {
+                  required: "Slug is required",
+                  onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                    setSlugEdited(true);
+                    setValue("slug", slugify(e.target.value), { shouldValidate: true });
+                  },
+                })}
+              />
+              <FieldDescription icon={<Globe />}>{URL + slug + "...."}</FieldDescription>
+              <FieldError errors={[errors.slug]} />
+            </Field>
+            <Field>
+              <FieldLabel>Description</FieldLabel>
+              <Textarea placeholder="What this category is for...." {...register("description")} />
+            </Field>
+            <Field>
+              <FieldLabel required>Category Icon</FieldLabel>
+              <IconPicker
+                value={icon}
+                onChange={(name) => setValue("icon", name, { shouldValidate: true })}
+              />
+            </Field>
+          </FieldGroup>
+        </form>
 
         <ModalFooter>
           <ModalClose asChild>
@@ -139,8 +174,8 @@ export function AddCategoryModal({ onSubmit, open, setOpen, category }: AddCateg
           </ModalClose>
           <Button
             leftIcon={isEditing ? <Pencil /> : <Plus />}
-            onClick={handleSubmit}
-            disabled={!name || !slug}
+            type="submit"
+            form="add-category-form"
             variant="default"
             color="primary"
           >

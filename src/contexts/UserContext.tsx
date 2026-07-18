@@ -19,9 +19,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null);
   const [isLoading, setIsLoading] = React.useState(() => Boolean(getAccessToken()));
 
-  // Fetch on mount only. The async function is declared and invoked inline so
-  // its setState calls only ever run after the `await`, never synchronously
-  // within the effect body.
   React.useEffect(() => {
     if (!getAccessToken()) return;
 

@@ -44,7 +44,7 @@ function generateUsers(total: number): UserRow[] {
     const name = `${firstName} ${lastName}`;
 
     return {
-      id: `user-${index + 1}`,
+      id: "8cc12192-9f4c-421d-9ba5-fd8f5dd82998",
       name,
       email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${index}@jewishchat.com`,
       mobile:

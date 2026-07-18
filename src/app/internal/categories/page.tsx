@@ -1,30 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useCategories } from "@/app/internal/categories/_context/CategoryContext";
 import AppHeader from "@/components/layout/app/AppHeader";
-import { CategoriesService } from "@/services/group/categories";
 import { Category } from "@/types/Category";
 import { FilterItem } from "@/types/Search";
 import { AddCategoryModal } from "./_components/AddCategoryModal";
-import { ALL_CATEGORIES } from "./_components/categoryData";
 import CategoryTable from "./_components/CategoryTable";
 
 export default function CategoryPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-
-  const fetchAllCategories = async () => {
-    try {
-      const res = await CategoriesService.listCategories();
-      console.log(res);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
-    fetchAllCategories().catch(() => {});
-  }, []);
+  const { categories, categoriesLoading } = useCategories();
 
   const handleModalOpenChange = (nextOpen: boolean) => {
     setModalOpen(nextOpen);
@@ -37,7 +24,7 @@ export default function CategoryPage() {
       label: "Name",
       component: "AUTOSELECT",
       value: null,
-      options: ALL_CATEGORIES.map((category) => ({ label: category.name, value: category.name })),
+      options: categories.map((category) => ({ label: category.name, value: category.name })),
       searchValue: "",
     },
     {
@@ -53,7 +40,7 @@ export default function CategoryPage() {
       <AppHeader
         title="Category Management"
         subtitle="The groups the community browses by. Each category has a public directory page and lives in the sitemap."
-        count={Number(ALL_CATEGORIES.length)}
+        count={Number(categories.length)}
         countLabel="Categories"
         filters={INITIAL_FILTERS}
         buttonLabel="Add Category"
@@ -68,13 +55,14 @@ export default function CategoryPage() {
             setEditingCategory(category);
             setModalOpen(true);
           }}
+          data={categories}
+          loading={categoriesLoading}
         />
       </div>
       <AddCategoryModal
         open={modalOpen}
         setOpen={handleModalOpenChange}
         category={editingCategory}
-        onSubmit={() => {}}
       />
     </>
   );

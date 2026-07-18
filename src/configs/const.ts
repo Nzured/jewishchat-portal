@@ -12,7 +12,7 @@ export const RESEND_OTP_COOLDOWN_SECONDS = 120;
 export const ACCESS_TOKEN_COOKIE = "accessToken";
 export const USER_TYPE_COOKIE = "userType";
 
-export const REFRESH_TOKEN_ENDPOINT = "/api/v1/auth/refresh-token";
+export const REFRESH_TOKEN_ENDPOINT = "api/v1/auth/refresh-token";
 
 export const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 

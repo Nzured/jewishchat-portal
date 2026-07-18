@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRoles } from "@/app/internal/roles/_context/RoleContext";
 import AppHeader from "@/components/layout/app/AppHeader";
+import { wordFormatter } from "@/configs/functions/WordFormatter";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
 import { FilterItem, FilterOption } from "@/types/Search";
 import { AddRoleModal } from "./_components/AddRoleModal";
@@ -39,7 +40,7 @@ export default function RoleListingPage() {
   useEffect(() => {
     const ROLE_NAME_FILTER_OPTIONS: FilterOption[] = Array.from(
       new Set(roles.map((role) => role.name)),
-    ).map((name) => ({ label: name, value: name }));
+    ).map((name) => ({ label: wordFormatter(name), value: name }));
 
     updateFilterOptions("role", ROLE_NAME_FILTER_OPTIONS);
   }, [roles, updateFilterOptions]);

@@ -17,7 +17,7 @@ const nameColumn: DataTableColumn<UserRow> = {
       <Avatar src={row.profilePic} variant="tile" name={row.name} />
       <div className="flex flex-col">
         <Typography variant="small" className="font-semibold text-ink-1">
-          {row.name ?? NOT_APPLICABLE}
+          {(row.firstName ?? "") + " " + (row.lastName ?? "")}
         </Typography>
         <Typography variant="muted">{row.email ?? NOT_APPLICABLE}</Typography>
       </div>
@@ -38,8 +38,8 @@ const actionsColumn: DataTableColumn<UserRow> = {
   cellClassName: "text-right",
   cell: (row) => (
     <div className="flex items-center justify-end gap-1">
-      <Link href={`/external/users/${row.id}`}>
-        <Button variant="icon" size="icon-sm" aria-label={`Manage ${row.name}`}>
+      <Link href={`/internal/users/${row.id}`}>
+        <Button variant="icon" size="icon-sm" aria-label={`Manage ${row.firstName}`}>
           <Settings className="text-ink-3 transition-colors group-hover/button:text-brand-green text-ink-4" />
         </Button>
       </Link>

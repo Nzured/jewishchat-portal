@@ -101,7 +101,7 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const editPermissions = React.useCallback(async (roleId: number, permissionIds: number[]) => {
-    const res = await RoleService.editPermissions(roleId, permissionIds);
+    const res = await RoleService.editPermissions(roleId, { permissionIds: permissionIds });
     setRoles((prev) => prev.map((role) => (role.id === roleId ? res.data : role)));
     return res.data;
   }, []);

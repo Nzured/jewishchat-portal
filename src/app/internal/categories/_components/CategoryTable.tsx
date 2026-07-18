@@ -8,8 +8,8 @@ import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "@/configs/const";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
 import { Category } from "@/types/Category";
 import { CategoryCard } from "./CategoryCard";
-import { ALL_CATEGORIES } from "./categoryData";
 import { getColumns } from "./columns";
+import { useCategories } from "../_context/CategoryContext";
 
 function matchesFilter(row: Category, key: string, value: string | string[] | null) {
   if (value == null || value === "") return true;
@@ -19,12 +19,7 @@ function matchesFilter(row: Category, key: string, value: string | string[] | nu
       return row.name.toLowerCase().includes(String(value).toLowerCase());
     case "slug":
       return row.slug === value;
-    case "groups": {
-      const [min, max] = Array.isArray(value) ? value : [value, ""];
-      if (min && row.groupsCount < Number(min)) return false;
-      if (max && row.groupsCount > Number(max)) return false;
-      return true;
-    }
+
     default:
       return true;
   }
@@ -32,9 +27,12 @@ function matchesFilter(row: Category, key: string, value: string | string[] | nu
 
 interface CategoryTableProps {
   onEdit: (category: Category) => void;
+  data: Category[];
+  loading?: boolean;
 }
 
-export default function CategoryTable({ onEdit }: CategoryTableProps) {
+export default function CategoryTable({ onEdit, data, loading }: CategoryTableProps) {
+  const { deleteCategory } = useCategories();
   const { appliedFilters } = useSearchFilter();
   const [page, setPage] = React.useState(DEFAULT_PAGE);
   const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_SIZE);
@@ -43,10 +41,10 @@ export default function CategoryTable({ onEdit }: CategoryTableProps) {
 
   const filteredCategories = React.useMemo(
     () =>
-      ALL_CATEGORIES.filter((row) =>
+      data?.filter((row) =>
         appliedFilters.every((filter) => matchesFilter(row, filter.key, filter.value)),
       ),
-    [appliedFilters],
+    [appliedFilters, data],
   );
 
   const [prevAppliedFilters, setPrevAppliedFilters] = React.useState(appliedFilters);
@@ -85,7 +83,8 @@ export default function CategoryTable({ onEdit }: CategoryTableProps) {
         data={pageData}
         cardData={mobileData}
         renderCard={renderCard}
-        getRowId={(row) => row.id}
+        getRowId={(row) => String(row.id)}
+        loading={loading}
         pagination={{
           page,
           pageSize,
@@ -120,7 +119,9 @@ export default function CategoryTable({ onEdit }: CategoryTableProps) {
             and its public directory page. Groups in this category will need to be recategorized.
           </>
         }
-        onConfirm={() => {}}
+        onConfirm={() => {
+          if (categoryToDelete) void deleteCategory(categoryToDelete.id);
+        }}
       />
     </>
   );

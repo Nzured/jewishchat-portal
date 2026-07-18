@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Typography } from "./Typography";
 
 const chipVariants = cva(
-  "inline-flex shrink-0 items-center gap-1.5 border px-3 py-1.5 text-sm font-medium transition-colors select-none",
+  "inline-flex shrink-0 items-center justify-start gap-1.5 border px-3 py-1.5 text-sm font-medium transition-colors select-none",
   {
     variants: {
       variant: {
