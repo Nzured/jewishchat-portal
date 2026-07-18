@@ -1,4 +1,5 @@
 import { ApiResponse } from "@/types/Common";
+import { Group } from "@/types/Group";
 import { User, UserType } from "@/types/User";
 import { api } from "../axiosConfig";
 
@@ -17,4 +18,6 @@ export const UserService = {
   fetchAdminUsers: (params: AdminUserSearchParams) =>
     api.get<ApiResponse<User[]>>(`${USER_SERVICE}/admin/users`, { params }),
   getUser: (userId: string) => api.get<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}`),
+  getGroupsByUser: (userId: string) =>
+    api.get<ApiResponse<Group[]>>(`${USER_SERVICE}/admin/users/${userId}/groups`),
 };

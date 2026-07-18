@@ -14,7 +14,7 @@ const nameColumn: DataTableColumn<UserRow> = {
   header: "User Name",
   cell: (row) => (
     <div className="flex items-center gap-3">
-      <Avatar src={row.profilePic} variant="tile" name={row.name} />
+      <Avatar src={row.profilePic} variant="tile" name={row.firstName + row.lastName} />
       <div className="flex flex-col">
         <Typography variant="small" className="font-semibold text-ink-1">
           {(row.firstName ?? "") + " " + (row.lastName ?? "")}
@@ -23,12 +23,6 @@ const nameColumn: DataTableColumn<UserRow> = {
       </div>
     </div>
   ),
-};
-
-const joinedDateColumn: DataTableColumn<UserRow> = {
-  id: "joinedDate",
-  header: "Joined Date",
-  cell: (row) => <Typography variant="small">{row.joinedDate ?? NOT_APPLICABLE}</Typography>,
 };
 
 const actionsColumn: DataTableColumn<UserRow> = {
@@ -59,10 +53,10 @@ export const externalColumns: DataTableColumn<UserRow>[] = [
         </Typography>
         {row.mobile && (
           <Chip
-            label={row.mobileNumberVerified ? "Verified" : "Not Verified"}
+            label={row.whatsappVerified ? "Verified" : "Not Verified"}
             shape="pill"
-            type={row.mobileNumberVerified ? "success" : "neutral"}
-            leftIcon={row.mobileNumberVerified ? <CheckCheck /> : <Minus />}
+            type={row.whatsappVerified ? "success" : "neutral"}
+            leftIcon={row.whatsappVerified ? <CheckCheck /> : <Minus />}
           />
         )}
       </div>
@@ -82,7 +76,6 @@ export const externalColumns: DataTableColumn<UserRow>[] = [
         );
     },
   },
-  joinedDateColumn,
   actionsColumn,
 ];
 
@@ -93,6 +86,5 @@ export const internalColumns: DataTableColumn<UserRow>[] = [
     header: "Role",
     cell: (row) => <Typography variant="small">{row.role ?? NOT_APPLICABLE}</Typography>,
   },
-  joinedDateColumn,
   actionsColumn,
 ];

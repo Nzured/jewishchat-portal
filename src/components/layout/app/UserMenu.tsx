@@ -26,7 +26,7 @@ export function UserMenu() {
 
   const handleMyProfile = () => {
     if (user?.userType === UserType.INTERNAL) {
-      router.push(`/internal/users/${user.id}`);
+      router.push(`/internal/users/${user.uuid}`);
     }
   };
 

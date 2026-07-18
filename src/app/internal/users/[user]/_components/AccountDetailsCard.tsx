@@ -1,14 +1,13 @@
-import { CalendarDays, CheckCheck, Clock, Mail, Minus, Phone } from "lucide-react";
+import { CheckCheck, Mail, Minus, Phone } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Separator } from "@/components/ui/Separator";
 import { Typography } from "@/components/ui/Typography";
 import { NOT_APPLICABLE } from "@/configs/const";
-import { UserRow } from "../../_components/UserRow";
+import { User } from "@/types/User";
 
 interface AccountDetailsCardProps {
-  user: UserRow;
-  lastActive: string;
+  user: User;
 }
 
 interface DetailRowProps {
@@ -31,7 +30,7 @@ function DetailRow({ icon, label, children }: DetailRowProps) {
   );
 }
 
-export default function AccountDetailsCard({ user, lastActive }: AccountDetailsCardProps) {
+export default function AccountDetailsCard({ user }: AccountDetailsCardProps) {
   return (
     <Card>
       <CardHeader>
@@ -55,10 +54,10 @@ export default function AccountDetailsCard({ user, lastActive }: AccountDetailsC
                 {user.mobile}
               </Typography>
               <Chip
-                label={user.mobileNumberVerified ? "Verified" : "Not Verified"}
+                label={user.whatsappVerified ? "Verified" : "Not Verified"}
                 shape="pill"
-                type={user.mobileNumberVerified ? "success" : "neutral"}
-                leftIcon={user.mobileNumberVerified ? <CheckCheck /> : <Minus />}
+                type={user.whatsappVerified ? "success" : "neutral"}
+                leftIcon={user.whatsappVerified ? <CheckCheck /> : <Minus />}
               />
             </>
           ) : (
@@ -66,22 +65,6 @@ export default function AccountDetailsCard({ user, lastActive }: AccountDetailsC
               {NOT_APPLICABLE}
             </Typography>
           )}
-        </DetailRow>
-
-        <Separator />
-
-        <DetailRow icon={<CalendarDays className="size-4" />} label="Joined">
-          <Typography variant="small" className="text-ink-1 font-medium">
-            {user.joinedDate ?? NOT_APPLICABLE}
-          </Typography>
-        </DetailRow>
-
-        <Separator />
-
-        <DetailRow icon={<Clock className="size-4" />} label="Last active">
-          <Typography variant="small" className="text-ink-1 font-medium">
-            {lastActive}
-          </Typography>
         </DetailRow>
       </CardContent>
     </Card>

@@ -4,7 +4,7 @@ import { Chip } from "@/components/ui/Chip";
 import { DataTable, DataTableColumn } from "@/components/ui/DataTable";
 import { Link } from "@/components/ui/Link";
 import { Typography } from "@/components/ui/Typography";
-import { GroupStatus } from "@/types/Group";
+import { Group, GroupStatus } from "@/types/Group";
 
 export interface UserGroupEntry {
   id: string;
@@ -16,7 +16,7 @@ export interface UserGroupEntry {
 }
 
 interface UserGroupsSectionProps {
-  groups: UserGroupEntry[];
+  groups: Group[];
 }
 
 const STATUS_TYPE = {
@@ -66,8 +66,8 @@ const columns: DataTableColumn<UserGroupEntry>[] = [
     ),
   },
   {
-    id: "views",
-    header: "Views",
+    id: "members",
+    header: "Members",
     headerClassName: "text-right",
     cellClassName: "text-right",
     cell: (row) => (
@@ -79,6 +79,15 @@ const columns: DataTableColumn<UserGroupEntry>[] = [
 ];
 
 export default function UserGroupsSection({ groups }: UserGroupsSectionProps) {
+  const entries: UserGroupEntry[] = groups.map((group) => ({
+    id: group.id,
+    groupName: group.groupName,
+    path: group.path,
+    category: group.mainCategory,
+    status: group.status,
+    views: group.memborCount,
+  }));
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -90,7 +99,7 @@ export default function UserGroupsSection({ groups }: UserGroupsSectionProps) {
         </Typography>
       </CardHeader>
 
-      <DataTable columns={columns} data={groups} getRowId={(row) => row.id} />
+      <DataTable columns={columns} data={entries} getRowId={(row) => row.id} />
     </Card>
   );
 }

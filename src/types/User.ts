@@ -29,7 +29,7 @@ export interface User extends UserTableData {
 export interface UserTableData {
   firstName: string;
   lastName: string;
-  joinedDate: string;
+  // joinedDate: string;
   profilePic?: string;
   email: string;
   status: UserStatus;

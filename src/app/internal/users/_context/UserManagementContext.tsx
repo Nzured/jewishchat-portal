@@ -2,12 +2,14 @@
 
 import * as React from "react";
 import { UserService } from "@/services/user/user.service";
+import { Group } from "@/types/Group";
 import { User } from "@/types/User";
 
 interface UserManagementContextType {
   users: User[];
   loading: boolean;
   fetchUserDetails: (userId: string) => Promise<User | undefined>;
+  fetchGroupsByUser: (userId: string) => Promise<Group[] | undefined>;
 }
 
 const UserContext = React.createContext<UserManagementContextType | undefined>(undefined);
@@ -39,8 +41,15 @@ export function UserManagementProvider({ children }: { children: React.ReactNode
     return res.data;
   }, []);
 
+  const fetchGroupsByUser = React.useCallback(async (userId: string) => {
+    if (userId === undefined || userId === null || userId === "") return;
+    const res = await UserService.getGroupsByUser(userId);
+    if (!res || !res.data) throw new Error("No data received");
+    return res.data;
+  }, []);
+
   return (
-    <UserContext.Provider value={{ users, loading, fetchUserDetails }}>
+    <UserContext.Provider value={{ users, loading, fetchUserDetails, fetchGroupsByUser }}>
       {children}
     </UserContext.Provider>
   );
