@@ -8,69 +8,31 @@ import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { Typography } from "@/components/ui/Typography";
-import { GroupStatus } from "@/types/Group";
-import { User, UserStatus } from "@/types/User";
+import { Group } from "@/types/Group";
+import { User, UserStatus, UserType } from "@/types/User";
 import AccountDetailsCard from "./_components/AccountDetailsCard";
-import UserGroupsSection, { UserGroupEntry } from "./_components/UserGroupsSection";
+import UserGroupsSection from "./_components/UserGroupsSection";
 import UserModerationCard from "./_components/UserModerationCard";
 import UserNavigation from "./_components/UserNavigation";
 import { useUserManagementContext } from "../_context/UserManagementContext";
 
-const MOCK_GROUPS: UserGroupEntry[] = [
-  {
-    id: "g1",
-    groupName: "Lakewood Auto Traders",
-    path: "/g/lakewood-auto-traders",
-    category: "Marketplace",
-    status: GroupStatus.ACTIVE,
-    views: 18420,
-  },
-  {
-    id: "g2",
-    groupName: "Lakewood Kallah Fund",
-    path: "/g/lakewood-kallah-fund",
-    category: "Chesed",
-    status: GroupStatus.ACTIVE,
-    views: 9310,
-  },
-  {
-    id: "g3",
-    groupName: "Toms River Carpool",
-    path: "/g/toms-river-carpool",
-    category: "Transport",
-    status: GroupStatus.ACTIVE,
-    views: 4205,
-  },
-  {
-    id: "g4",
-    groupName: "Passaic Produce Co-op",
-    path: "/g/passaic-produce-coop",
-    category: "Food",
-    status: GroupStatus.SUSPENDED,
-    views: 2870,
-  },
-];
-
-const LAST_ACTIVE_OPTIONS = ["2h ago", "5h ago", "1d ago", "3d ago", "Just now", "30m ago"];
-
 export default function UserDetailPage() {
   const params = useParams<{ user: string }>();
   const userId = params.user;
-  // const user = ALL_USERS.find((u) => u.id === userId) ?? ALL_USERS[0];
-  // const index = ALL_USERS.indexOf(user);
-  // const lastActive = LAST_ACTIVE_OPTIONS[index % LAST_ACTIVE_OPTIONS.length];
-  const { fetchUserDetails } = useUserManagementContext();
+  const { fetchUserDetails, fetchGroupsByUser } = useUserManagementContext();
   const [user, setUser] = useState<User | null>(null);
+  const [userGroups, setUserGroups] = useState<Group[] | null>(null);
 
   useEffect(() => {
     if (userId) {
-      fetchUserDetails(userId)
-        .then((res) => {
-          if (res) setUser(res);
+      Promise.all([fetchGroupsByUser(userId), fetchUserDetails(userId)])
+        .then(([groupsRes, userRes]) => {
+          if (groupsRes) setUserGroups(groupsRes);
+          if (userRes) setUser(userRes);
         })
         .catch(() => {});
     }
-  }, [userId, fetchUserDetails]);
+  }, [userId, fetchUserDetails, fetchGroupsByUser]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -107,9 +69,11 @@ export default function UserDetailPage() {
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2 flex flex-col gap-4">
           {user && <AccountDetailsCard user={user} />}
-          {user && <UserGroupsSection groups={MOCK_GROUPS} />}
+          {userGroups && user?.userType === UserType.EXTERNAL && (
+            <UserGroupsSection groups={userGroups} />
+          )}
         </div>
-        <div>{user && <UserModerationCard user={user} />}</div>
+        <div>{user && <UserModerationCard user={{ ...user, id: user.uuid }} />}</div>
       </div>
     </div>
   );

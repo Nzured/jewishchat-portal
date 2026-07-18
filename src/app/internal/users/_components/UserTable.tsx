@@ -16,7 +16,7 @@ function matchesFilter(row: UserRow, key: string, value: string | string[] | nul
 
   switch (key) {
     case "userName":
-      return row.name === value;
+      return row.firstName === value;
     case "email":
       return row.email === value;
     case "status":
@@ -31,7 +31,6 @@ export default function UserTable({ tab }: { tab: UserType }) {
   const [page, setPage] = React.useState(DEFAULT_PAGE);
   const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_SIZE);
   const [mobileCount, setMobileCount] = React.useState(DEFAULT_PAGE_SIZE);
-
   const isInternal = tab === UserType.INTERNAL;
   const columns = isInternal ? internalColumns : externalColumns;
   const renderCard = isInternal

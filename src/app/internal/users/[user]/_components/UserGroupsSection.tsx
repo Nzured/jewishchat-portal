@@ -4,7 +4,7 @@ import { Chip } from "@/components/ui/Chip";
 import { DataTable, DataTableColumn } from "@/components/ui/DataTable";
 import { Link } from "@/components/ui/Link";
 import { Typography } from "@/components/ui/Typography";
-import { GroupStatus } from "@/types/Group";
+import { Group, GroupStatus } from "@/types/Group";
 
 export interface UserGroupEntry {
   id: string;
@@ -16,7 +16,7 @@ export interface UserGroupEntry {
 }
 
 interface UserGroupsSectionProps {
-  groups: UserGroupEntry[];
+  groups: Group[];
 }
 
 const STATUS_TYPE = {
