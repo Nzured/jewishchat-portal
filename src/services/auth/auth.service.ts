@@ -1,0 +1,42 @@
+import { REFRESH_TOKEN_ENDPOINT } from "@/configs/const";
+import { api } from "@/services/axiosConfig";
+import { ApiResponse } from "@/types/Common";
+import type {
+  LoginPayload,
+  LoginResponse,
+  RefreshTokenPayload,
+  RefreshTokenResponse,
+  SignupRequest,
+  SignupResponse,
+  UserTypeResponse,
+  VerifyEmailResponse,
+  VerifyOtpPayload,
+} from "./auth.types";
+
+const AUTH_SERVICE = "/auth-service/api/v1/auth";
+const AUTH_ADMIN_SERVICE = "/auth-service/api/v1/admin/auth";
+
+export const AuthService = {
+  signup: async (payload: SignupRequest) =>
+    api.post<ApiResponse<SignupResponse>>(`${AUTH_SERVICE}/register`, payload, {
+      globalLoader: true,
+    }),
+  verifyEmail: async (payload: VerifyOtpPayload) =>
+    api.post<VerifyEmailResponse>(`${AUTH_SERVICE}/verify-email`, payload),
+  adminLogin: async (payload: LoginPayload) =>
+    api.post<LoginResponse>(`${AUTH_ADMIN_SERVICE}/login`, payload, { globalLoader: true }),
+  refreshToken: async (payload: RefreshTokenPayload) =>
+    api.post<RefreshTokenResponse>(REFRESH_TOKEN_ENDPOINT, payload),
+  getUserType: async (payload: { email: string }) =>
+    api.get<UserTypeResponse>(`${AUTH_SERVICE}/user-type`, { params: { email: payload.email } }),
+  externalLogin: async (payload: LoginPayload) =>
+    api.post<LoginResponse>(`${AUTH_SERVICE}/login`, payload, { globalLoader: true }),
+  resendOtp: async (payload: { email: string }) =>
+    api.post<ApiResponse<void>>(`${AUTH_SERVICE}/resend-otp`, payload),
+  logout: async () =>
+    api.post<ApiResponse<void>>(`${AUTH_SERVICE}/logout`, undefined, { globalLoader: true }),
+  forgotPassword: async (payload: { email: string }) =>
+    api.post<ApiResponse<void>>(`${AUTH_SERVICE}/forgot-password`, payload, {
+      globalLoader: true,
+    }),
+};

@@ -1,14 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import verifiedAnimation from "@public/animations/Verified.json";
 import Lottie from "lottie-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import verifiedAnimation from "@/assets/animations/Verified.json";
 import { Progress } from "@/components/ui/Progress";
 import { Typography } from "@/components/ui/Typography";
+import { getHomePathForUserType } from "@/lib/auth";
+import { UserType } from "@/types/User";
 
-export default function OtpVerificationSuccess() {
+interface OtpVerificationSuccessProps {
+  userType: UserType;
+}
+
+export default function OtpVerificationSuccess({ userType }: OtpVerificationSuccessProps) {
   const [progress, setProgress] = useState(0);
   const [isAnimationDone, setIsAnimationDone] = useState(false);
   const router = useRouter();
@@ -31,11 +37,11 @@ export default function OtpVerificationSuccess() {
     if (progress >= 100 && isAnimationDone) {
       const timeout = setTimeout(() => {
         toast.success("User has successfully signed up");
-        router.push("/");
+        router.push(getHomePathForUserType(userType));
       }, 200);
       return () => clearTimeout(timeout);
     }
-  }, [progress, isAnimationDone, router]);
+  }, [progress, isAnimationDone, router, userType]);
 
   return (
     <div className="flex flex-col items-center justify-center text-center w-full max-w-[320px] mx-auto py-8">

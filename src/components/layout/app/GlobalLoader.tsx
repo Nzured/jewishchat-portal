@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { usePromiseTracker } from "react-promise-tracker";
 
 export function GlobalLoader() {
-  const { promiseInProgress } = usePromiseTracker();
+  const { promiseInProgress } = usePromiseTracker({ area: "global" });
 
   if (!promiseInProgress) return null;
 

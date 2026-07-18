@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { useForm } from "react-hook-form";
 import AuthIllustration from "@/components/layout/auth/AuthIllustration";
 import { TransitionLink } from "@/components/layout/auth/TransitionLink";
 import { Button } from "@/components/ui/Button";
@@ -11,61 +11,69 @@ import { Field, FieldLabel, FieldGroup } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Link } from "@/components/ui/Link";
 import { Typography } from "@/components/ui/Typography";
-import { EMAIL_REGEX } from "@/configs/const";
-import { getHomePathForUserType, setAuthSession } from "@/lib/auth";
-import { UserType } from "@/types/User";
+import { EMAIL_REGEX, NAME_PART_ONE, NAME_PART_TWO } from "@/configs/const";
+import { useAuth } from "@/contexts/AuthContext";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { LoginPayload } from "@/services/auth/auth.types";
+import { VerifyEmailModal } from "./_components/VerifyEmailModal";
+
+const USER_TYPE_CHECK_DEBOUNCE_MS = 400;
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { resolveUserType, login } = useAuth();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setError,
+    formState: { errors },
+  } = useForm<LoginPayload>();
 
-  const clearError = (field: string) => {
-    if (errors[field]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
-  };
+  const email = watch("email");
+  const debouncedEmail = useDebouncedValue(email, USER_TYPE_CHECK_DEBOUNCE_MS);
+  const [pendingVerifyEmail, setPendingVerifyEmail] = useState<string | null>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (!debouncedEmail || !EMAIL_REGEX.test(debouncedEmail)) return;
 
-    const formData = new FormData(e.currentTarget);
-    const newErrors: Record<string, string> = {};
+    void (async () => {
+      setIsCheckingEmail(true);
+      try {
+        await resolveUserType(debouncedEmail);
+      } catch {
+        // resolveUserType already swallows its own errors; nothing to do here.
+      } finally {
+        setIsCheckingEmail(false);
+      }
+    })();
+  }, [debouncedEmail, resolveUserType]);
 
-    const email = formData.get("email") as string;
-    const pass = formData.get("password") as string;
+  const onSubmit = async (data: LoginPayload) => {
+    try {
+      if (!data || !data.email || !data.password) return;
 
-    if (!email) {
-      newErrors.email = "Email is required";
-    } else if (!EMAIL_REGEX.test(email)) {
-      newErrors.email = "Invalid email format";
-    }
+      const userType = await resolveUserType(data.email);
+      if (!userType) {
+        setError("email", {
+          type: "manual",
+          message: "No account found with this email. Please sign up.",
+        });
+        return;
+      }
 
-    if (!pass) {
-      newErrors.password = "Password is required";
-    }
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
-      const payload = Object.fromEntries(formData) as Record<string, string>;
-      console.log("Login Form is valid! Payload:", payload);
-
-      // TODO: replace with the real login API response
-      const accessToken = "mock-access-token";
-      const userType = UserType.EXTERNAL;
-
-      setAuthSession(accessToken, userType);
-      toast.success("User has successfully logged in");
-      router.push(getHomePathForUserType(userType));
+      await login(data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        setPendingVerifyEmail(data.email);
+        return;
+      }
+      console.error(error);
     }
   };
 
   return (
-    <div className="flex flex-col-reverse lg:grid min-h-screen lg:h-screen w-full overflow-x-hidden overflow-y-auto lg:overflow-hidden lg:grid-cols-2">
+    <div className="flex flex-col-reverse justify-end lg:grid lg:justify-normal min-h-screen lg:h-screen w-full overflow-x-hidden overflow-y-auto lg:overflow-hidden lg:grid-cols-2">
       <div className="flex h-full flex-col items-center justify-center px-6 py-8 lg:py-0 overflow-x-hidden [view-transition-name:auth-form]">
         <div className="w-full max-w-[420px]">
           <div className="mb-8 flex flex-col gap-2">
@@ -76,9 +84,9 @@ export default function LoginPage() {
               Log In
             </Typography>
             <Typography variant="h2" className="font-semibold text-ink-1 leading-[1.2]">
-              Welcome back to Jewish
+              Welcome back to {NAME_PART_ONE}
               <Typography as="span" className="font-serif italic font-normal text-brand-green">
-                chat
+                {NAME_PART_TWO.toLowerCase()}
               </Typography>
             </Typography>
             <Typography variant="p" className="text-sm text-ink-3">
@@ -86,19 +94,22 @@ export default function LoginPage() {
             </Typography>
           </div>
 
-          <form onSubmit={handleSubmit} noValidate>
+          <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} noValidate>
             <FieldGroup className="gap-5">
               <Field>
                 <FieldLabel required htmlFor="email">
                   Email address
                 </FieldLabel>
                 <Input
-                  name="email"
                   type="email"
                   id="email"
                   placeholder="you@email.com"
-                  error={errors.email}
-                  onChange={() => clearError("email")}
+                  error={errors.email?.message}
+                  loading={isCheckingEmail}
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: { value: EMAIL_REGEX, message: "Invalid email format" },
+                  })}
                 />
               </Field>
 
@@ -107,15 +118,14 @@ export default function LoginPage() {
                   Password
                 </FieldLabel>
                 <Input
-                  name="password"
                   type="password"
                   id="password"
                   placeholder="Enter your password"
-                  error={errors.password}
-                  onChange={() => clearError("password")}
+                  error={errors.password?.message}
+                  {...register("password", { required: "Password is required" })}
                 />
                 <div className="flex w-full justify-end">
-                  <Link href="#">Forgot Password?</Link>
+                  <Link href="/forgot-password">Forgot Password?</Link>
                 </div>
               </Field>
 
@@ -124,12 +134,8 @@ export default function LoginPage() {
               </Button>
 
               <div className="flex flex-row items-start justify-center gap-2 text-[13px] text-ink-3 mt-4">
-                <span>New to JewishChat?</span>
-                <TransitionLink
-                  href="/signup"
-                  direction="login-to-signup"
-                  className="font-medium text-brand-green underline underline-offset-4 hover:text-brand-deep"
-                >
+                <span>New to {NAME_PART_ONE + NAME_PART_TWO}?</span>
+                <TransitionLink href="/signup" direction="login-to-signup">
                   Create Account
                 </TransitionLink>
               </div>
@@ -138,6 +144,13 @@ export default function LoginPage() {
         </div>
       </div>
       <AuthIllustration />
+
+      <VerifyEmailModal
+        email={pendingVerifyEmail}
+        onOpenChange={(open) => {
+          if (!open) setPendingVerifyEmail(null);
+        }}
+      />
     </div>
   );
 }

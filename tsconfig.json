@@ -32,6 +32,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "src/app/external/reports/[report]"  ],
+, "src/app/internal/reports/[report]"  ],
   "exclude": ["node_modules"]
 }

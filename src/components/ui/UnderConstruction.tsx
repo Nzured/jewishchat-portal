@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import underConstructionAnimation from "@public/animations/UnderConstruction.json";
+import underConstructionAnimation from "@/assets/animations/UnderConstruction.json";
 import Lottie from "lottie-react";
 import { cn } from "@/lib/utils";
 import { Typography } from "./Typography";

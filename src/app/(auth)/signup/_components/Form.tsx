@@ -1,70 +1,93 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { useForm, useWatch } from "react-hook-form";
 import { TransitionLink } from "@/components/layout/auth/TransitionLink";
 import { Button } from "@/components/ui/Button";
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Typography } from "@/components/ui/Typography";
-import { PASSWORD_REQUIREMENTS, EMAIL_REGEX } from "@/configs/const";
+import { EMAIL_REGEX, PASSWORD_REQUIREMENTS } from "@/configs/const";
+import { useAuth } from "@/contexts/AuthContext";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { AuthService } from "@/services/auth/auth.service";
+import type { SignupRequest } from "@/services/auth/auth.types";
+import { emailRules, firstNameRules, lastNameRules, passwordRules } from "./validation";
+
+const EMAIL_EXISTS_DEBOUNCE_MS = 400;
+const EMAIL_EXISTS_MESSAGE = "An account with this email already exists.";
 
 interface FormProps {
-  onSuccess?: (data: Record<string, string>) => void;
+  onSuccess?: (email: string) => void;
 }
 
 export default function Form({ onSuccess }: FormProps) {
-  const [passwordValue, setPasswordValue] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { signup } = useAuth();
+  const {
+    register,
+    handleSubmit,
+    control,
+    setError,
+    clearErrors,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupRequest>({
+    defaultValues: {
+      email: "",
+      firstName: "",
+      lastName: "",
+      mobile: "",
+      password: "",
+    },
+  });
 
-  const clearError = (field: string) => {
-    if (errors[field]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
+  const passwordValue = useWatch({ control, name: "password" });
+  const emailValue = useWatch({ control, name: "email" });
+  const debouncedEmail = useDebouncedValue(emailValue, EMAIL_EXISTS_DEBOUNCE_MS);
+  const emailExistsCacheRef = useRef<{ email: string; exists: boolean } | null>(null);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+
+  const checkEmailExists = async (email: string): Promise<boolean> => {
+    if (emailExistsCacheRef.current?.email === email) return emailExistsCacheRef.current.exists;
+
+    const res = await AuthService.getUserType({ email }).catch(() => null);
+    const exists = Boolean(res?.data?.userType);
+    emailExistsCacheRef.current = { email, exists };
+    return exists;
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (!debouncedEmail || !EMAIL_REGEX.test(debouncedEmail)) return;
 
-    const formData = new FormData(e.currentTarget);
-    const newErrors: Record<string, string> = {};
-
-    const email = formData.get("email") as string;
-    const firstName = formData.get("firstName") as string;
-    const lastName = formData.get("lastName") as string;
-    const pass = formData.get("password") as string;
-
-    if (!email) {
-      newErrors.email = "Email is required";
-    } else if (!EMAIL_REGEX.test(email)) {
-      newErrors.email = "Invalid email format";
-    }
-
-    if (!firstName) newErrors.firstName = "First name is required";
-    if (!lastName) newErrors.lastName = "Last name is required";
-
-    if (!pass) {
-      newErrors.password = "Password is required";
-    } else {
-      const isPasswordValid = PASSWORD_REQUIREMENTS.every((req) => req.regex.test(pass));
-      if (!isPasswordValid) {
-        newErrors.password = "Password does not meet all requirements";
+    void (async () => {
+      setIsCheckingEmail(true);
+      try {
+        const exists = await checkEmailExists(debouncedEmail);
+        if (exists) {
+          setError("email", { type: "manual", message: EMAIL_EXISTS_MESSAGE });
+        } else {
+          clearErrors("email");
+        }
+      } catch {
+        // checkEmailExists already swallows its own errors; nothing to do here.
+      } finally {
+        setIsCheckingEmail(false);
       }
-    }
+    })();
+  }, [debouncedEmail]);
 
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
-      const payload = Object.fromEntries(formData) as Record<string, string>;
-      console.log("Form is valid! Payload:", payload);
-      alert("Form valid! See console for payload.");
-      if (onSuccess) {
-        onSuccess(payload);
+  const onValid = async (values: SignupRequest) => {
+    try {
+      const exists = await checkEmailExists(values.email);
+      if (exists) {
+        setError("email", { type: "manual", message: EMAIL_EXISTS_MESSAGE });
+        return;
       }
+
+      await signup(values);
+      onSuccess?.(values.email);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -84,19 +107,19 @@ export default function Form({ onSuccess }: FormProps) {
           Takes a minute. You&apos;ll verify your email next.
         </Typography>
       </div>
-      <form onSubmit={handleSubmit} noValidate>
+      <form onSubmit={(e) => void handleSubmit(onValid)(e)} noValidate>
         <FieldGroup className="gap-3">
           <Field>
             <FieldLabel required htmlFor="email">
               Email address
             </FieldLabel>
             <Input
-              name="email"
-              type="email"
               id="email"
+              type="email"
               placeholder="you@email.com"
-              error={errors.email}
-              onChange={() => clearError("email")}
+              error={errors.email?.message}
+              loading={isCheckingEmail}
+              {...register("email", emailRules)}
             />
           </Field>
 
@@ -106,11 +129,10 @@ export default function Form({ onSuccess }: FormProps) {
                 First name
               </FieldLabel>
               <Input
-                name="firstName"
                 id="firstName"
                 placeholder="Rivka"
-                error={errors.firstName}
-                onChange={() => clearError("firstName")}
+                error={errors.firstName?.message}
+                {...register("firstName", firstNameRules)}
               />
             </Field>
             <Field className="flex-1">
@@ -118,24 +140,22 @@ export default function Form({ onSuccess }: FormProps) {
                 Last name
               </FieldLabel>
               <Input
-                name="lastName"
                 id="lastName"
                 placeholder="Cohen"
-                error={errors.lastName}
-                onChange={() => clearError("lastName")}
+                error={errors.lastName?.message}
+                {...register("lastName", lastNameRules)}
               />
             </Field>
           </div>
 
           <Field>
-            <FieldLabel htmlFor="mobileNumber">Mobile Number</FieldLabel>
+            <FieldLabel htmlFor="mobile">Mobile Number</FieldLabel>
             <Input
-              name="mobileNumber"
+              id="mobile"
               type="tel"
-              id="mobileNumber"
               placeholder="Enter your phone number"
-              error={errors.mobileNumber}
-              onChange={() => clearError("mobileNumber")}
+              error={errors.mobile?.message}
+              {...register("mobile")}
             />
           </Field>
 
@@ -144,16 +164,11 @@ export default function Form({ onSuccess }: FormProps) {
               Password
             </FieldLabel>
             <Input
-              name="password"
-              type="password"
               id="password"
+              type="password"
               placeholder="Create a password"
-              value={passwordValue}
-              error={errors.password}
-              onChange={(e) => {
-                setPasswordValue(e.target.value);
-                clearError("password");
-              }}
+              error={errors.password?.message}
+              {...register("password", passwordRules)}
             />
             <div className=" grid grid-cols-2 gap-x-4 gap-y-1.5 text-[12px] text-ink-3">
               {PASSWORD_REQUIREMENTS.map((req) => {
@@ -172,7 +187,12 @@ export default function Form({ onSuccess }: FormProps) {
             </div>
           </Field>
 
-          <Button type="submit" variant="default" className="w-full text-base mt-4">
+          <Button
+            type="submit"
+            variant="default"
+            className="w-full text-base mt-4"
+            disabled={isSubmitting}
+          >
             Continue <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
 

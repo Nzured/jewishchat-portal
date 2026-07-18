@@ -1,8 +1,15 @@
-import { UserRef } from "./User";
+import { Permission } from "@/types/Permission";
 
 export interface Role {
-  id: string;
-  role: string;
+  id: number;
+  name: string;
   description: string;
-  users?: UserRef[];
+  userCount: number;
+  permissions: Permission[];
+}
+
+export interface CreateRolePayload {
+  name: string;
+  description: string;
+  permissionIds?: number[];
 }

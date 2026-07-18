@@ -9,11 +9,20 @@ export type CategoryColor =
   | "indigo";
 
 export interface Category {
-  id: string;
+  id: number;
   name: string;
   slug: string;
-  description: string;
+  description?: string;
   icon: string;
-  color: CategoryColor;
-  groupsCount: number;
+  displayOrder?: number;
+
+  color?: CategoryColor;
+  groupsCount?: number;
+}
+
+export interface CategoryPayload {
+  name: string;
+  slug: string;
+  description?: string;
+  icon: string;
 }

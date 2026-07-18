@@ -3,8 +3,3 @@ declare module "*.svg" {
   const content: any;
   export default content;
 }
-
-declare module "@public/animations/*.json" {
-  const value: Record<string, unknown>;
-  export default value;
-}

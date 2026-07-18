@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Separator } from "@/components/ui/Separator";
 import { Typography } from "@/components/ui/Typography";
+import { NAME_PART_ONE, NAME_PART_TWO } from "@/configs/const";
 import { SIDEBAR_NAV_BY_USER_TYPE } from "@/configs/sidebarNav";
 import { cn } from "@/lib/utils";
 import type { UserType } from "@/types/User";
@@ -61,7 +62,7 @@ export function Sidebar({ userType, mobileOpen, onMobileOpenChange }: SidebarPro
                 collapsed && "lg:hidden",
               )}
             >
-              JewishChat
+              {NAME_PART_ONE + NAME_PART_TWO}
             </Typography>
           </div>
           <Button
