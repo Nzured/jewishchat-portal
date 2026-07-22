@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await establishSession(res.data);
       toast.success("User has successfully logged in");
       router.push(getHomePathForUserType(res.data.user.userType));
+      router.refresh();
     },
     [resolveUserType, establishSession, router],
   );
@@ -99,6 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearAuthSession();
     clearUser();
     router.push("/login");
+    router.refresh();
   }, [clearUser, router]);
 
   return (

@@ -5,9 +5,9 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Typography } from "@/components/ui/Typography";
 import { NOT_APPLICABLE } from "@/configs/const";
-import { UserRow } from "./UserRow";
+import { User } from "@/types/User";
 
-export function InternalUserCard({ row }: { row: UserRow }) {
+export function InternalUserCard({ row }: { row: User }) {
   return (
     <Card size="sm">
       <CardContent className="flex flex-col gap-3">

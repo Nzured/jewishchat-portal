@@ -7,7 +7,7 @@ export interface FilterOption {
 export interface FilterItem {
   key: string;
   label: string;
-  component: "AUTOSELECT" | "NUMBER_INPUT" | "NUMBER_RANGE" | "DROPDOWN" | "DATE_RANGE";
+  component: "AUTOSELECT" | "TEXT_INPUT" | "NUMBER_INPUT" | "NUMBER_RANGE" | "DROPDOWN" | "DATE_RANGE";
   value: string | string[] | null;
   options?: FilterOption[];
   searchValue?: string;

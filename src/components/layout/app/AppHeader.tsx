@@ -173,6 +173,13 @@ export default function AppHeader({
                       value={filter.value as string | null}
                       onValueChange={(val) => updateFilterValue(filter.key, val)}
                     />
+                  ) : filter.component === "TEXT_INPUT" ? (
+                    <Input
+                      type="text"
+                      placeholder={"Enter " + filter.label}
+                      value={(filter.value as string) || ""}
+                      onChange={(e) => updateFilterValue(filter.key, e.target.value)}
+                    />
                   ) : filter.component === "NUMBER_INPUT" ? (
                     <Input
                       type="number"

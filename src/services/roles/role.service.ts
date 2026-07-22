@@ -13,9 +13,13 @@ export const RoleService = {
   createRole: async (data: CreateRolePayload) =>
     api.post<ApiResponse<Role>>(`${ROLE_SERVICE}/roles`, data, { globalLoader: true }),
   editPermissions: async (roleId: number, permissionIds: { permissionIds: number[] }) =>
-    api.put<ApiResponse<Role>>(`${ROLE_SERVICE}/roles/${roleId}/permissions`, permissionIds),
+    api.put<ApiResponse<Role>>(`${ROLE_SERVICE}/roles/${roleId}/permissions`, permissionIds, {
+      globalLoader: true,
+    }),
   editRoleDetails: async (roleId: number, payload: CreateRolePayload) =>
-    api.patch<ApiResponse<Role>>(`${ROLE_SERVICE}/roles/${roleId}`, payload),
+    api.patch<ApiResponse<Role>>(`${ROLE_SERVICE}/roles/${roleId}`, payload, {
+      globalLoader: true,
+    }),
   deleteRole: async (roleId: number) =>
     api.delete<ApiResponse<void>>(`${ROLE_SERVICE}/roles/${roleId}`, { globalLoader: true }),
 };

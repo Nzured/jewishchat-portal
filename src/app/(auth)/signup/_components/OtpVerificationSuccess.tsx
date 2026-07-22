@@ -38,6 +38,7 @@ export default function OtpVerificationSuccess({ userType }: OtpVerificationSucc
       const timeout = setTimeout(() => {
         toast.success("User has successfully signed up");
         router.push(getHomePathForUserType(userType));
+        router.refresh();
       }, 200);
       return () => clearTimeout(timeout);
     }

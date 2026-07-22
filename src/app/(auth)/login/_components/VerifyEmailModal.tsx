@@ -69,6 +69,7 @@ function VerifyEmailModalBody({ email, onOpenChange }: VerifyEmailModalBodyProps
       toast.success("Email verified. You're now logged in.");
       onOpenChange(false);
       router.push(getHomePathForUserType(userType));
+      router.refresh();
     } finally {
       setIsVerifying(false);
     }

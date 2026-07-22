@@ -50,3 +50,8 @@ export interface UserTypeData {
 }
 
 export type UserTypeResponse = ApiResponse<UserTypeData>;
+
+export interface ResetPasswordPayload {
+  token: string;
+  password: string;
+}

@@ -1,72 +1,62 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { UserCircle, UserStar } from "lucide-react";
 import AppHeader from "@/components/layout/app/AppHeader";
 import { Tabs } from "@/components/ui/Tabs";
 import { TabsHeader } from "@/components/ui/TabsHeader";
+import { wordFormatter } from "@/configs/functions/WordFormatter";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
-import { FilterItem } from "@/types/Search";
-import { UserType } from "@/types/User";
-import { ALL_USERS } from "./_components/userData";
+import { FilterItem, FilterOption } from "@/types/Search";
+import { UserStatus, UserType } from "@/types/User";
+import { AddInternalUserModal } from "./_components/AddInternalUserModal";
 import UserTable from "./_components/UserTable";
+
+const STATUS_OPTIONS: FilterOption[] = Object.values(UserStatus).map((status) => ({
+  label: wordFormatter(status),
+  value: status,
+}));
 
 const INITIAL_FILTERS: FilterItem[] = [
   {
     key: "userName",
     label: "User name",
-    component: "AUTOSELECT",
+    component: "TEXT_INPUT",
     value: null,
-    options: [],
-    searchValue: "",
-  },
-  {
-    key: "email",
-    label: "Email",
-    component: "AUTOSELECT",
-    value: null,
-    options: [],
-    searchValue: "",
   },
   {
     key: "status",
     label: "Status",
     component: "DROPDOWN",
     value: null,
-    options: [],
-    searchValue: "",
-  },
-  {
-    key: "joinedDate",
-    label: "Joined Date",
-    component: "DATE_RANGE",
-    value: null,
-    options: [],
+    options: STATUS_OPTIONS,
     searchValue: "",
   },
 ];
 
-const externalCount = ALL_USERS.filter((u) => u.userType === UserType.EXTERNAL).length;
-const internalCount = ALL_USERS.filter((u) => u.userType === UserType.INTERNAL).length;
-
 export default function UserListing() {
   const [activeTab, setActiveTab] = useState<UserType>(UserType.EXTERNAL);
+  const [addUserModalOpen, setAddUserModalOpen] = useState(false);
+  const [externalCount, setExternalCount] = useState(0);
+  const [internalCount, setInternalCount] = useState(0);
   const { filters, resetFilters } = useSearchFilter();
 
   useEffect(() => {
     resetFilters(INITIAL_FILTERS);
   }, [resetFilters]);
 
+  const handleCountChange = useCallback((tab: UserType, total: number) => {
+    if (tab === UserType.EXTERNAL) setExternalCount(total);
+    else setInternalCount(total);
+  }, []);
+
   return (
     <div className="flex flex-col ">
       <AppHeader
         title={"User Management"}
         subtitle={"Community members and the team who keeps them safe."}
-        count={30}
         buttonLabel={"Add new Admin"}
-        onButtonPress={() => {
-          console.log("Add new Admin");
-        }}
+        onButtonPress={() => setAddUserModalOpen(true)}
         filters={filters}
       />
       <div className="my-6">
@@ -90,7 +80,12 @@ export default function UserListing() {
           />
         </Tabs>
       </div>
-      <UserTable tab={activeTab} />
+      <UserTable tab={activeTab} onCountChange={handleCountChange} />
+      <AddInternalUserModal
+        open={addUserModalOpen}
+        setOpen={setAddUserModalOpen}
+        onInvite={() => {}}
+      />
     </div>
   );
 }

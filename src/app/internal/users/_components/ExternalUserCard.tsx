@@ -5,10 +5,9 @@ import { Card, CardContent } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Typography } from "@/components/ui/Typography";
 import { NOT_APPLICABLE } from "@/configs/const";
-import { UserStatus } from "@/types/User";
-import { UserRow } from "./UserRow";
+import { USER_STATUS_CHIP, User } from "@/types/User";
 
-export function ExternalUserCard({ row }: { row: UserRow }) {
+export function ExternalUserCard({ row }: { row: User }) {
   return (
     <Card size="sm">
       <CardContent className="flex flex-col gap-3">
@@ -23,8 +22,8 @@ export function ExternalUserCard({ row }: { row: UserRow }) {
             </div>
           </div>
           <Chip
-            type={row.status === UserStatus.ACTIVE ? "success" : "error"}
-            label={row.status === UserStatus.ACTIVE ? "Active" : "Suspended"}
+            type={USER_STATUS_CHIP[row.status].type}
+            label={USER_STATUS_CHIP[row.status].label}
             shape="pill"
           />
         </div>

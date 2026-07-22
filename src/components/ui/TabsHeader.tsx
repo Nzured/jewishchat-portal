@@ -70,7 +70,7 @@ function PillsTabsHeader({ items, className }: { items: TabHeaderItem[]; classNa
         >
           {item.icon}
           {item.label}
-          {item.count !== undefined && (
+          {item?.count !== undefined && item?.count > 0 && (
             <span className="rounded-full bg-surface-line px-1.5 py-0.5 text-xs font-semibold text-ink-3 group-data-active:bg-brand-soft group-data-active:text-brand-green">
               {item.count}
             </span>

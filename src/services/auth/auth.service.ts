@@ -1,11 +1,13 @@
 import { REFRESH_TOKEN_ENDPOINT } from "@/configs/const";
 import { api } from "@/services/axiosConfig";
 import { ApiResponse } from "@/types/Common";
+import { InviteInternalUserPayload, User } from "@/types/User";
 import type {
   LoginPayload,
   LoginResponse,
   RefreshTokenPayload,
   RefreshTokenResponse,
+  ResetPasswordPayload,
   SignupRequest,
   SignupResponse,
   UserTypeResponse,
@@ -37,6 +39,14 @@ export const AuthService = {
     api.post<ApiResponse<void>>(`${AUTH_SERVICE}/logout`, undefined, { globalLoader: true }),
   forgotPassword: async (payload: { email: string }) =>
     api.post<ApiResponse<void>>(`${AUTH_SERVICE}/forgot-password`, payload, {
+      globalLoader: true,
+    }),
+  resetPassword: async (payload: ResetPasswordPayload) =>
+    api.post<ApiResponse<void>>(`${AUTH_SERVICE}/reset-password`, payload, {
+      globalLoader: true,
+    }),
+  inviteInternalUser: (payload: InviteInternalUserPayload) =>
+    api.post<ApiResponse<User>>(`${AUTH_ADMIN_SERVICE}/invite`, payload, {
       globalLoader: true,
     }),
 };
