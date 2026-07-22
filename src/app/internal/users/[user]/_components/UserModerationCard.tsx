@@ -1,83 +1,266 @@
 "use client";
 
 import { useState } from "react";
-import { KeyRound, Pencil, PauseCircle, RefreshCw, Trash2 } from "lucide-react";
+import { KeyRound, Mail, PauseCircle, Phone, RefreshCw, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardHeader } from "@/components/ui/Card";
-import { Separator } from "@/components/ui/Separator";
-import { Typography } from "@/components/ui/Typography";
-import { UserStatus } from "@/types/User";
-import { UserRow } from "../../_components/UserRow";
+import { DeleteModal } from "@/components/ui/DeleteModal";
+import { ModerationActionItem, ModerationActionsCard } from "@/components/ui/ModerationActionsCard";
+import { useUser } from "@/contexts/UserContext";
+import { AuthService } from "@/services/auth/auth.service";
+import { User, UserStatus, UserType } from "@/types/User";
+import { EditEmailModal } from "./EditEmailModal";
+import { EditMobileModal } from "./EditMobileModal";
+import { SendPasswordResetModal } from "./SendPasswordResetModal";
+import { SuspendUserModal } from "./SuspendUserModal";
+import { useUserManagementContext } from "../../_context/UserManagementContext";
 
 interface UserModerationCardProps {
-  user: UserRow;
+  user?: User | null;
+  loading?: boolean;
+  onUserChange?: (user: User) => void;
 }
 
-export default function UserModerationCard({ user }: UserModerationCardProps) {
-  const [status, setStatus] = useState(user.status);
+export default function UserModerationCard({
+  user,
+  loading,
+  onUserChange,
+}: UserModerationCardProps) {
+  const router = useRouter();
+  const { user: currentUser } = useUser();
+  const { deleteUser, suspendUser, reactivateUser, changeEmail, changeMobile } =
+    useUserManagementContext();
+  const isSelf = Boolean(currentUser && user && currentUser.uuid === user.uuid);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [suspendModalOpen, setSuspendModalOpen] = useState(false);
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [editEmailModalOpen, setEditEmailModalOpen] = useState(false);
+  const [editMobileModalOpen, setEditMobileModalOpen] = useState(false);
 
-  return (
-    <Card>
-      <CardHeader>
-        <Typography variant="tiny" className="font-mono font-medium tracking-[1.6px] text-ink-3">
-          MODERATION
-        </Typography>
-      </CardHeader>
+  const handleDelete = async () => {
+    if (!user) return;
+    try {
+      await deleteUser(user.uuid);
+      router.push("/internal/users");
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-      <CardContent className="flex flex-col gap-2 pt-0">
-        {status === UserStatus.SUSPENDED ? (
-          <Button
-            size="sm"
-            variant="default"
-            color="primary"
-            leftIcon={<RefreshCw className="size-4" />}
-            onClick={() => setStatus(UserStatus.ACTIVE)}
-          >
-            Reactivate User
-          </Button>
-        ) : (
-          <Button
-            size="sm"
-            variant="default"
-            color="warning"
-            leftIcon={<PauseCircle className="size-4" />}
-            onClick={() => setStatus(UserStatus.SUSPENDED)}
-          >
-            Suspend User
-          </Button>
-        )}
+  const handleReactivate = async () => {
+    if (!user) return;
+    try {
+      const updatedUser = await reactivateUser(user.uuid);
+      if (updatedUser) onUserChange?.(updatedUser);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
+  const handleSuspend = async (data: { reason: number; reasonLabel: string; remark: string }) => {
+    if (!user) return;
+    try {
+      const updatedUser = await suspendUser(user.uuid, {
+        suspendTypeId: data.reason,
+        reason: data.remark,
+      });
+      if (updatedUser) onUserChange?.(updatedUser);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSendPasswordReset = async () => {
+    if (!user) return;
+    try {
+      await AuthService.forgotPassword({ email: user.email });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSaveEmail = async (email: string) => {
+    if (!user) return;
+    try {
+      const updatedUser = await changeEmail(user.uuid, email);
+      if (updatedUser) onUserChange?.(updatedUser);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSaveMobile = async (mobile: string) => {
+    if (!user) return;
+    try {
+      const updatedUser = await changeMobile(user.uuid, mobile);
+      if (updatedUser) onUserChange?.(updatedUser);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const showSkeleton = loading || !user;
+
+  const actions: ModerationActionItem[] = [
+    user?.status === UserStatus.SUSPENDED
+      ? {
+          key: "reactivate",
+          primary: true,
+          node: (
+            <Button
+              size="sm"
+              leftIcon={<RefreshCw className="size-4" />}
+              variant="default"
+              color="primary"
+              onClick={() => void handleReactivate()}
+            >
+              Reactivate User
+            </Button>
+          ),
+        }
+      : {
+          key: "suspend",
+          primary: true,
+          hidden: isSelf || user?.userType === UserType.INTERNAL,
+          node: (
+            <Button
+              size="sm"
+              leftIcon={<PauseCircle className="size-4" />}
+              variant="default"
+              color="warning"
+              onClick={() => setSuspendModalOpen(true)}
+            >
+              Suspend User
+            </Button>
+          ),
+        },
+    {
+      key: "delete",
+      hidden: isSelf,
+      node: (
         <Button
           size="sm"
+          leftIcon={<Trash2 className="size-4" />}
           variant="secondary"
           color="danger"
-          leftIcon={<Trash2 className="size-4" />}
+          onClick={() => setDeleteModalOpen(true)}
         >
           Permanently Delete
         </Button>
-
-        <Separator className="my-1" />
-
+      ),
+    },
+    {
+      key: "separator",
+      type: "separator",
+      hidden: isSelf || user?.status === UserStatus.PENDING_INVITATION,
+    },
+    {
+      key: "reset-password",
+      hidden: isSelf || user?.status === UserStatus.PENDING_INVITATION,
+      node: (
         <Button
           size="sm"
+          leftIcon={<KeyRound className="size-4" />}
           variant="secondary"
           color="info"
-          leftIcon={<KeyRound className="size-4" />}
           className="justify-start"
+          onClick={() => setResetModalOpen(true)}
         >
           Reset Password
         </Button>
-
+      ),
+    },
+    {
+      key: "edit-email",
+      hidden: user?.status === UserStatus.PENDING_INVITATION,
+      node: (
         <Button
           size="sm"
+          leftIcon={<Mail className="size-4" />}
           variant="secondary"
           color="warning"
-          leftIcon={<Pencil className="size-4" />}
           className="justify-start"
+          onClick={() => setEditEmailModalOpen(true)}
         >
-          Edit email / phone
+          Edit Email
         </Button>
-      </CardContent>
-    </Card>
+      ),
+    },
+    {
+      key: "edit-mobile",
+      hidden: user?.userType === UserType.INTERNAL,
+      node: (
+        <Button
+          size="sm"
+          leftIcon={<Phone className="size-4" />}
+          variant="secondary"
+          color="info"
+          className="justify-start"
+          onClick={() => setEditMobileModalOpen(true)}
+        >
+          Edit Mobile Number
+        </Button>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <ModerationActionsCard actions={actions} loading={showSkeleton} />
+
+      {user && (
+        <DeleteModal
+          open={deleteModalOpen}
+          onOpenChange={setDeleteModalOpen}
+          title="Permanently delete this user?"
+          description={
+            <>
+              This cannot be undone. It permanently removes{" "}
+              <span className="font-semibold text-ink-2">
+                {user.firstName} {user.lastName}
+              </span>{" "}
+              and all their account data.
+            </>
+          }
+          onConfirm={() => void handleDelete()}
+        />
+      )}
+
+      {user && (
+        <SuspendUserModal
+          user={user}
+          open={suspendModalOpen}
+          setOpen={setSuspendModalOpen}
+          onSuspend={handleSuspend}
+        />
+      )}
+
+      {user && (
+        <SendPasswordResetModal
+          email={user.email}
+          open={resetModalOpen}
+          setOpen={setResetModalOpen}
+          onConfirm={handleSendPasswordReset}
+        />
+      )}
+
+      {user && (
+        <EditEmailModal
+          user={user}
+          open={editEmailModalOpen}
+          setOpen={setEditEmailModalOpen}
+          onSave={handleSaveEmail}
+        />
+      )}
+
+      {user && (
+        <EditMobileModal
+          user={user}
+          open={editMobileModalOpen}
+          setOpen={setEditMobileModalOpen}
+          onSave={handleSaveMobile}
+        />
+      )}
+    </>
   );
 }

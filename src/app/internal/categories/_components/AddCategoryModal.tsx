@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Globe, Link, Pencil, Plus, X } from "lucide-react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
@@ -20,10 +20,7 @@ import { Typography } from "@/components/ui/Typography";
 import { URL } from "@/configs/const";
 import { Category } from "@/types/Category";
 import { useCategories } from "../_context/CategoryContext";
-import { DEFAULT_ICON_NAMES } from "./categoryIcons";
 import { IconPicker } from "./IconPicker";
-
-const DEFAULT_ICON_NAME: string = DEFAULT_ICON_NAMES[0];
 
 interface CategoryFormValues {
   name: string;
@@ -51,7 +48,7 @@ function defaultValuesFor(category?: Category | null): CategoryFormValues {
     name: category?.name ?? "",
     slug: category?.slug ?? "",
     description: category?.description ?? "",
-    icon: category?.icon ?? DEFAULT_ICON_NAME,
+    icon: category?.icon ?? "",
   };
 }
 
@@ -73,7 +70,6 @@ export function AddCategoryModal({ open, setOpen, category }: AddCategoryModalPr
   });
 
   const slug = useWatch({ control, name: "slug" });
-  const icon = useWatch({ control, name: "icon" });
 
   const [prevOpen, setPrevOpen] = React.useState(open);
   if (open !== prevOpen) {
@@ -151,12 +147,17 @@ export function AddCategoryModal({ open, setOpen, category }: AddCategoryModalPr
               <FieldLabel>Description</FieldLabel>
               <Textarea placeholder="What this category is for...." {...register("description")} />
             </Field>
-            <Field>
+            <Field data-invalid={!!errors.icon}>
               <FieldLabel required>Category Icon</FieldLabel>
-              <IconPicker
-                value={icon}
-                onChange={(name) => setValue("icon", name, { shouldValidate: true })}
+              <Controller
+                control={control}
+                name="icon"
+                rules={{ required: "Please select an icon" }}
+                render={({ field }) => (
+                  <IconPicker value={field.value} onChange={field.onChange} />
+                )}
               />
+              <FieldError errors={[errors.icon]} />
             </Field>
           </FieldGroup>
         </form>

@@ -3,8 +3,8 @@
 import * as React from "react";
 import { CheckCheck, History, PauseCircle, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { DeleteModal } from "@/components/ui/DeleteModal";
+import { ModerationActionItem, ModerationActionsCard } from "@/components/ui/ModerationActionsCard";
 import { Typography } from "@/components/ui/Typography";
 import { Group, GroupStatus } from "@/types/Group";
 import { SuspendGroupModal } from "./SuspendGroupModal";
@@ -19,47 +19,82 @@ interface ActionsCardProps {
 export default function ActionsCard({ group, onSuspend, onRelist, onDelete }: ActionsCardProps) {
   const [deleteOpen, setDeleteOpen] = React.useState(false);
 
-  return (
-    <Card className="flex flex-col gap-2">
-      <CardHeader>
-        <Typography variant={"tiny"} className="text-ink-3 font-mono font-medium tracking-[1.6px]">
-          MODERATIONS
-        </Typography>
-      </CardHeader>
-
-      <CardContent className="flex flex-col gap-2 pt-2">
-        {group.status === GroupStatus.SUSPENDED ? (
-          <Button
-            size={"sm"}
-            leftIcon={<RefreshCw />}
-            variant={"default"}
-            color="primary"
-            onClick={onRelist}
-          >
-            Re-list Group
-          </Button>
-        ) : (
-          <SuspendGroupModal
-            group={group}
-            onSuspend={onSuspend}
-            trigger={
-              <Button size={"sm"} leftIcon={<PauseCircle />} variant={"default"} color="warning">
-                Suspend Group
-              </Button>
-            }
-          />
-        )}
-        <Button size={"sm"} leftIcon={<CheckCheck />} variant={"secondary"} color="primary">
+  const actions: ModerationActionItem[] = [
+    group.status === GroupStatus.SUSPENDED
+      ? {
+          key: "relist",
+          primary: true,
+          node: (
+            <Button
+              size="sm"
+              leftIcon={<RefreshCw className="size-4" />}
+              variant="default"
+              color="primary"
+              onClick={onRelist}
+            >
+              Re-list Group
+            </Button>
+          ),
+        }
+      : {
+          key: "suspend",
+          primary: true,
+          node: (
+            <SuspendGroupModal
+              group={group}
+              onSuspend={onSuspend}
+              trigger={
+                <Button
+                  size="sm"
+                  leftIcon={<PauseCircle className="size-4" />}
+                  variant="default"
+                  color="warning"
+                >
+                  Suspend Group
+                </Button>
+              }
+            />
+          ),
+        },
+    {
+      key: "mark-reviewed",
+      node: (
+        <Button
+          size="sm"
+          leftIcon={<CheckCheck className="size-4" />}
+          variant="secondary"
+          color="primary"
+        >
           Mark as reviewed
         </Button>
-        <Button size={"sm"} leftIcon={<History />} variant={"secondary"} color="warning">
+      ),
+    },
+    {
+      key: "reset-report-count",
+      node: (
+        <Button
+          size="sm"
+          leftIcon={<History className="size-4" />}
+          variant="secondary"
+          color="warning"
+        >
           Reset Report Count
         </Button>
+      ),
+    },
+    {
+      key: "delete",
+      node: (
         <DeleteModal
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
           trigger={
-            <Button size={"sm"} leftIcon={<Trash2 />} variant={"secondary"} color="danger">
+            <Button
+              size="sm"
+              leftIcon={<Trash2 className="size-4" />}
+              variant="secondary"
+              color="danger"
+            >
               Permenantly Delete
             </Button>
           }
@@ -79,7 +114,9 @@ export default function ActionsCard({ group, onSuspend, onRelist, onDelete }: Ac
           }
           onConfirm={() => onDelete?.()}
         />
-      </CardContent>
-    </Card>
-  );
+      ),
+    },
+  ];
+
+  return <ModerationActionsCard actions={actions} contentClassName="pt-2" />;
 }

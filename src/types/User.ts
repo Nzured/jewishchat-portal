@@ -6,7 +6,19 @@ export enum UserType {
 export enum UserStatus {
   SUSPENDED = "SUSPENDED",
   ACTIVE = "ACTIVE",
+  BLACKLISTED = "BLACKLISTED",
+  PENDING_INVITATION = "PENDING_INVITATION",
 }
+
+export const USER_STATUS_CHIP: Record<
+  UserStatus,
+  { type: "success" | "error" | "warning"; label: string }
+> = {
+  [UserStatus.ACTIVE]: { type: "success", label: "Active" },
+  [UserStatus.SUSPENDED]: { type: "error", label: "Suspended" },
+  [UserStatus.BLACKLISTED]: { type: "error", label: "Blacklisted" },
+  [UserStatus.PENDING_INVITATION]: { type: "warning", label: "Pending Invitation" },
+};
 
 export interface UserRef {
   id: number | string;
@@ -41,6 +53,21 @@ export interface Admin {
   userType: UserType;
 }
 
+export interface AdminUsersPage {
+  totalPages: number;
+  pageSize: number;
+  currentPage: number;
+  totalElements: number;
+  users: User[];
+}
+
+export interface InviteInternalUserPayload {
+  email: string;
+  firstName: string;
+  lastName: string;
+  mobile?: string;
+  roles: string[];
+}
 //  "can_manage_categories",
 //     "can_view_groups",
 //     "can_manage_external_users",
@@ -54,3 +81,9 @@ export interface Admin {
 //     "can_manage_system_config",
 //     "can_view_reports",
 //     "can_manage_internal_users",
+
+export interface UserReportTypes {
+  code: string;
+  description: string;
+  id: number;
+}

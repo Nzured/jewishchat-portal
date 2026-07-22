@@ -2,7 +2,9 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { DataTable, DataTableColumn } from "@/components/ui/DataTable";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Link } from "@/components/ui/Link";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
 import { Group, GroupStatus } from "@/types/Group";
 
@@ -17,6 +19,7 @@ export interface UserGroupEntry {
 
 interface UserGroupsSectionProps {
   groups: Group[];
+  loading?: boolean;
 }
 
 const STATUS_TYPE = {
@@ -64,6 +67,7 @@ const columns: DataTableColumn<UserGroupEntry>[] = [
     cell: (row) => (
       <Chip shape="pill" type={STATUS_TYPE[row.status]} label={STATUS_LABEL[row.status]} />
     ),
+    skeletonCell: <Skeleton className="h-6 w-20 rounded-full" />,
   },
   {
     id: "members",
@@ -78,8 +82,8 @@ const columns: DataTableColumn<UserGroupEntry>[] = [
   },
 ];
 
-export default function UserGroupsSection({ groups }: UserGroupsSectionProps) {
-  const entries: UserGroupEntry[] = groups.map((group) => ({
+export default function UserGroupsSection({ groups, loading }: UserGroupsSectionProps) {
+  const entries: UserGroupEntry[] = (Array.isArray(groups) ? groups : []).map((group) => ({
     id: group.id,
     groupName: group.groupName,
     path: group.path,
@@ -95,11 +99,15 @@ export default function UserGroupsSection({ groups }: UserGroupsSectionProps) {
           GROUPS ADDED
         </Typography>
         <Typography variant="tiny" className="font-mono font-medium tracking-[1.6px] text-ink-4">
-          {groups.length} TOTAL
+          {entries.length} TOTAL
         </Typography>
       </CardHeader>
 
-      <DataTable columns={columns} data={entries} getRowId={(row) => row.id} />
+      {!loading && entries.length === 0 ? (
+        <EmptyState message="No groups added yet." className="py-10" />
+      ) : (
+        <DataTable columns={columns} data={entries} getRowId={(row) => row.id} loading={loading} />
+      )}
     </Card>
   );
 }

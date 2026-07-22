@@ -11,13 +11,11 @@ import { Field, FieldLabel, FieldGroup } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Link } from "@/components/ui/Link";
 import { Typography } from "@/components/ui/Typography";
-import { EMAIL_REGEX, NAME_PART_ONE, NAME_PART_TWO } from "@/configs/const";
+import { EMAIL_CHECK_DEBOUNCE_MS, EMAIL_REGEX, NAME_PART_ONE, NAME_PART_TWO } from "@/configs/const";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { LoginPayload } from "@/services/auth/auth.types";
 import { VerifyEmailModal } from "./_components/VerifyEmailModal";
-
-const USER_TYPE_CHECK_DEBOUNCE_MS = 400;
 
 export default function LoginPage() {
   const { resolveUserType, login } = useAuth();
@@ -30,7 +28,7 @@ export default function LoginPage() {
   } = useForm<LoginPayload>();
 
   const email = watch("email");
-  const debouncedEmail = useDebouncedValue(email, USER_TYPE_CHECK_DEBOUNCE_MS);
+  const debouncedEmail = useDebouncedValue(email, EMAIL_CHECK_DEBOUNCE_MS);
   const [pendingVerifyEmail, setPendingVerifyEmail] = useState<string | null>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 

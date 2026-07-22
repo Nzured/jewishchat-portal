@@ -5,8 +5,8 @@ import { Save, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent } from "@/components/ui/Card";
 import { DeleteModal } from "@/components/ui/DeleteModal";
+import { ModerationActionItem, ModerationActionsCard } from "@/components/ui/ModerationActionsCard";
 import { Role } from "@/types/Role";
 
 interface RoleActionsCardProps {
@@ -39,25 +39,32 @@ export function RoleActionsCard({
     })();
   };
 
-  return (
-    <Card size="sm">
-      <CardContent className="flex flex-col gap-2">
+  const actions: ModerationActionItem[] = [
+    {
+      key: "save",
+      primary: true,
+      node: (
         <Button
-          size={"sm"}
+          size="sm"
+          leftIcon={<Save className="size-4" />}
           variant="default"
           color="primary"
-          leftIcon={<Save className="size-4" />}
-          onClick={() => void onSaveChanges()}
           disabled={saveDisabled}
+          onClick={() => void onSaveChanges()}
         >
           Save Changes
         </Button>
+      ),
+    },
+    {
+      key: "delete",
+      node: (
         <DeleteModal
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
           trigger={
             <Button
-              size={"sm"}
+              size="sm"
               variant="secondary"
               color="danger"
               leftIcon={<Trash2 className="size-4" />}
@@ -69,17 +76,23 @@ export function RoleActionsCard({
           description="This role will be permanently removed. Users assigned to it will lose these permissions."
           onConfirm={handleDeleteConfirm}
         />
-
+      ),
+    },
+    {
+      key: "clear-permissions",
+      node: (
         <Button
+          size="sm"
+          leftIcon={<X className="size-4" />}
           variant="secondary"
           color="warning"
-          size={"sm"}
-          leftIcon={<X className="size-4" />}
           onClick={onClearPermissions}
         >
           Clear Permissions
         </Button>
-      </CardContent>
-    </Card>
-  );
+      ),
+    },
+  ];
+
+  return <ModerationActionsCard title={null} cardSize="sm" actions={actions} />;
 }

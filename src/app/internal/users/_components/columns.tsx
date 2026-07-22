@@ -6,10 +6,9 @@ import { Chip } from "@/components/ui/Chip";
 import { DataTableColumn } from "@/components/ui/DataTable";
 import { Typography } from "@/components/ui/Typography";
 import { NOT_APPLICABLE } from "@/configs/const";
-import { UserStatus } from "@/types/User";
-import { UserRow } from "./UserRow";
+import { USER_STATUS_CHIP, User } from "@/types/User";
 
-const nameColumn: DataTableColumn<UserRow> = {
+const nameColumn: DataTableColumn<User> = {
   id: "name",
   header: "User Name",
   cell: (row) => (
@@ -25,15 +24,15 @@ const nameColumn: DataTableColumn<UserRow> = {
   ),
 };
 
-const actionsColumn: DataTableColumn<UserRow> = {
+const actionsColumn: DataTableColumn<User> = {
   id: "actions",
   header: "",
   headerClassName: "text-right",
   cellClassName: "text-right",
   cell: (row) => (
     <div className="flex items-center justify-end gap-1">
-      <Link href={`/internal/users/${row.id}`}>
-        <Button variant="icon" size="icon-sm" aria-label={`Manage ${row.firstName}`}>
+      <Link href={`/internal/users/${row?.uuid}`}>
+        <Button variant="icon" size="icon-sm" aria-label={`Manage ${row?.firstName}`}>
           <Settings className="text-ink-3 transition-colors group-hover/button:text-brand-green text-ink-4" />
         </Button>
       </Link>
@@ -41,7 +40,7 @@ const actionsColumn: DataTableColumn<UserRow> = {
   ),
 };
 
-export const externalColumns: DataTableColumn<UserRow>[] = [
+export const externalColumns: DataTableColumn<User>[] = [
   nameColumn,
   {
     id: "mobileNumber",
@@ -69,8 +68,8 @@ export const externalColumns: DataTableColumn<UserRow>[] = [
       if (row.status)
         return (
           <Chip
-            type={row.status === UserStatus.ACTIVE ? "success" : "error"}
-            label={row.status}
+            type={USER_STATUS_CHIP[row.status].type}
+            label={USER_STATUS_CHIP[row.status].label}
             shape="pill"
           />
         );
@@ -79,7 +78,7 @@ export const externalColumns: DataTableColumn<UserRow>[] = [
   actionsColumn,
 ];
 
-export const internalColumns: DataTableColumn<UserRow>[] = [
+export const internalColumns: DataTableColumn<User>[] = [
   nameColumn,
   {
     id: "role",

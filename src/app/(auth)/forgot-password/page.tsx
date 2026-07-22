@@ -10,12 +10,11 @@ import { Field, FieldLabel, FieldGroup } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Link } from "@/components/ui/Link";
 import { Typography } from "@/components/ui/Typography";
-import { EMAIL_REGEX } from "@/configs/const";
+import { EMAIL_CHECK_DEBOUNCE_MS, EMAIL_REGEX } from "@/configs/const";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { AuthService } from "@/services/auth/auth.service";
 
-const EMAIL_EXISTS_DEBOUNCE_MS = 400;
 const NO_ACCOUNT_MESSAGE = "No account found with this email.";
 
 interface ForgotPasswordPayload {
@@ -34,7 +33,7 @@ export default function ForgotPasswordPage() {
   } = useForm<ForgotPasswordPayload>();
 
   const email = watch("email");
-  const debouncedEmail = useDebouncedValue(email, EMAIL_EXISTS_DEBOUNCE_MS);
+  const debouncedEmail = useDebouncedValue(email, EMAIL_CHECK_DEBOUNCE_MS);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   useEffect(() => {

@@ -24,6 +24,8 @@ interface DataTableColumn<T> {
   cell: (row: T, rowIndex: number) => React.ReactNode;
   headerClassName?: string;
   cellClassName?: string;
+  /** Replaces the default skeleton bar for this column's cells while `loading`. */
+  skeletonCell?: React.ReactNode;
 }
 
 interface DataTablePagination {
@@ -294,7 +296,7 @@ function DataTable<T>({
                   )}
                   {columns.map((column) => (
                     <TableCell key={column.id} className={column.cellClassName}>
-                      <Skeleton className="h-4 w-full max-w-32" />
+                      {column.skeletonCell ?? <Skeleton className="h-4 w-full max-w-32" />}
                     </TableCell>
                   ))}
                 </TableRow>

@@ -24,10 +24,15 @@ export function IconPicker({ value, onChange, className }: IconPickerProps) {
   const searching = query.trim().length > 0;
 
   const matches = React.useMemo(() => {
-    if (!searching) return DEFAULT_ICON_NAMES;
+    if (!searching) {
+      if (value && ALL_ICON_NAMES.includes(value) && !DEFAULT_ICON_NAMES.includes(value)) {
+        return [value, ...DEFAULT_ICON_NAMES];
+      }
+      return DEFAULT_ICON_NAMES;
+    }
     const search = normalize(query);
     return ALL_ICON_NAMES.filter((name) => normalize(name).includes(search));
-  }, [query, searching]);
+  }, [query, searching, value]);
 
   const visibleIcons = matches.slice(0, ICON_SEARCH_RESULTS_CAP);
   const hiddenCount = matches.length - visibleIcons.length;

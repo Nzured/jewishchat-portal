@@ -7,16 +7,25 @@ import { TransitionLink } from "@/components/layout/auth/TransitionLink";
 import { Button } from "@/components/ui/Button";
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
+import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { Typography } from "@/components/ui/Typography";
-import { EMAIL_REGEX, PASSWORD_REQUIREMENTS } from "@/configs/const";
+import {
+  COUNTRY_CODES,
+  EMAIL_CHECK_DEBOUNCE_MS,
+  EMAIL_EXISTS_MESSAGE,
+  EMAIL_REGEX,
+  PASSWORD_REQUIREMENTS,
+} from "@/configs/const";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { AuthService } from "@/services/auth/auth.service";
 import type { SignupRequest } from "@/services/auth/auth.types";
 import { emailRules, firstNameRules, lastNameRules, passwordRules } from "./validation";
 
-const EMAIL_EXISTS_DEBOUNCE_MS = 400;
-const EMAIL_EXISTS_MESSAGE = "An account with this email already exists.";
+interface SignupFormValues extends Omit<SignupRequest, "mobile"> {
+  countryCode: string;
+  mobile: string;
+}
 
 interface FormProps {
   onSuccess?: (email: string) => void;
@@ -28,14 +37,16 @@ export default function Form({ onSuccess }: FormProps) {
     register,
     handleSubmit,
     control,
+    setValue,
     setError,
     clearErrors,
     formState: { errors, isSubmitting },
-  } = useForm<SignupRequest>({
+  } = useForm<SignupFormValues>({
     defaultValues: {
       email: "",
       firstName: "",
       lastName: "",
+      countryCode: COUNTRY_CODES[0].value,
       mobile: "",
       password: "",
     },
@@ -43,7 +54,7 @@ export default function Form({ onSuccess }: FormProps) {
 
   const passwordValue = useWatch({ control, name: "password" });
   const emailValue = useWatch({ control, name: "email" });
-  const debouncedEmail = useDebouncedValue(emailValue, EMAIL_EXISTS_DEBOUNCE_MS);
+  const debouncedEmail = useDebouncedValue(emailValue, EMAIL_CHECK_DEBOUNCE_MS);
   const emailExistsCacheRef = useRef<{ email: string; exists: boolean } | null>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
@@ -76,7 +87,9 @@ export default function Form({ onSuccess }: FormProps) {
     })();
   }, [debouncedEmail]);
 
-  const onValid = async (values: SignupRequest) => {
+  const countryCode = useWatch({ control, name: "countryCode" });
+
+  const onValid = async (values: SignupFormValues) => {
     try {
       const exists = await checkEmailExists(values.email);
       if (exists) {
@@ -84,7 +97,8 @@ export default function Form({ onSuccess }: FormProps) {
         return;
       }
 
-      await signup(values);
+      const { countryCode, mobile, ...rest } = values;
+      await signup({ ...rest, mobile: mobile ? `${countryCode}${mobile}` : mobile });
       onSuccess?.(values.email);
     } catch (error) {
       console.error(error);
@@ -150,13 +164,22 @@ export default function Form({ onSuccess }: FormProps) {
 
           <Field>
             <FieldLabel htmlFor="mobile">Mobile Number</FieldLabel>
-            <Input
-              id="mobile"
-              type="tel"
-              placeholder="Enter your phone number"
-              error={errors.mobile?.message}
-              {...register("mobile")}
-            />
+            <div className="flex gap-2">
+              <SelectDropdown
+                items={COUNTRY_CODES}
+                value={countryCode}
+                onValueChange={(value) => setValue("countryCode", value)}
+                className="w-24 shrink-0"
+              />
+              <Input
+                id="mobile"
+                type="tel"
+                placeholder="Enter your phone number"
+                error={errors.mobile?.message}
+                className="flex-1"
+                {...register("mobile")}
+              />
+            </div>
           </Field>
 
           <Field>

@@ -154,7 +154,15 @@
       "Bash(curl -s -o /dev/null -w \"LOGIN STATUS:%{http_code}\\\\n\" http://localhost:4000/login --max-time 30)",
       "Bash(curl -s -o /dev/null -w \"SIGNUP STATUS:%{http_code}\\\\n\" http://localhost:4000/signup --max-time 30)",
       "Bash(curl -s -o /dev/null -w \"ROOT STATUS:%{http_code}\\\\n\" http://localhost:4000/ --max-time 30)",
-      "Bash(xargs -I{} cat {})"
+      "Bash(xargs -I{} cat {})",
+      "Bash(command -v magick)",
+      "Bash(command -v convert)",
+      "Bash(command -v inkscape)",
+      "Bash(command -v rsvg-convert)",
+      "Bash(command -v npx)",
+      "Bash(npm ls *)",
+      "Bash(node \"C:/Users/NILUPU~1/AppData/Local/Temp/claude/d--Projects-jewishchat/33f1e8f1-7115-4d5e-be04-3202a2aacc77/scratchpad/svg-to-ico.js\")",
+      "Bash(node ./_svg-to-ico-tmp.js)"
     ],
     "additionalDirectories": [
       "d:\\Projects\\jewishchat\\src\\app\\external\\reports\\[report]\\_components",
