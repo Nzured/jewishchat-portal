@@ -49,7 +49,7 @@ export const externalColumns: DataTableColumn<User>[] = [
     cell: (row) => (
       <div className="flex flex-col items-start gap-1.5">
         <Typography variant="small" className="font-semibold text-ink-1">
-          {row.mobile ?? NOT_APPLICABLE}
+          {row.mobile || NOT_APPLICABLE}
         </Typography>
         {row.mobile && (
           <Chip

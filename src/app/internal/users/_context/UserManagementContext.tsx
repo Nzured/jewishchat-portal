@@ -49,8 +49,7 @@ export function UserManagementProvider({ children }: { children: React.ReactNode
 
   const inviteInternalUser = React.useCallback(async (payload: InviteInternalUserPayload) => {
     const res = await AuthService.inviteInternalUser(payload);
-    if (!res || !res.data) throw new Error("No data received");
-    return res.data;
+    return res?.data;
   }, []);
 
   const deleteUser = React.useCallback(async (userId: string) => {
