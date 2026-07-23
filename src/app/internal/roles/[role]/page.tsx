@@ -45,7 +45,7 @@ export default function RolePage() {
   }, [role, rolesLoading, router]);
 
   return (
-    <>
+    <div className="pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
       <RoleNavigation />
       <div className="mt-4">
         <AppHeader
@@ -60,6 +60,6 @@ export default function RolePage() {
       ) : (
         role && <RoleWorkspace key={params.role} role={role} permissions={permissions} />
       )}
-    </>
+    </div>
   );
 }

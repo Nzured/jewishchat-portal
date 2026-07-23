@@ -42,7 +42,7 @@ export function CategoryCard({ row, onEdit, onDelete }: CategoryCardProps) {
           onEdit(row);
         }
       }}
-      className="cursor-pointer transition-shadow hover:shadow-md"
+      className="cursor-pointer transition-shadow hover:shadow-md active:shadow-md"
     >
       <CardContent className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">

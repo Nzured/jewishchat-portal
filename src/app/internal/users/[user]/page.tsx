@@ -68,7 +68,7 @@ export default function UserDetailPage() {
   }, [userId, fetchUserDetails, fetchGroupsByUser]);
 
   return (
-    <div className="flex flex-col gap-4 pb-20 md:pb-0">
+    <div className="flex flex-col gap-4 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
       <UserNavigation />
 
       <Card className="flex gap-4  flex-row px-5 py-4">

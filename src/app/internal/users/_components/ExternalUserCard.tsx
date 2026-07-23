@@ -10,7 +10,7 @@ import { USER_STATUS_CHIP, User } from "@/types/User";
 export function ExternalUserCard({ row }: { row: User }) {
   return (
     <Link href={`/internal/users/${row.uuid}`} className="block">
-      <Card size="sm" className="transition-shadow hover:shadow-md">
+      <Card size="sm" className="transition-shadow hover:shadow-md active:shadow-md">
         <CardContent className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <Avatar

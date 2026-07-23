@@ -3,6 +3,7 @@
 import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import AppHeader from "@/components/layout/app/AppHeader";
+import { UnderConstruction } from "@/components/ui/UnderConstruction";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
 import { FilterItem } from "@/types/Search";
 import {
@@ -55,6 +56,8 @@ const INITIAL_FILTERS: FilterItem[] = [
   },
 ];
 
+const isCompleted = false;
+
 function ExternalGroupsContent() {
   const { filters, resetFilters, updateFilterOptions } = useSearchFilter();
   const searchParams = useSearchParams();
@@ -74,6 +77,15 @@ function ExternalGroupsContent() {
     updateFilterOptions("status", STATUS_FILTER_OPTIONS);
     updateFilterOptions("submittedBy", SUBMITTED_BY_FILTER_OPTIONS);
   }, [categoryParam, resetFilters, updateFilterOptions]);
+
+  if (!isCompleted) {
+    return (
+      <UnderConstruction
+        title="Group management is under construction"
+        description="We're still building this out. Check back soon."
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col ">
