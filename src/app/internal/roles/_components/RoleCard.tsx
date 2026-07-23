@@ -8,7 +8,7 @@ import { Role } from "@/types/Role";
 export function RoleCard({ row }: { row: Role }) {
   return (
     <Link href={`/internal/roles/${row.id}`} className="block">
-      <Card size="sm" className="transition-shadow hover:shadow-md">
+      <Card size="sm" className="transition-shadow hover:shadow-md active:shadow-md">
         <CardContent className="flex flex-col gap-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">

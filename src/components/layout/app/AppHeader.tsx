@@ -5,6 +5,7 @@ import { PlusCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { Fab } from "@/components/ui/Fab";
 import { Input } from "@/components/ui/Input";
 import {
   Popover,
@@ -108,14 +109,11 @@ export default function AppHeader({
             >
               {buttonLabel}
             </Button>
-            <Button
-              variant="default"
+            <Fab
+              icon={<PlusCircle className="size-6" />}
               onClick={onButtonPress}
               aria-label={buttonLabel}
-              className="fixed right-5 bottom-5 z-40 size-14 rounded-full p-0 shadow-lg md:hidden"
-            >
-              <PlusCircle className="size-6" />
-            </Button>
+            />
           </>
         )}
       </div>

@@ -83,7 +83,7 @@ export function ModerationActionsCard({
         </Card>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-surface-line bg-surface-card p-3 md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-surface-line bg-surface-card px-3 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))] md:hidden">
         {loading ? (
           <>
             <Skeleton className="h-10 flex-1 rounded-xl" />

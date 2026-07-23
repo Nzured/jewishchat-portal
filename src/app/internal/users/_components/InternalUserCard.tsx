@@ -9,7 +9,7 @@ import { RoleChips } from "./RoleChips";
 export function InternalUserCard({ row }: { row: User }) {
   return (
     <Link href={`/internal/users/${row.uuid}`} className="block">
-      <Card size="sm" className="transition-shadow hover:shadow-md">
+      <Card size="sm" className="transition-shadow hover:shadow-md active:shadow-md">
         <CardContent className="flex flex-col gap-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">

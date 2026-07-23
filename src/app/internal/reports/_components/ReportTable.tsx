@@ -200,7 +200,7 @@ const columns: DataTableColumn<ReportRow>[] = [
 
 function renderReportCard(row: ReportRow) {
   return (
-    <Card key={row.id} size="sm" className="transition-shadow hover:shadow-md">
+    <Card key={row.id} size="sm" className="transition-shadow hover:shadow-md active:shadow-md">
       <CardContent className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">

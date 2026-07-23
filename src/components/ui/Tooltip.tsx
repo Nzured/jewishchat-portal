@@ -21,9 +21,38 @@ function Tooltip({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root
   return <TooltipPrimitive.Root data-slot="tooltip" {...props} />;
 }
 
-function TooltipTrigger({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
+function mergeRefs<T>(...refs: Array<React.Ref<T> | undefined>) {
+  return (node: T) => {
+    for (const ref of refs) {
+      if (!ref) continue;
+      if (typeof ref === "function") ref(node);
+      else ref.current = node;
+    }
+  };
 }
+
+const TooltipTrigger = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Trigger>,
+  React.ComponentProps<typeof TooltipPrimitive.Trigger>
+>(({ onClick, ...props }, forwardedRef) => {
+  const innerRef = React.useRef<React.ElementRef<typeof TooltipPrimitive.Trigger>>(null);
+
+  return (
+    <TooltipPrimitive.Trigger
+      ref={mergeRefs(forwardedRef, innerRef)}
+      data-slot="tooltip-trigger"
+      onClick={(event) => {
+        // Touch devices don't focus elements on tap the way pointer hover
+        // does, which is what Radix relies on to reveal the tooltip without
+        // a mouse. Focus explicitly so tapping shows it too.
+        innerRef.current?.focus();
+        onClick?.(event);
+      }}
+      {...props}
+    />
+  );
+});
+TooltipTrigger.displayName = "TooltipTrigger";
 
 function TooltipContent({
   className,

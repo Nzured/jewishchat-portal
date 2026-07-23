@@ -1,6 +1,9 @@
 import AppHeader from "@/components/layout/app/AppHeader";
+import { UnderConstruction } from "@/components/ui/UnderConstruction";
 import { FilterItem } from "@/types/Search";
 import { ReportsTable } from "./_components/ReportTable";
+
+const isCompleted = false;
 
 export default function ReportPage() {
   const INITIAL_FILTERS: FilterItem[] = [
@@ -44,6 +47,16 @@ export default function ReportPage() {
       searchValue: "",
     },
   ];
+
+  if (!isCompleted) {
+    return (
+      <UnderConstruction
+        title="Report management is under construction"
+        description="We're still building this out. Check back soon."
+      />
+    );
+  }
+
   return (
     <>
       <AppHeader
