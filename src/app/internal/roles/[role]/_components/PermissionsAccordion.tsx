@@ -98,7 +98,7 @@ export function PermissionsAccordion({
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Typography variant="small" className="text-ink-3">
+                      <Typography variant="small" className="hidden text-ink-3 md:inline">
                         Select all
                       </Typography>
                       <Switch

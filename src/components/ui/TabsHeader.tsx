@@ -59,14 +59,17 @@ function StepsTabsHeader({ items, className }: { items: TabHeaderItem[]; classNa
 function PillsTabsHeader({ items, className }: { items: TabHeaderItem[]; className?: string }) {
   return (
     <TabsList
-      className={cn(" w-fit  gap-1 rounded-lg bg-surface-card p-2 py-6 shadow-sm", className)}
+      className={cn(
+        "w-full gap-1 rounded-lg bg-surface-card p-2 py-6 shadow-sm md:w-fit",
+        className,
+      )}
     >
       {items.map((item) => (
         <TabsTrigger
           key={item.value}
           value={item.value}
           disabled={item.disabled}
-          className="group h-8 gap-1.5  rounded-lg px-3 text-sm font-medium text-ink-3 data-active:bg-brand-softer data-active:text-state-success data-active:shadow-sm"
+          className="group h-8 flex-1 gap-1.5 rounded-lg px-3 text-sm font-medium text-ink-3 data-active:bg-brand-softer data-active:text-state-success data-active:shadow-sm md:flex-none"
         >
           {item.icon}
           {item.label}

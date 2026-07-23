@@ -49,4 +49,8 @@ export const AuthService = {
     api.post<ApiResponse<User>>(`${AUTH_ADMIN_SERVICE}/invite`, payload, {
       globalLoader: true,
     }),
+  validateToken: (token: string) =>
+    api.get<ApiResponse<User>>(`${AUTH_ADMIN_SERVICE}/invite/validate/${token}`),
+  acceptAccount: (payload: { token: string; password: string; confirmPassword: string }) =>
+    api.post<ApiResponse<User>>(`${AUTH_SERVICE}/invite/accept`, payload, { globalLoader: true }),
 };

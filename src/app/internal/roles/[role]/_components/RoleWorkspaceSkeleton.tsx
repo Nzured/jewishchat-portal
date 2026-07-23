@@ -5,8 +5,8 @@ const PERMISSION_SKELETON_ROWS = 6;
 
 export function RoleWorkspaceSkeleton() {
   return (
-    <div className="mt-2 flex flex-row gap-6">
-      <div className="flex flex-3 flex-col gap-3">
+    <div className="mt-2 flex flex-col gap-6 md:flex-row">
+      <div className="order-2 flex flex-col gap-3 md:order-1 md:flex-3">
         <div className="flex items-center justify-between">
           <Skeleton className="h-3 w-24" />
           <Skeleton className="h-3 w-20" />
@@ -29,7 +29,7 @@ export function RoleWorkspaceSkeleton() {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-4">
+      <div className="order-1 flex flex-col gap-4 md:order-2 md:flex-1">
         <Card size="sm">
           <CardContent className="flex flex-col gap-4">
             <Skeleton className="h-3 w-24" />

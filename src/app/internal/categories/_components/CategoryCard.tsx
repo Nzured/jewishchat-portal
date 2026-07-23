@@ -1,4 +1,5 @@
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
@@ -7,6 +8,8 @@ import { Typography } from "@/components/ui/Typography";
 import { NOT_APPLICABLE } from "@/configs/const";
 import { Category } from "@/types/Category";
 import { CategoryIcon } from "./CategoryIcon";
+
+const CANNOT_DELETE_MESSAGE = "Move or remove this category's groups before deleting it.";
 
 interface CategoryCardProps {
   row: Category;
@@ -61,7 +64,13 @@ export function CategoryCard({ row, onEdit, onDelete }: CategoryCardProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-1" onClick={(event) => event.stopPropagation()}>
+          <div
+            className="flex items-center gap-1"
+            onClick={(event) => {
+              event.stopPropagation();
+              if (!canDelete) toast.error(CANNOT_DELETE_MESSAGE);
+            }}
+          >
             {canDelete ? (
               deleteButton
             ) : (
@@ -69,9 +78,7 @@ export function CategoryCard({ row, onEdit, onDelete }: CategoryCardProps) {
                 <TooltipTrigger asChild>
                   <span tabIndex={0}>{deleteButton}</span>
                 </TooltipTrigger>
-                <TooltipContent>
-                  Move or remove this category&apos;s groups before deleting it.
-                </TooltipContent>
+                <TooltipContent>{CANNOT_DELETE_MESSAGE}</TooltipContent>
               </Tooltip>
             )}
           </div>

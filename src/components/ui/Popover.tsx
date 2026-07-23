@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Popover as PopoverPrimitive } from "radix-ui";
+import { useKeyboardInset } from "@/hooks/useKeyboardInset";
 import { cn } from "@/lib/utils";
 import { Typography } from "./Typography";
 
@@ -17,16 +18,22 @@ function PopoverContent({
   className,
   align = "start",
   sideOffset = 4,
+  collisionPadding = 16,
+  style,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+  const keyboardInset = useKeyboardInset();
+
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content
         data-slot="popover-content"
         align={align}
         sideOffset={sideOffset}
+        collisionPadding={collisionPadding}
+        style={{ ...style, "--kb-offset": `${keyboardInset}px` } as React.CSSProperties}
         className={cn(
-          "border border-surface-line z-50 flex origin-(--radix-popover-content-transform-origin) flex-col gap-2.5 rounded-lg bg-surface-card p-4 text-sm shadow-xl outline-hidden duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "border border-surface-line z-50 flex max-h-[calc(100dvh_-_var(--kb-offset,0px)_-_2rem)] origin-(--radix-popover-content-transform-origin) flex-col gap-2.5 overflow-y-auto rounded-lg bg-surface-card p-4 text-sm shadow-xl outline-hidden duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className,
         )}
         {...props}
