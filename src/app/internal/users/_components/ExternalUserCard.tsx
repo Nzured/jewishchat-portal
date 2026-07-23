@@ -24,17 +24,15 @@ export function ExternalUserCard({ row }: { row: User }) {
                 {(row.firstName ?? "") + " " + (row.lastName ?? "") || NOT_APPLICABLE}
               </Typography>
               <Typography variant="muted">{row.email ?? NOT_APPLICABLE}</Typography>
-              {row.mobile && (
-                <div className="flex items-center gap-1.5">
-                  <Typography variant="muted">{row.mobile}</Typography>
-                  {row.whatsappVerified && (
-                    <BadgeCheck
-                      className="size-4 text-state-success"
-                      aria-label="WhatsApp verified"
-                    />
-                  )}
-                </div>
-              )}
+              <div className="flex items-center gap-1.5">
+                <Typography variant="muted">{row.mobile || NOT_APPLICABLE}</Typography>
+                {row.mobile && row.whatsappVerified && (
+                  <BadgeCheck
+                    className="size-4 text-state-success"
+                    aria-label="WhatsApp verified"
+                  />
+                )}
+              </div>
             </div>
           </div>
 
