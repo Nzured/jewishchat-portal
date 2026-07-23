@@ -93,7 +93,7 @@ export function ModerationActionsCard({
           primaryAction && (
             <>
               {React.cloneElement(primaryAction.node, {
-                className: cn("flex-1", primaryAction.node.props.className),
+                className: cn("flex-1 justify-center", primaryAction.node.props.className),
               })}
               {secondaryActions.length > 0 && (
                 <Button

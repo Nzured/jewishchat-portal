@@ -36,7 +36,7 @@ export default function RoleNavigation() {
           disabled={!hasPrevious}
           onClick={() => router.push(`/internal/roles/${roles[currentIndex - 1].id}`)}
         >
-          Previous id
+          Previous Role
         </Button>
         <Button
           rightIcon={<ChevronRight className="size-4" />}
