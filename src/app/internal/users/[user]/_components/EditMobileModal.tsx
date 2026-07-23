@@ -107,8 +107,13 @@ export function EditMobileModal({ user, open, setOpen, onSave }: EditMobileModal
               <div className="flex items-start gap-2 rounded-lg bg-state-bg-warning p-3">
                 <Phone className="mt-0.5 size-4 shrink-0 text-state-warn" />
                 <Typography variant="small" className="text-state-warn">
-                  Changing the mobile number clears its WhatsApp verification — the user must
-                  re-verify before they can add groups.
+                  Changing the mobile number to{" "}
+                  <span className="font-semibold">
+                    {countryCode}
+                    {mobile}
+                  </span>{" "}
+                  clears its WhatsApp verification — the user must re-verify before they can add
+                  groups.
                 </Typography>
               </div>
             )}

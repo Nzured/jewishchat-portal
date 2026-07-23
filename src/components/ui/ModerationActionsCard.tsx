@@ -12,9 +12,7 @@ import { cn } from "@/lib/utils";
 
 export interface ModerationAction {
   key: string;
-  /** Fully configured element (icon, label, variant, color, onClick, etc. all live here). */
   node: React.ReactElement<{ className?: string; onClick?: (event: React.MouseEvent) => void }>;
-  /** Pins this action to the mobile bottom bar; the rest fall into the "More actions" drawer. */
   primary?: boolean;
   hidden?: boolean;
 }

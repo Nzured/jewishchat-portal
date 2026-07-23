@@ -11,7 +11,12 @@ import { Field, FieldLabel, FieldGroup } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Link } from "@/components/ui/Link";
 import { Typography } from "@/components/ui/Typography";
-import { EMAIL_CHECK_DEBOUNCE_MS, EMAIL_REGEX, NAME_PART_ONE, NAME_PART_TWO } from "@/configs/const";
+import {
+  EMAIL_CHECK_DEBOUNCE_MS,
+  EMAIL_REGEX,
+  NAME_PART_ONE,
+  NAME_PART_TWO,
+} from "@/configs/const";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { LoginPayload } from "@/services/auth/auth.types";

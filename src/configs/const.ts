@@ -1,8 +1,8 @@
 export const PASSWORD_REQUIREMENTS = [
   { id: "length", label: "At least 8 characters", regex: /.{8,}/ },
-  { id: "lowercase", label: "One lowercase letter", regex: /[a-z]/ },
-  { id: "special", label: "One special character", regex: /[^A-Za-z0-9]/ },
-  { id: "uppercase", label: "One uppercase letter", regex: /[A-Z]/ },
+  // { id: "lowercase", label: "One lowercase letter", regex: /[a-z]/ },
+  // { id: "special", label: "One special character", regex: /[^A-Za-z0-9]/ },
+  // { id: "uppercase", label: "One uppercase letter", regex: /[A-Z]/ },
   { id: "number", label: "One number", regex: /[0-9]/ },
 ];
 

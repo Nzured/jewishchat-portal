@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KeyRound, Mail, PauseCircle, Phone, RefreshCw, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -19,12 +19,14 @@ interface UserModerationCardProps {
   user?: User | null;
   loading?: boolean;
   onUserChange?: (user: User) => void;
+  onVisibilityChange?: (visible: boolean) => void;
 }
 
 export default function UserModerationCard({
   user,
   loading,
   onUserChange,
+  onVisibilityChange,
 }: UserModerationCardProps) {
   const router = useRouter();
   const { user: currentUser } = useUser();
@@ -106,6 +108,7 @@ export default function UserModerationCard({
       ? {
           key: "reactivate",
           primary: true,
+          hidden: isSelf || user?.userType === UserType.INTERNAL || user?.superAdmin,
           node: (
             <Button
               size="sm"
@@ -121,7 +124,7 @@ export default function UserModerationCard({
       : {
           key: "suspend",
           primary: true,
-          hidden: isSelf || user?.userType === UserType.INTERNAL,
+          hidden: isSelf || user?.userType === UserType.INTERNAL || user?.superAdmin,
           node: (
             <Button
               size="sm"
@@ -136,7 +139,7 @@ export default function UserModerationCard({
         },
     {
       key: "delete",
-      hidden: isSelf,
+      hidden: isSelf || user?.superAdmin,
       node: (
         <Button
           size="sm"
@@ -152,11 +155,11 @@ export default function UserModerationCard({
     {
       key: "separator",
       type: "separator",
-      hidden: isSelf || user?.status === UserStatus.PENDING_INVITATION,
+      hidden: isSelf || user?.status === UserStatus.PENDING_INVITATION || user?.superAdmin,
     },
     {
       key: "reset-password",
-      hidden: isSelf || user?.status === UserStatus.PENDING_INVITATION,
+      hidden: isSelf || user?.status === UserStatus.PENDING_INVITATION || user?.superAdmin,
       node: (
         <Button
           size="sm"
@@ -172,7 +175,7 @@ export default function UserModerationCard({
     },
     {
       key: "edit-email",
-      hidden: user?.status === UserStatus.PENDING_INVITATION,
+      hidden: user?.status === UserStatus.PENDING_INVITATION || user?.superAdmin,
       node: (
         <Button
           size="sm"
@@ -188,7 +191,7 @@ export default function UserModerationCard({
     },
     {
       key: "edit-mobile",
-      hidden: user?.userType === UserType.INTERNAL,
+      hidden: user?.userType === UserType.INTERNAL || user?.superAdmin,
       node: (
         <Button
           size="sm"
@@ -203,6 +206,17 @@ export default function UserModerationCard({
       ),
     },
   ];
+
+  const hasVisibleActions = actions.some(
+    (action) => !action.hidden && !("type" in action && action.type === "separator"),
+  );
+  const isVisible = showSkeleton || hasVisibleActions;
+
+  useEffect(() => {
+    onVisibilityChange?.(isVisible);
+  }, [isVisible, onVisibilityChange]);
+
+  if (!isVisible) return null;
 
   return (
     <>

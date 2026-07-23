@@ -9,6 +9,7 @@ import { Chip } from "@/components/ui/Chip";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
+import { cn } from "@/lib/utils";
 import { Group } from "@/types/Group";
 import { USER_STATUS_CHIP, User, UserType } from "@/types/User";
 import AccountDetailsCard from "./_components/AccountDetailsCard";
@@ -28,6 +29,7 @@ export default function UserDetailPage() {
   const [userGroups, setUserGroups] = useState<Group[]>([]);
   const [groupsLoading, setGroupsLoading] = useState(true);
   const [rolesModalOpen, setRolesModalOpen] = useState(false);
+  const [moderationVisible, setModerationVisible] = useState(true);
 
   useEffect(() => {
     if (!userId) return;
@@ -117,7 +119,12 @@ export default function UserDetailPage() {
       </Card>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="flex flex-col gap-4 md:col-span-2">
+        <div
+          className={cn(
+            "flex flex-col gap-4",
+            moderationVisible ? "md:col-span-2" : "md:col-span-3",
+          )}
+        >
           <AccountDetailsCard user={user} loading={userLoading} />
           {userLoading ? (
             <Card>
@@ -140,11 +147,12 @@ export default function UserDetailPage() {
             />
           ) : null}
         </div>
-        <div>
+        <div className={cn(!moderationVisible && "hidden")}>
           <UserModerationCard
             user={user}
             loading={userLoading}
             onUserChange={(updatedUser) => setUser(updatedUser)}
+            onVisibilityChange={setModerationVisible}
           />
         </div>
       </div>
