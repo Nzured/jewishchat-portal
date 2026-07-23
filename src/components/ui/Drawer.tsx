@@ -41,6 +41,7 @@ function DrawerContent({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content>) {
   const keyboardInset = useKeyboardInset();
+  const isKeyboardOpen = keyboardInset > 0;
   const childArray = React.Children.toArray(children);
   const header = childArray.find(
     (child) => React.isValidElement(child) && child.type === DrawerHeader,
@@ -55,6 +56,7 @@ function DrawerContent({
         style={{ ...style, "--kb-offset": `${keyboardInset}px` } as React.CSSProperties}
         className={cn(
           "fixed inset-x-0 bottom-[var(--kb-offset,0px)] z-50 flex max-h-[calc(85vh_-_var(--kb-offset,0px))] w-full flex-col overflow-hidden rounded-t-2xl border-t border-surface-line bg-surface-card shadow-xl outline-none",
+          isKeyboardOpen && "max-h-[calc(100dvh_-_var(--kb-offset,0px))]",
           "data-open:animate-in data-open:slide-in-from-bottom data-closed:animate-out data-closed:slide-out-to-bottom",
           className,
         )}

@@ -221,11 +221,7 @@ export default function Form({ onSuccess }: FormProps) {
 
           <div className="flex flex-row items-center justify-center gap-1 text-sm text-ink-3">
             <span>Already have an account?</span>
-            <TransitionLink
-              href="/login"
-              direction="signup-to-login"
-              className="font-medium text-brand-green underline underline-offset-4 hover:text-brand-deep"
-            >
+            <TransitionLink href="/login" direction="signup-to-login">
               Log in
             </TransitionLink>
           </div>

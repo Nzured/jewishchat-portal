@@ -2,8 +2,8 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { DataTable, DataTableColumn } from "@/components/ui/DataTable";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { Link } from "@/components/ui/Link";
+import { NoData } from "@/components/ui/NoData";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
 import { Group, GroupStatus } from "@/types/Group";
@@ -104,7 +104,10 @@ export default function UserGroupsSection({ groups, loading }: UserGroupsSection
       </CardHeader>
 
       {!loading && entries.length === 0 ? (
-        <EmptyState message="No groups added yet." className="py-10" />
+        <NoData
+          title="No groups added yet"
+          description="Groups this user adds will show up here."
+        />
       ) : (
         <DataTable columns={columns} data={entries} getRowId={(row) => row.id} loading={loading} />
       )}

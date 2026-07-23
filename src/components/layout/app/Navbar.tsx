@@ -1,16 +1,7 @@
 "use client";
 
-import { Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/Popover";
-import { Separator } from "@/components/ui/Separator";
 import { Typography } from "@/components/ui/Typography";
 import { UserMenu } from "./UserMenu";
 
@@ -27,7 +18,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ title = "", notifications = [], onMenuClick }: NavbarProps) {
-  const hasNotifications = notifications.length > 0;
+  // const hasNotifications = notifications.length > 0;
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-surface-line px-6 bg-surface-card">
@@ -44,7 +35,7 @@ export function Navbar({ title = "", notifications = [], onMenuClick }: NavbarPr
         <Typography variant="h4">{title}</Typography>
       </div>
       <div className="flex flex-row items-center gap-4">
-        <Popover>
+        {/* <Popover>
           <PopoverTrigger asChild>
             <Button variant="icon" size="icon" className="relative" aria-label="Notifications">
               <Bell className="size-5 mt-1" />
@@ -75,7 +66,7 @@ export function Navbar({ title = "", notifications = [], onMenuClick }: NavbarPr
             )}
           </PopoverContent>
         </Popover>
-        <Separator orientation="vertical" className="bg-surface-line" />
+        <Separator orientation="vertical" className="bg-surface-line" /> */}
         <UserMenu />
       </div>
     </header>

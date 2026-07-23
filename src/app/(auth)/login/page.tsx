@@ -76,10 +76,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col-reverse justify-end lg:grid lg:justify-normal min-h-screen lg:h-screen w-full overflow-x-hidden overflow-y-auto lg:overflow-hidden lg:grid-cols-2">
-      <div className="flex h-full flex-col items-center justify-center px-6 py-8 lg:py-0 overflow-x-hidden [view-transition-name:auth-form]">
+    <div className="flex h-dvh w-full flex-col-reverse justify-end overflow-hidden lg:grid lg:h-screen lg:grid-cols-2 lg:justify-normal">
+      <div className="flex h-full flex-col items-center justify-center overflow-x-hidden px-6 py-4 lg:py-0 [view-transition-name:auth-form]">
         <div className="w-full max-w-[420px]">
-          <div className="mb-8 flex flex-col gap-2">
+          <div className="mb-4 flex flex-col gap-2">
             <Typography
               variant="p"
               className="text-xs font-semibold tracking-widest text-brand-green uppercase"
@@ -98,7 +98,7 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} noValidate>
-            <FieldGroup className="gap-5">
+            <FieldGroup className="gap-3 md:gap-5">
               <Field>
                 <FieldLabel required htmlFor="email">
                   Email address
@@ -132,11 +132,15 @@ export default function LoginPage() {
                 </div>
               </Field>
 
-              <Button type="submit" variant="default" className="w-full text-base mt-2 h-[46px]">
+              <Button
+                type="submit"
+                variant="default"
+                className="w-full text-base mt-1 md:mt-2 h-[46px]"
+              >
                 Log In <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
 
-              <div className="flex flex-row items-start justify-center gap-2 text-[13px] text-ink-3 mt-4">
+              <div className="flex flex-row items-start justify-center gap-2 text-[13px] text-ink-3 mt-2 md:mt-4">
                 <span>New to {NAME_PART_ONE + NAME_PART_TWO}?</span>
                 <TransitionLink href="/signup" direction="login-to-signup">
                   Create Account
@@ -146,7 +150,7 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
-      <AuthIllustration />
+      <AuthIllustration mobileClassName="h-[110px] p-4" />
 
       <VerifyEmailModal
         email={pendingVerifyEmail}

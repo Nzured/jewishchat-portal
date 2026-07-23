@@ -3,6 +3,7 @@
 import * as React from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import { DeleteModal } from "@/components/ui/DeleteModal";
+import { NoData } from "@/components/ui/NoData";
 import { Typography } from "@/components/ui/Typography";
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "@/configs/const";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
@@ -33,7 +34,7 @@ interface CategoryTableProps {
 
 export default function CategoryTable({ onEdit, data, loading }: CategoryTableProps) {
   const { deleteCategory } = useCategories();
-  const { appliedFilters } = useSearchFilter();
+  const { appliedFilters, hasActiveFilters, clearAllFilters } = useSearchFilter();
   const [page, setPage] = React.useState(DEFAULT_PAGE);
   const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_SIZE);
   const [mobileCount, setMobileCount] = React.useState(DEFAULT_PAGE_SIZE);
@@ -85,6 +86,17 @@ export default function CategoryTable({ onEdit, data, loading }: CategoryTablePr
         renderCard={renderCard}
         getRowId={(row) => String(row.id)}
         loading={loading}
+        emptyState={
+          <NoData
+            title={hasActiveFilters ? "No categories match these filters" : "No categories yet"}
+            description={
+              hasActiveFilters
+                ? "Try adjusting or clearing your filters to see more categories."
+                : "Categories you create will show up here."
+            }
+            onClearFilters={hasActiveFilters ? clearAllFilters : undefined}
+          />
+        }
         pagination={{
           page,
           pageSize,

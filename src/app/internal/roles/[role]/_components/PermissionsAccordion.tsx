@@ -83,7 +83,7 @@ export function PermissionsAccordion({
             >
               <AccordionPrimitive.Header className="flex">
                 <AccordionPrimitive.Trigger asChild>
-                  <div className="group/accordion-trigger flex w-full cursor-pointer items-center justify-between gap-4 bg-surface-bg px-4 py-3 outline-none focus-visible:ring-3 focus-visible:ring-brand-green/20">
+                  <div className="group/accordion-trigger flex w-full cursor-pointer items-center justify-between gap-4 bg-surface-header px-4 py-3 outline-none focus-visible:ring-3 focus-visible:ring-brand-green/20">
                     <div className="flex items-center gap-3">
                       <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-surface-line bg-surface-card">
                         <Icon className="size-4 text-ink-3" />

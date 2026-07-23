@@ -44,7 +44,9 @@ export function RoleDetailsCard({
               onChange={(event) => onNameChange(event.target.value)}
               leftIcon={<LinkIcon />}
             />
-            <FieldDescription icon={<Globe />}>{`${URL}${slugify(name)}....`}</FieldDescription>
+            <FieldDescription icon={<Globe />} className="break-all">
+              {`${URL}${slugify(name)}....`}
+            </FieldDescription>
           </Field>
           <Field>
             <FieldLabel required>Description</FieldLabel>

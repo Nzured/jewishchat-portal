@@ -9,6 +9,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
+import { NoData } from "@/components/ui/NoData";
 import { Typography } from "@/components/ui/Typography";
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "@/configs/const";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
@@ -199,7 +200,7 @@ const columns: DataTableColumn<ReportRow>[] = [
 
 function renderReportCard(row: ReportRow) {
   return (
-    <Card key={row.id} size="sm">
+    <Card key={row.id} size="sm" className="transition-shadow hover:shadow-md">
       <CardContent className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -278,7 +279,7 @@ function matchesFilter(row: ReportRow, key: string, value: string | string[] | n
 }
 
 export function ReportsTable() {
-  const { appliedFilters } = useSearchFilter();
+  const { appliedFilters, hasActiveFilters, clearAllFilters } = useSearchFilter();
   const [page, setPage] = React.useState(DEFAULT_PAGE);
   const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_SIZE);
   const [mobileCount, setMobileCount] = React.useState(DEFAULT_PAGE_SIZE);
@@ -314,6 +315,17 @@ export function ReportsTable() {
       cardData={mobileData}
       renderCard={renderReportCard}
       getRowId={(row) => row.id}
+      emptyState={
+        <NoData
+          title={hasActiveFilters ? "No reports match these filters" : "No reports yet"}
+          description={
+            hasActiveFilters
+              ? "Try adjusting or clearing your filters to see more reports."
+              : "Reported groups will show up here."
+          }
+          onClearFilters={hasActiveFilters ? clearAllFilters : undefined}
+        />
+      }
       pagination={{
         page,
         pageSize,

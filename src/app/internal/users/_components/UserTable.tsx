@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { DataTable } from "@/components/ui/DataTable";
+import { NoData } from "@/components/ui/NoData";
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_SORT } from "@/configs/const";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
 import { User, UserType } from "@/types/User";
@@ -28,7 +29,7 @@ export default function UserTable({
   tab: UserType;
   onCountChange?: (tab: UserType, total: number) => void;
 }) {
-  const { appliedFilters } = useSearchFilter();
+  const { appliedFilters, hasActiveFilters, clearAllFilters } = useSearchFilter();
   const { fetchUsers, setLastListedUserIds } = useUserManagementContext();
   const [users, setUsers] = React.useState<User[]>([]);
   const [mobileUsers, setMobileUsers] = React.useState<User[]>([]);
@@ -120,6 +121,17 @@ export default function UserTable({
       renderCard={renderCard}
       getRowId={(row) => row?.uuid}
       loading={loading && page === 1}
+      emptyState={
+        <NoData
+          title={hasActiveFilters ? "No users match these filters" : "No users yet"}
+          description={
+            hasActiveFilters
+              ? "Try adjusting or clearing your filters to see more users."
+              : "Users will show up here once they're added."
+          }
+          onClearFilters={hasActiveFilters ? clearAllFilters : undefined}
+        />
+      }
       pagination={{
         page,
         pageSize,

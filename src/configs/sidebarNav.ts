@@ -1,4 +1,4 @@
-import { Flag, LayoutGrid, MessageSquare, Tag, Upload, UserCog, Users } from "lucide-react";
+import { Flag, LayoutGrid, MessageSquare, Tag, UserCog, Users } from "lucide-react";
 import type { SidebarNavSection } from "@/types/Navigation";
 import { UserType } from "@/types/User";
 
@@ -21,10 +21,10 @@ const ADMIN_NAV_SECTIONS: SidebarNavSection[] = [
       { label: "Category Management", href: "/internal/categories", icon: Tag },
     ],
   },
-  {
-    label: "System",
-    items: [{ label: "Bulk Update", href: "/internal/bulk-update", icon: Upload }],
-  },
+  // {
+  //   label: "System",
+  //   items: [{ label: "Bulk Update", href: "/internal/bulk-update", icon: Upload }],
+  // },
 ];
 
 const INTERNAL_NAV_SECTIONS: SidebarNavSection[] = [
