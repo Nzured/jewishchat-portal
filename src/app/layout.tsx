@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import { EmailVerificationGate } from "@/components/layout/app/EmailVerificationGate";
 import { GlobalLoader } from "@/components/layout/app/GlobalLoader";
 import { Toaster } from "@/components/ui/Sonner";
 import { TooltipProvider } from "@/components/ui/Tooltip";
@@ -33,7 +34,10 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-surface-bg">
         <TooltipProvider>
           <UserProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              {children}
+              <EmailVerificationGate />
+            </AuthProvider>
           </UserProvider>
           <GlobalLoader />
         </TooltipProvider>

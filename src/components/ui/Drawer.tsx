@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
+import { useKeyboardInset } from "@/hooks/useKeyboardInset";
 import { cn } from "@/lib/utils";
 import { Typography } from "./Typography";
 
@@ -36,8 +37,10 @@ function DrawerOverlay({
 function DrawerContent({
   className,
   children,
+  style,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content>) {
+  const keyboardInset = useKeyboardInset();
   const childArray = React.Children.toArray(children);
   const header = childArray.find(
     (child) => React.isValidElement(child) && child.type === DrawerHeader,
@@ -49,8 +52,9 @@ function DrawerContent({
       <DrawerOverlay />
       <DialogPrimitive.Content
         data-slot="drawer-content"
+        style={{ ...style, "--kb-offset": `${keyboardInset}px` } as React.CSSProperties}
         className={cn(
-          "fixed inset-x-0 bottom-0 z-50 flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-2xl border-t border-surface-line bg-surface-card shadow-xl outline-none",
+          "fixed inset-x-0 bottom-[var(--kb-offset,0px)] z-50 flex max-h-[calc(85vh_-_var(--kb-offset,0px))] w-full flex-col overflow-hidden rounded-t-2xl border-t border-surface-line bg-surface-card shadow-xl outline-none",
           "data-open:animate-in data-open:slide-in-from-bottom data-closed:animate-out data-closed:slide-out-to-bottom",
           className,
         )}

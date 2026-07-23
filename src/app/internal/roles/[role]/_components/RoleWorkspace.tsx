@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { getRoleChanges, useRoles } from "@/app/internal/roles/_context/RoleContext";
 import { Permission } from "@/types/Permission";
 import { Role } from "@/types/Role";
-import { PermissionsPanel } from "./PermissionsPanel";
+import { PermissionsAccordion } from "./PermissionsAccordion";
 import { RoleActionsCard } from "./RoleActionsCard";
 import { RoleDetailsCard } from "./RoleDetailsCard";
 
@@ -51,15 +51,15 @@ export function RoleWorkspace({ role, permissions }: RoleWorkspaceProps) {
   };
 
   return (
-    <div className="mt-2 flex flex-row gap-6">
-      <div className="flex-3">
-        <PermissionsPanel
+    <div className="mt-2 flex flex-col gap-6 md:flex-row">
+      <div className="order-2 flex-3 md:order-1">
+        <PermissionsAccordion
           permissions={permissions}
           grantedIds={grantedIds}
           onToggle={handleToggle}
         />
       </div>
-      <div className="flex flex-1 flex-col gap-4">
+      <div className="order-1 flex flex-1 flex-col gap-4 md:order-2">
         <RoleDetailsCard
           name={name}
           description={description}

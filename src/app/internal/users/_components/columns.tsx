@@ -7,6 +7,7 @@ import { DataTableColumn } from "@/components/ui/DataTable";
 import { Typography } from "@/components/ui/Typography";
 import { NOT_APPLICABLE } from "@/configs/const";
 import { USER_STATUS_CHIP, User } from "@/types/User";
+import { RoleChips } from "./RoleChips";
 
 const nameColumn: DataTableColumn<User> = {
   id: "name",
@@ -83,7 +84,7 @@ export const internalColumns: DataTableColumn<User>[] = [
   {
     id: "role",
     header: "Role",
-    cell: (row) => <Typography variant="small">{row.role ?? NOT_APPLICABLE}</Typography>,
+    cell: (row) => <RoleChips roles={row.roles} />,
   },
   actionsColumn,
 ];

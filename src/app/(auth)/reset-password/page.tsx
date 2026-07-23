@@ -42,7 +42,7 @@ function ResetPasswordContent() {
     }
 
     try {
-      await AuthService.resetPassword({ token, password: values.password });
+      await AuthService.resetPassword({ token, newPassword: values.password });
       toast.success("Your password has been changed. Please log in.");
       router.push("/login");
     } catch (error) {

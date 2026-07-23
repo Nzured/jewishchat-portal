@@ -47,7 +47,6 @@ export interface UserTableData {
   status: UserStatus;
   mobile?: string;
   whatsappVerified: boolean;
-  role: string;
 }
 export interface Admin {
   userType: UserType;
