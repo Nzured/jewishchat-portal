@@ -99,14 +99,24 @@ export default function AppHeader({
           )}
         </div>
         {onButtonPress && (
-          <Button
-            variant="default"
-            onClick={onButtonPress}
-            leftIcon={<PlusCircle className="size-4" />}
-            className="justify-center"
-          >
-            {buttonLabel}
-          </Button>
+          <>
+            <Button
+              variant="default"
+              onClick={onButtonPress}
+              leftIcon={<PlusCircle className="size-4" />}
+              className="hidden justify-center md:inline-flex"
+            >
+              {buttonLabel}
+            </Button>
+            <Button
+              variant="default"
+              onClick={onButtonPress}
+              aria-label={buttonLabel}
+              className="fixed right-5 bottom-5 z-40 size-14 rounded-full p-0 shadow-lg md:hidden"
+            >
+              <PlusCircle className="size-6" />
+            </Button>
+          </>
         )}
       </div>
 
@@ -152,7 +162,7 @@ export default function AppHeader({
                   />
                 )}
               </PopoverTrigger>
-              <PopoverContent className="mt-2">
+              <PopoverContent className="mt-2 w-[calc(100vw-2rem)] max-w-xs sm:w-72">
                 <PopoverHeader>
                   <PopoverTitle>{`Filter by : ${filter.label}`}</PopoverTitle>
                 </PopoverHeader>
@@ -188,14 +198,14 @@ export default function AppHeader({
                       onChange={(e) => updateFilterValue(filter.key, e.target.value)}
                     />
                   ) : filter.component === "NUMBER_RANGE" ? (
-                    <div className="flex w-full items-center gap-2">
+                    <div className="flex w-full flex-col items-stretch gap-2 sm:flex-row sm:items-center">
                       <Input
                         type="number"
                         placeholder="Min"
                         value={rangeStart || ""}
                         onChange={(e) => updateFilterValue(filter.key, [e.target.value, rangeEnd])}
                       />
-                      <Typography variant={"small"} className="shrink-0 text-ink-3">
+                      <Typography variant={"small"} className="shrink-0 self-center text-ink-3">
                         to
                       </Typography>
                       <Input
@@ -208,7 +218,7 @@ export default function AppHeader({
                       />
                     </div>
                   ) : filter.component === "DATE_RANGE" ? (
-                    <div className="flex w-full items-center gap-2">
+                    <div className="flex w-full flex-col items-stretch gap-2 sm:flex-row sm:items-center">
                       <DatePicker
                         value={rangeStart ? parseDateKey(rangeStart) : undefined}
                         onChange={(date) =>
@@ -216,8 +226,9 @@ export default function AppHeader({
                         }
                         placeholder="From"
                         align="start"
+                        className="w-full sm:w-auto"
                       />
-                      <Typography variant={"small"} className="shrink-0 text-ink-3">
+                      <Typography variant={"small"} className="shrink-0 self-center text-ink-3">
                         to
                       </Typography>
                       <DatePicker
@@ -227,6 +238,7 @@ export default function AppHeader({
                         }
                         placeholder="To"
                         align="end"
+                        className="w-full sm:w-auto"
                       />
                     </div>
                   ) : null}

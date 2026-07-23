@@ -194,7 +194,7 @@ function DataTable<T>({
   selectedIds = [],
   onSelectedIdsChange,
   pagination,
-  emptyState = "No results found.",
+  emptyState,
   rowClassName,
   className,
   renderCard,
@@ -241,7 +241,7 @@ function DataTable<T>({
             ))
           ) : cardView.rows.length === 0 ? (
             <div className="rounded-xl border border-surface-line bg-surface-card">
-              <EmptyState message={emptyState} className="py-10" />
+              {emptyState ?? <EmptyState className="py-10" />}
             </div>
           ) : (
             cardView.rows.map((row, index) => (
@@ -304,7 +304,7 @@ function DataTable<T>({
             ) : data.length === 0 ? (
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={columns.length + (selectable ? 1 : 0)}>
-                  <EmptyState message={emptyState} className="py-10" />
+                  {emptyState ?? <EmptyState className="py-10" />}
                 </TableCell>
               </TableRow>
             ) : (

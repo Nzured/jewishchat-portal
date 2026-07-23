@@ -1,10 +1,10 @@
-import { Settings, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
-import { Link } from "@/components/ui/Link";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
 import { Typography } from "@/components/ui/Typography";
+import { NOT_APPLICABLE } from "@/configs/const";
 import { Category } from "@/types/Category";
 import { CategoryIcon } from "./CategoryIcon";
 
@@ -20,9 +20,9 @@ export function CategoryCard({ row, onEdit, onDelete }: CategoryCardProps) {
   const deleteButton = (
     <Button
       variant="icon"
-      size="icon-sm"
+      size="icon"
       aria-label={`Delete ${row.name}`}
-      className="hover:bg-state-danger/10 hover:text-state-danger"
+      className="size-11 hover:bg-state-danger/10 hover:text-state-danger md:size-7"
       disabled={!canDelete}
       onClick={() => onDelete(row)}
     >
@@ -31,27 +31,37 @@ export function CategoryCard({ row, onEdit, onDelete }: CategoryCardProps) {
   );
 
   return (
-    <Card size="sm">
+    <Card
+      size="sm"
+      role="button"
+      tabIndex={0}
+      onClick={() => onEdit(row)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onEdit(row);
+        }
+      }}
+      className="cursor-pointer transition-shadow hover:shadow-md"
+    >
       <CardContent className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <CategoryIcon icon={row.icon} color={row.color} />
+            {row?.icon && <CategoryIcon icon={row.icon} color={row.color} />}
             <div className="flex flex-col gap-1">
               <Typography variant="small" className="font-semibold text-ink-1">
                 {row.name}
               </Typography>
-              <Chip label={`/${row.slug}`} shape="rounded" type="neutral" className="font-mono" />
+              <Chip
+                label={`/${row.slug}`}
+                shape="rounded"
+                type="neutral"
+                className="w-fit font-mono"
+              />
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="icon"
-              size="icon-sm"
-              aria-label={`Edit ${row.name}`}
-              onClick={() => onEdit(row)}
-            >
-              <Settings className="text-ink-3 transition-colors group-hover/button:text-brand-green" />
-            </Button>
+
+          <div className="flex items-center gap-1" onClick={(event) => event.stopPropagation()}>
             {canDelete ? (
               deleteButton
             ) : (
@@ -67,11 +77,7 @@ export function CategoryCard({ row, onEdit, onDelete }: CategoryCardProps) {
           </div>
         </div>
 
-        <Typography variant="muted">{row.description}</Typography>
-
-        <div className="border-t border-surface-line pt-3">
-          <Link href={`/external/groups?category=${row.slug}`}>{row.groupsCount} groups</Link>
-        </div>
+        <Typography variant="muted">{row.description || NOT_APPLICABLE}</Typography>
       </CardContent>
     </Card>
   );

@@ -5,11 +5,22 @@ import {
 } from "@public/svgs";
 import Image, { StaticImageData } from "next/image";
 import { Typography } from "@/components/ui/Typography";
+import { cn } from "@/lib/utils";
 
-export default function AuthIllustration() {
+interface AuthIllustrationProps {
+  /** Overrides the mobile banner height (e.g. for pages tight on vertical space). Defaults to 160px. */
+  mobileClassName?: string;
+}
+
+export default function AuthIllustration({ mobileClassName }: AuthIllustrationProps) {
   return (
     <>
-      <div className="relative w-full h-[160px] lg:hidden select-none p-5 flex flex-col justify-center">
+      <div
+        className={cn(
+          "relative w-full h-[160px] lg:hidden select-none p-5 flex flex-col justify-center",
+          mobileClassName,
+        )}
+      >
         <Image
           src={AuthIllustrationMobile as StaticImageData}
           alt="Authentication Illustration"

@@ -72,6 +72,7 @@ function ModalContent({
   ...props
 }: ModalContentProps) {
   const keyboardInset = useKeyboardInset();
+  const isKeyboardOpen = keyboardInset > 0;
   const childArray = React.Children.toArray(children);
   const header = childArray.find(
     (child) => React.isValidElement(child) && child.type === ModalHeader,
@@ -91,6 +92,7 @@ function ModalContent({
           "fixed top-1/2 left-1/2 z-50 flex max-h-[85vh] w-full max-w-md -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-surface-line bg-surface-card shadow-xl outline-none",
           "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           "max-md:top-auto max-md:left-0 max-md:bottom-[var(--kb-offset,0px)] max-md:inset-x-0 max-md:max-h-[calc(85vh_-_var(--kb-offset,0px))] max-md:max-w-none! max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-b-none max-md:rounded-t-2xl",
+          isKeyboardOpen && "max-md:max-h-[calc(100dvh_-_var(--kb-offset,0px))]",
           "max-md:data-open:fade-in-0! max-md:data-open:zoom-in-100! max-md:data-open:slide-in-from-bottom max-md:data-closed:fade-out-0! max-md:data-closed:zoom-out-100! max-md:data-closed:slide-out-to-bottom",
           className,
         )}

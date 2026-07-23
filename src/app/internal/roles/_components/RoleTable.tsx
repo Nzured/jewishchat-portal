@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { DataTable } from "@/components/ui/DataTable";
+import { NoData } from "@/components/ui/NoData";
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "@/configs/const";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
 import { Role } from "@/types/Role";
@@ -26,7 +27,7 @@ function matchesFilter(row: Role, key: string, value: string | string[] | null) 
 }
 
 export default function RoleTable({ data, loading }: { data: Role[]; loading?: boolean }) {
-  const { appliedFilters } = useSearchFilter();
+  const { appliedFilters, hasActiveFilters, clearAllFilters } = useSearchFilter();
   const [page, setPage] = React.useState(DEFAULT_PAGE);
   const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_SIZE);
   const [mobileCount, setMobileCount] = React.useState(DEFAULT_PAGE_SIZE);
@@ -65,6 +66,17 @@ export default function RoleTable({ data, loading }: { data: Role[]; loading?: b
       renderCard={renderCard}
       getRowId={(row) => String(row.id)}
       loading={loading}
+      emptyState={
+        <NoData
+          title={hasActiveFilters ? "No roles match these filters" : "No roles yet"}
+          description={
+            hasActiveFilters
+              ? "Try adjusting or clearing your filters to see more roles."
+              : "Roles you create will show up here."
+          }
+          onClearFilters={hasActiveFilters ? clearAllFilters : undefined}
+        />
+      }
       pagination={{
         page,
         pageSize,

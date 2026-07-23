@@ -3,9 +3,14 @@
 import * as React from "react";
 import { FilterItem, FilterOption } from "@/types/Search";
 
+function hasFilterValue(item: FilterItem) {
+  return Array.isArray(item.value) ? item.value.some(Boolean) : Boolean(item.value);
+}
+
 interface SearchFilterContextType {
   filters: FilterItem[];
   appliedFilters: FilterItem[];
+  hasActiveFilters: boolean;
   setFilters: React.Dispatch<React.SetStateAction<FilterItem[]>>;
   resetFilters: (items: FilterItem[]) => void;
   updateFilterValue: (key: string, value: string | string[] | null) => void;
@@ -13,6 +18,7 @@ interface SearchFilterContextType {
   updateSearchValue: (key: string, searchValue: string) => void;
   applyFilters: () => void;
   clearFilter: (key: string) => void;
+  clearAllFilters: () => void;
 }
 
 const SearchFilterContext = React.createContext<SearchFilterContextType | undefined>(undefined);
@@ -26,6 +32,7 @@ export function SearchFilterProvider({
 }) {
   const [filters, setFilters] = React.useState<FilterItem[]>(initialFilters ?? []);
   const [appliedFilters, setAppliedFilters] = React.useState<FilterItem[]>(initialFilters ?? []);
+  const hasActiveFilters = appliedFilters.some(hasFilterValue);
 
   const resetFilters = React.useCallback((items: FilterItem[]) => {
     setFilters(items);
@@ -55,11 +62,18 @@ export function SearchFilterProvider({
     setAppliedFilters((prev) => prev.map(clear));
   }, []);
 
+  const clearAllFilters = React.useCallback(() => {
+    const clear = (item: FilterItem) => ({ ...item, value: null, searchValue: "" });
+    setFilters((prev) => prev.map(clear));
+    setAppliedFilters((prev) => prev.map(clear));
+  }, []);
+
   return (
     <SearchFilterContext.Provider
       value={{
         filters,
         appliedFilters,
+        hasActiveFilters,
         setFilters,
         resetFilters,
         updateFilterValue,
@@ -67,6 +81,7 @@ export function SearchFilterProvider({
         updateSearchValue,
         applyFilters,
         clearFilter,
+        clearAllFilters,
       }}
     >
       {children}
