@@ -12,7 +12,7 @@ export const createErrorHandler = () => {
 
     if (statusCode === 400 && statusMessage) {
       toast.error(statusMessage);
-    } else if (statusCode && statusCode !== 401) {
+    } else if (statusCode) {
       toast.error(statusMessage || "Something went wrong");
     }
 

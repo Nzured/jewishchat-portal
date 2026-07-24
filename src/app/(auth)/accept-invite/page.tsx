@@ -1,7 +1,6 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { CheckCircle2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import AuthIllustration from "@/components/layout/auth/AuthIllustration";
@@ -12,7 +11,7 @@ import { Link } from "@/components/ui/Link";
 import { Typography } from "@/components/ui/Typography";
 import { PASSWORD_REQUIREMENTS } from "@/configs/const";
 import { AuthService } from "@/services/auth/auth.service";
-import { User } from "@/types/User";
+import type { InvitedUser } from "@/services/auth/auth.types";
 
 type Step = "invitation" | "set-password" | "invalid" | "success";
 
@@ -47,7 +46,7 @@ function AcceptInviteContent() {
 
   const [step, setStep] = useState<Step>("invitation");
   const [isValidating, setIsValidating] = useState(false);
-  const [invitedUser, setInvitedUser] = useState<User | null>(null);
+  const [invitedUser, setInvitedUser] = useState<InvitedUser | null>(null);
 
   const {
     register,
@@ -170,21 +169,6 @@ function AcceptInviteContent() {
                           "Password does not meet all requirements",
                       })}
                     />
-                    <div className="grid grid-flow-col grid-rows-3 gap-x-6 gap-y-1.5 text-[12px] text-ink-3">
-                      {PASSWORD_REQUIREMENTS.map((req) => {
-                        const isMet = req.regex.test(passwordValue);
-                        return (
-                          <div key={req.id} className="flex items-center gap-1.5">
-                            {isMet ? (
-                              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-brand-green" />
-                            ) : (
-                              <div className="h-3 w-3 shrink-0 rounded-full border border-surface-line-strong" />
-                            )}
-                            <span className={isMet ? "text-ink-1" : ""}>{req.label}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
                   </Field>
 
                   <Field>
