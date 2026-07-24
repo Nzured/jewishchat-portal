@@ -6,6 +6,13 @@ declare module "axios" {
   export interface AxiosRequestConfig {
     /** Opt a single request into the full-screen GlobalLoader overlay. */
     globalLoader?: boolean;
+    /**
+     * Marks a request as unauthenticated-by-design (login, signup, invite
+     * validation, etc). A 401 from these means "bad credentials/token", not
+     * "session expired" — skip the token-refresh + force-logout flow and let
+     * the error surface normally to the caller.
+     */
+    skipAuthRefresh?: boolean;
   }
 }
 

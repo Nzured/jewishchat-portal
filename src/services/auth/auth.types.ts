@@ -55,3 +55,9 @@ export interface ResetPasswordPayload {
   token: string;
   newPassword: string;
 }
+
+export interface InvitedUser {
+  email: string;
+  firstName: string;
+  lastName: string;
+}

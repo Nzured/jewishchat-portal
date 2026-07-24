@@ -88,6 +88,16 @@ export const setupInterceptors = (
       const config = error.config as RetriableConfig | undefined;
 
       if (error.response?.status === 401) {
+        // Requests that are unauthenticated by design (login, signup, invite
+        // validation, ...) are marked with skipAuthRefresh — a 401 from them
+        // means "bad credentials/token", not "session expired", so they
+        // should never trigger a refresh or force-redirect. Fall back to the
+        // same check by access-token presence for anything unmarked, since a
+        // 401 with no token on file couldn't be an expired session either.
+        if (config?.skipAuthRefresh || !getAccessToken()) {
+          return errorHandler(error);
+        }
+
         if (config && !config._retry) {
           config._retry = true;
 
