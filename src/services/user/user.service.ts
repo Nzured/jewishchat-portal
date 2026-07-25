@@ -20,7 +20,6 @@ export const UserService = {
   getUser: (userId: string) => api.get<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}`),
   getGroupsByUser: (userId: string) =>
     api.get<ApiResponse<Group[]>>(`${USER_SERVICE}/admin/users/${userId}/groups`),
-
   deleteUser: (userId: string) =>
     api.delete<ApiResponse<void>>(`${USER_SERVICE}/admin/users/${userId}`, {
       globalLoader: true,
@@ -47,6 +46,14 @@ export const UserService = {
     api.patch<ApiResponse<User>>(
       `${USER_SERVICE}/admin/users/${userId}/mobile`,
       { newMobile: mobile },
+      {
+        globalLoader: true,
+      },
+    ),
+  changeUserRole: (userId: string, roles: number[]) =>
+    api.patch<ApiResponse<User>>(
+      `${USER_SERVICE}/admin/users/${userId}/role`,
+      { roles: roles },
       {
         globalLoader: true,
       },

@@ -19,6 +19,7 @@ interface UserManagementContextType {
   reactivateUser: (userId: string) => Promise<User | undefined>;
   changeEmail: (userId: string, email: string) => Promise<User | undefined>;
   changeMobile: (userId: string, mobile: string) => Promise<User | undefined>;
+  changeUserRole: (userId: string, roles: number[]) => Promise<User | undefined>;
   lastListedUserIds: string[];
   setLastListedUserIds: (ids: string[]) => void;
 }
@@ -79,6 +80,11 @@ export function UserManagementProvider({ children }: { children: React.ReactNode
     return res?.data;
   }, []);
 
+  const changeUserRole = React.useCallback(async (userId: string, roles: number[]) => {
+    const res = await UserService.changeUserRole(userId, roles);
+    return res?.data;
+  }, []);
+
   return (
     <UserContext.Provider
       value={{
@@ -91,6 +97,7 @@ export function UserManagementProvider({ children }: { children: React.ReactNode
         reactivateUser,
         changeEmail,
         changeMobile,
+        changeUserRole,
         lastListedUserIds,
         setLastListedUserIds,
       }}

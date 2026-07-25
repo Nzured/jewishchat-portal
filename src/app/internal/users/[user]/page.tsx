@@ -23,7 +23,7 @@ import { useUserManagementContext } from "../_context/UserManagementContext";
 export default function UserDetailPage() {
   const params = useParams<{ user: string }>();
   const userId = params.user;
-  const { fetchUserDetails, fetchGroupsByUser } = useUserManagementContext();
+  const { fetchUserDetails, fetchGroupsByUser, changeUserRole } = useUserManagementContext();
   const [user, setUser] = useState<User | null>(null);
   const [userLoading, setUserLoading] = useState(true);
   const [userGroups, setUserGroups] = useState<Group[]>([]);
@@ -66,6 +66,16 @@ export default function UserDetailPage() {
       ignore = true;
     };
   }, [userId, fetchUserDetails, fetchGroupsByUser]);
+
+  const handleSaveRoles = async (roleIds: number[]) => {
+    if (!user) return;
+    try {
+      const updatedUser = await changeUserRole(user.uuid, roleIds);
+      if (updatedUser) setUser(updatedUser);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
@@ -163,7 +173,7 @@ export default function UserDetailPage() {
           setOpen={setRolesModalOpen}
           userName={`${user.firstName} ${user.lastName}`}
           assignedRoles={user.roles}
-          onSave={(roles) => setUser((prev) => (prev ? { ...prev, roles } : prev))}
+          onSave={handleSaveRoles}
         />
       )}
     </div>
