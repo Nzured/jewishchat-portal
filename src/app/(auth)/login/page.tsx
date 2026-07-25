@@ -23,8 +23,6 @@ import { LoginPayload } from "@/services/auth/auth.types";
 import { UserType } from "@/types/User";
 import { VerifyEmailModal } from "./_components/VerifyEmailModal";
 
-const ADMIN_RESET_MESSAGE = "Admins cannot reset their own password. Please contact support.";
-
 export default function LoginPage() {
   const { resolveUserType, login } = useAuth();
   const {
@@ -149,8 +147,11 @@ export default function LoginPage() {
                 />
                 <div className="flex w-full justify-end">
                   {isInternal ? (
-                    <Typography variant="small" className="text-right text-state-danger">
-                      {ADMIN_RESET_MESSAGE}
+                    <Typography
+                      as="span"
+                      className="text-[13px] font-medium text-ink-4 cursor-not-allowed"
+                    >
+                      Forgot Password?
                     </Typography>
                   ) : (
                     <Link href={forgotPasswordHref}>Forgot Password?</Link>

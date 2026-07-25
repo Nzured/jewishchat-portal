@@ -26,7 +26,7 @@ interface ManageRolesModalProps {
   setOpen: (open: boolean) => void;
   userName: string;
   assignedRoles: string[];
-  onSave: (roleNames: string[]) => void;
+  onSave: (roleIds: number[]) => void | Promise<void>;
 }
 
 export function ManageRolesModal({
@@ -39,6 +39,7 @@ export function ManageRolesModal({
   const [roles, setRoles] = React.useState<Role[]>([]);
   const [rolesLoading, setRolesLoading] = React.useState(true);
   const [selected, setSelected] = React.useState<Set<string>>(new Set(assignedRoles));
+  const [saving, setSaving] = React.useState(false);
 
   const [prevOpen, setPrevOpen] = React.useState(open);
   if (open !== prevOpen) {
@@ -80,9 +81,15 @@ export function ManageRolesModal({
 
   const handleOpenChange = (next: boolean) => setOpen(next);
 
-  const handleSave = () => {
-    onSave([...selected]);
-    handleOpenChange(false);
+  const handleSave = async () => {
+    const roleIds = roles.filter((role) => selected.has(role.name)).map((role) => role.id);
+    setSaving(true);
+    try {
+      await onSave(roleIds);
+      handleOpenChange(false);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -135,7 +142,13 @@ export function ManageRolesModal({
               Cancel
             </Button>
           </ModalClose>
-          <Button leftIcon={<Save />} onClick={handleSave} variant="default" color="primary">
+          <Button
+            leftIcon={<Save />}
+            onClick={() => void handleSave()}
+            variant="default"
+            color="primary"
+            disabled={rolesLoading || saving}
+          >
             Save Changes
           </Button>
         </ModalFooter>

@@ -11,8 +11,10 @@ import { Input } from "@/components/ui/Input";
 import { Link } from "@/components/ui/Link";
 import { Typography } from "@/components/ui/Typography";
 import { PASSWORD_REQUIREMENTS } from "@/configs/const";
+import { useAuth } from "@/contexts/AuthContext";
 import { AuthService } from "@/services/auth/auth.service";
 import type { InvitedUser } from "@/services/auth/auth.types";
+import type { User } from "@/types/User";
 
 type Step = "invitation" | "set-password" | "invalid" | "success";
 
@@ -44,9 +46,11 @@ function AcceptInviteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const { acceptInvite } = useAuth();
   const [step, setStep] = useState<Step>("invitation");
   const [isValidating, setIsValidating] = useState(false);
   const [invitedUser, setInvitedUser] = useState<InvitedUser | null>(null);
+  const [activatedUser, setActivatedUser] = useState<User | null>(null);
 
   const {
     register,
@@ -85,12 +89,12 @@ function AcceptInviteContent() {
     }
 
     try {
-      const res = await AuthService.acceptAccount({
+      const user = await acceptInvite({
         token,
         newPassword: values.newPassword,
         confirmPassword: values.confirmPassword,
       });
-      setInvitedUser(res?.data ?? invitedUser);
+      setActivatedUser(user);
       setStep("success");
     } catch (error) {
       console.error(error);
@@ -257,7 +261,10 @@ function AcceptInviteContent() {
               <div className="mb-8 flex flex-col gap-2">
                 <Eyebrow />
                 <Typography variant="h2" className="font-semibold text-ink-1 leading-[1.2]">
-                  You are all set{invitedUser?.firstName ? `, ${invitedUser.firstName}` : ""}
+                  You are all set
+                  {activatedUser?.firstName || invitedUser?.firstName
+                    ? `, ${activatedUser?.firstName ?? invitedUser?.firstName}`
+                    : ""}
                 </Typography>
                 <Typography variant="p" className="text-sm text-ink-3">
                   Your password is saved and you are signed in. We are taking you to the admin
@@ -276,7 +283,10 @@ function AcceptInviteContent() {
                   type="button"
                   variant="default"
                   className="w-full text-base mt-2 h-[46px]"
-                  onClick={() => router.push("/internal")}
+                  onClick={() => {
+                    router.push("/internal");
+                    router.refresh();
+                  }}
                 >
                   Go to Dashboard
                 </Button>

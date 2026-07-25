@@ -12,13 +12,20 @@ import {
   SignupRequest,
   VerifyOtpPayload,
 } from "@/services/auth/auth.types";
-import { UserType } from "@/types/User";
+import { User, UserType } from "@/types/User";
+
+interface AcceptInvitePayload {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
 
 interface AuthContextType {
   resolveUserType: (email: string) => Promise<UserType | null>;
   login: (payload: LoginPayload) => Promise<void>;
   signup: (payload: SignupRequest) => Promise<void>;
   verifyEmail: (payload: VerifyOtpPayload) => Promise<UserType | null>;
+  acceptInvite: (payload: AcceptInvitePayload) => Promise<User>;
   resendOtp: (email: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -90,6 +97,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [establishSession],
   );
 
+  const acceptInvite = React.useCallback(
+    async (payload: AcceptInvitePayload): Promise<User> => {
+      const res = await AuthService.acceptAccount(payload);
+      if (!res?.data?.accessToken || !res?.data?.refreshToken || !res?.data?.user?.userType)
+        throw new Error("Failed to activate account");
+
+      await establishSession(res.data);
+      return res.data.user;
+    },
+    [establishSession],
+  );
+
   const resendOtp = React.useCallback(async (email: string) => {
     await AuthService.resendOtp({ email });
     toast.success("Verification code resent!");
@@ -105,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ resolveUserType, login, signup, verifyEmail, resendOtp, logout }}
+      value={{ resolveUserType, login, signup, verifyEmail, acceptInvite, resendOtp, logout }}
     >
       {children}
     </AuthContext.Provider>
