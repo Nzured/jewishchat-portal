@@ -25,9 +25,12 @@ function matchesFilter(row: User, key: string, value: string | string[] | null) 
 export default function UserTable({
   tab,
   onCountChange,
+  refreshToken,
 }: {
   tab: UserType;
   onCountChange?: (tab: UserType, total: number) => void;
+  /** Bump this value to force the current page to be refetched (e.g. after an invite). */
+  refreshToken?: number;
 }) {
   const { appliedFilters, hasActiveFilters, clearAllFilters } = useSearchFilter();
   const { fetchUsers, setLastListedUserIds } = useUserManagementContext();
@@ -95,7 +98,16 @@ export default function UserTable({
     return () => {
       ignore = true;
     };
-  }, [tab, page, pageSize, searchTerm, fetchUsers, setLastListedUserIds, onCountChange]);
+  }, [
+    tab,
+    page,
+    pageSize,
+    searchTerm,
+    refreshToken,
+    fetchUsers,
+    setLastListedUserIds,
+    onCountChange,
+  ]);
 
   const filteredUsers = React.useMemo(
     () =>

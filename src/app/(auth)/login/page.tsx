@@ -20,7 +20,10 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { LoginPayload } from "@/services/auth/auth.types";
+import { UserType } from "@/types/User";
 import { VerifyEmailModal } from "./_components/VerifyEmailModal";
+
+const ADMIN_RESET_MESSAGE = "Admins cannot reset their own password. Please contact support.";
 
 export default function LoginPage() {
   const { resolveUserType, login } = useAuth();
@@ -36,14 +39,18 @@ export default function LoginPage() {
   const debouncedEmail = useDebouncedValue(email, EMAIL_CHECK_DEBOUNCE_MS);
   const [pendingVerifyEmail, setPendingVerifyEmail] = useState<string | null>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [userType, setUserType] = useState<UserType | null>(null);
 
   useEffect(() => {
-    if (!debouncedEmail || !EMAIL_REGEX.test(debouncedEmail)) return;
+    if (!debouncedEmail || !EMAIL_REGEX.test(debouncedEmail)) {
+      setUserType(null);
+      return;
+    }
 
     void (async () => {
       setIsCheckingEmail(true);
       try {
-        await resolveUserType(debouncedEmail);
+        setUserType(await resolveUserType(debouncedEmail));
       } catch {
         // resolveUserType already swallows its own errors; nothing to do here.
       } finally {
@@ -51,6 +58,12 @@ export default function LoginPage() {
       }
     })();
   }, [debouncedEmail, resolveUserType]);
+
+  const isInternal = userType === UserType.INTERNAL;
+  const forgotPasswordHref =
+    email && EMAIL_REGEX.test(email)
+      ? `/forgot-password?email=${encodeURIComponent(email)}`
+      : "/forgot-password";
 
   const onSubmit = async (data: LoginPayload) => {
     try {
@@ -69,6 +82,13 @@ export default function LoginPage() {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 403) {
         setPendingVerifyEmail(data.email);
+        return;
+      }
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        const message =
+          (error.response?.data as { message?: string } | undefined)?.message ||
+          "Invalid email or password.";
+        setError("password", { type: "manual", message });
         return;
       }
       console.error(error);
@@ -128,7 +148,13 @@ export default function LoginPage() {
                   {...register("password", { required: "Password is required" })}
                 />
                 <div className="flex w-full justify-end">
-                  <Link href="/forgot-password">Forgot Password?</Link>
+                  {isInternal ? (
+                    <Typography variant="small" className="text-right text-state-danger">
+                      {ADMIN_RESET_MESSAGE}
+                    </Typography>
+                  ) : (
+                    <Link href={forgotPasswordHref}>Forgot Password?</Link>
+                  )}
                 </div>
               </Field>
 

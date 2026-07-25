@@ -71,7 +71,7 @@ export const AuthService = {
       params: { token },
       skipAuthRefresh: true,
     }),
-  acceptAccount: (payload: { token: string; password: string; confirmPassword: string }) =>
+  acceptAccount: (payload: { token: string; newPassword: string; confirmPassword: string }) =>
     api.post<ApiResponse<InvitedUser>>(`${AUTH_ADMIN_SERVICE}/invite/accept`, payload, {
       globalLoader: true,
       skipAuthRefresh: true,
