@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import AuthIllustration from "@/components/layout/auth/AuthIllustration";
@@ -14,14 +15,17 @@ import { EMAIL_CHECK_DEBOUNCE_MS, EMAIL_REGEX } from "@/configs/const";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { AuthService } from "@/services/auth/auth.service";
+import { UserType } from "@/types/User";
 
 const NO_ACCOUNT_MESSAGE = "No account found with this email.";
+const ADMIN_RESET_MESSAGE = "Admins cannot reset their own password. Please contact support.";
 
 interface ForgotPasswordPayload {
   email: string;
 }
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordContent() {
+  const searchParams = useSearchParams();
   const { resolveUserType } = useAuth();
   const {
     register,
@@ -30,26 +34,35 @@ export default function ForgotPasswordPage() {
     setError,
     clearErrors,
     formState: { errors, isSubmitting },
-  } = useForm<ForgotPasswordPayload>();
+  } = useForm<ForgotPasswordPayload>({
+    defaultValues: { email: searchParams.get("email") ?? "" },
+  });
 
   const email = watch("email");
   const debouncedEmail = useDebouncedValue(email, EMAIL_CHECK_DEBOUNCE_MS);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const [userType, setUserType] = useState<UserType | null>(null);
 
   useEffect(() => {
-    if (!debouncedEmail || !EMAIL_REGEX.test(debouncedEmail)) return;
+    if (!debouncedEmail || !EMAIL_REGEX.test(debouncedEmail)) {
+      setUserType(null);
+      return;
+    }
 
     void (async () => {
       setIsCheckingEmail(true);
       try {
-        const userType = await resolveUserType(debouncedEmail);
-        if (!userType) {
+        const type = await resolveUserType(debouncedEmail);
+        setUserType(type);
+        if (!type) {
           setError("email", { type: "manual", message: NO_ACCOUNT_MESSAGE });
+        } else if (type === UserType.INTERNAL) {
+          setError("email", { type: "manual", message: ADMIN_RESET_MESSAGE });
         } else {
           clearErrors("email");
         }
       } catch {
-        // resolveUserType already swallows its own errors; nothing to do here.
+        setUserType(null);
       } finally {
         setIsCheckingEmail(false);
       }
@@ -61,6 +74,10 @@ export default function ForgotPasswordPage() {
       const userType = await resolveUserType(data.email);
       if (!userType) {
         setError("email", { type: "manual", message: NO_ACCOUNT_MESSAGE });
+        return;
+      }
+      if (userType === UserType.INTERNAL) {
+        setError("email", { type: "manual", message: ADMIN_RESET_MESSAGE });
         return;
       }
 
@@ -116,7 +133,9 @@ export default function ForgotPasswordPage() {
                 type="submit"
                 variant="default"
                 className="w-full text-base mt-2 h-[46px]"
-                disabled={isSubmitting}
+                disabled={
+                  isSubmitting || userType === UserType.INTERNAL || !EMAIL_REGEX.test(email ?? "")
+                }
               >
                 Send Reset Link <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -131,5 +150,13 @@ export default function ForgotPasswordPage() {
       </div>
       <AuthIllustration />
     </div>
+  );
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ForgotPasswordContent />
+    </Suspense>
   );
 }

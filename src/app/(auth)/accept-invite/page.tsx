@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import { CheckCircle2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import AuthIllustration from "@/components/layout/auth/AuthIllustration";
@@ -16,7 +17,7 @@ import type { InvitedUser } from "@/services/auth/auth.types";
 type Step = "invitation" | "set-password" | "invalid" | "success";
 
 interface SetPasswordFormValues {
-  password: string;
+  newPassword: string;
   confirmPassword: string;
 }
 
@@ -43,7 +44,6 @@ function AcceptInviteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-
   const [step, setStep] = useState<Step>("invitation");
   const [isValidating, setIsValidating] = useState(false);
   const [invitedUser, setInvitedUser] = useState<InvitedUser | null>(null);
@@ -54,10 +54,10 @@ function AcceptInviteContent() {
     control,
     formState: { errors, isSubmitting },
   } = useForm<SetPasswordFormValues>({
-    defaultValues: { password: "", confirmPassword: "" },
+    defaultValues: { newPassword: "", confirmPassword: "" },
   });
 
-  const passwordValue = useWatch({ control, name: "password" }) ?? "";
+  const passwordValue = useWatch({ control, name: "newPassword" }) ?? "";
 
   const onContinue = async () => {
     if (!token) {
@@ -87,7 +87,7 @@ function AcceptInviteContent() {
     try {
       const res = await AuthService.acceptAccount({
         token,
-        password: values.password,
+        newPassword: values.newPassword,
         confirmPassword: values.confirmPassword,
       });
       setInvitedUser(res?.data ?? invitedUser);
@@ -159,16 +159,31 @@ function AcceptInviteContent() {
                     </FieldLabel>
                     <Input
                       type="password"
-                      id="password"
+                      id="newPassword"
                       placeholder="Create a password"
-                      error={errors.password?.message}
-                      {...register("password", {
+                      error={errors.newPassword?.message}
+                      {...register("newPassword", {
                         required: "Password is required",
                         validate: (value) =>
                           PASSWORD_REQUIREMENTS.every((req) => req.regex.test(value)) ||
                           "Password does not meet all requirements",
                       })}
                     />
+                    <div className="flex flex-col gap-1.5 text-[12px] text-ink-3">
+                      {PASSWORD_REQUIREMENTS.map((req) => {
+                        const isMet = req.regex.test(passwordValue);
+                        return (
+                          <div key={req.id} className="flex items-center gap-1.5">
+                            {isMet ? (
+                              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-brand-green" />
+                            ) : (
+                              <div className="h-3 w-3 shrink-0 rounded-full border border-surface-line-strong" />
+                            )}
+                            <span className={isMet ? "text-ink-1" : ""}>{req.label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </Field>
 
                   <Field>
@@ -183,7 +198,7 @@ function AcceptInviteContent() {
                       {...register("confirmPassword", {
                         required: "Please confirm your password",
                         validate: (value, formValues) =>
-                          value === formValues.password || "Passwords do not match",
+                          value === formValues.newPassword || "Passwords do not match",
                       })}
                     />
                   </Field>

@@ -39,6 +39,7 @@ export default function UserListing() {
   const [addUserModalOpen, setAddUserModalOpen] = useState(false);
   const [externalCount, setExternalCount] = useState(0);
   const [internalCount, setInternalCount] = useState(0);
+  const [refreshToken, setRefreshToken] = useState(0);
   const { filters, resetFilters } = useSearchFilter();
 
   useEffect(() => {
@@ -80,11 +81,11 @@ export default function UserListing() {
           />
         </Tabs>
       </div>
-      <UserTable tab={activeTab} onCountChange={handleCountChange} />
+      <UserTable tab={activeTab} onCountChange={handleCountChange} refreshToken={refreshToken} />
       <AddInternalUserModal
         open={addUserModalOpen}
         setOpen={setAddUserModalOpen}
-        onInvite={() => {}}
+        onInvite={() => setRefreshToken((prev) => prev + 1)}
       />
     </div>
   );

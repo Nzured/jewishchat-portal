@@ -87,7 +87,7 @@ function ResetPasswordContent() {
                       "Password does not meet all requirements",
                   })}
                 />
-                <div className="grid grid-flow-col grid-rows-3 gap-x-6 gap-y-1.5 text-[12px] text-ink-3">
+                <div className="grid grid-flow-col gap-x-6 gap-y-1.5 text-[12px] text-ink-3">
                   {PASSWORD_REQUIREMENTS.map((req) => {
                     const isMet = req.regex.test(passwordValue);
                     return (
