@@ -28,7 +28,7 @@ export function GroupAdminCard({ group, className }: GroupAdminCardProps) {
 
     let ignore = false;
 
-    UserService.getUser(ownerUuid)
+    UserService.getUserById(ownerUuid)
       .then((res) => {
         if (!ignore) setOwner(res.data);
       })
@@ -64,8 +64,7 @@ export function GroupAdminCard({ group, className }: GroupAdminCardProps) {
     <div className={cn(cardClasses, className)}>
       <Avatar
         variant="circle"
-        size="sm"
-        className="rounded-xl"
+        size="lg"
         name={ownerName}
         src={owner.profilePic ?? group.ownerProfileUrl}
         alt={ownerName}

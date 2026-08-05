@@ -58,4 +58,6 @@ export const UserService = {
         globalLoader: true,
       },
     ),
+  getUserById: (userId: string) =>
+    api.get<ApiResponse<User>>(`${USER_SERVICE}/users/getById/${userId}`),
 };

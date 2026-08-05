@@ -37,7 +37,7 @@ function GroupCard({ group, className }: GroupCardProps) {
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-1 items-start justify-between gap-3">
         <div className="flex items-flex-start gap-4">
           <Avatar variant="tile" src={""} name={group.name} />
           <div className="flex-col">
