@@ -17,14 +17,17 @@ const UserContext = React.createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null);
-  const [isLoading, setIsLoading] = React.useState(() => Boolean(getAccessToken()));
+  const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    if (!getAccessToken()) return;
-
     let ignore = false;
 
     async function fetchUser() {
+      if (!getAccessToken()) {
+        if (!ignore) setIsLoading(false);
+        return;
+      }
+
       try {
         const res = await UserService.myProfile();
         if (!ignore) setUser(res.data);

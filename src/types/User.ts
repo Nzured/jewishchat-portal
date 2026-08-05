@@ -1,3 +1,5 @@
+import { Paginated } from "./Common";
+
 export enum UserType {
   INTERNAL = "INTERNAL",
   EXTERNAL = "EXTERNAL",
@@ -52,13 +54,7 @@ export interface Admin {
   userType: UserType;
 }
 
-export interface AdminUsersPage {
-  totalPages: number;
-  pageSize: number;
-  currentPage: number;
-  totalElements: number;
-  users: User[];
-}
+export type AdminUsersPage = Paginated<"users", User>;
 
 export interface InviteInternalUserPayload {
   email: string;

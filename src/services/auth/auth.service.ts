@@ -35,7 +35,10 @@ export const AuthService = {
       skipAuthRefresh: true,
     }),
   refreshToken: async (payload: RefreshTokenPayload) =>
-    api.post<RefreshTokenResponse>(REFRESH_TOKEN_ENDPOINT, payload, { skipAuthRefresh: true }),
+    api.post<RefreshTokenResponse>(REFRESH_TOKEN_ENDPOINT, undefined, {
+      headers: { Authorization: payload.refreshToken },
+      skipAuthRefresh: true,
+    }),
   getUserType: async (payload: { email: string }) =>
     api.get<UserTypeResponse>(`${AUTH_SERVICE}/user-type`, {
       params: { email: payload.email },

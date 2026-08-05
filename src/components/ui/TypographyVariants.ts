@@ -4,9 +4,11 @@ import { cva, type VariantProps } from "class-variance-authority";
 const typographyVariants = cva("text-ink-1", {
   variants: {
     variant: {
+      title:
+        "scroll-m-20 font-display text-4xl font-semibold tracking-tight sm:text-6xl lg:text-[96px] lg:leading-[95px] lg:tracking-[-0.06em]", // 96px, line-height 95px, letter-spacing -6% at desktop
       h1: "scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl", // 36px (2.25rem), lg: 48px (3rem)
       h2: "scroll-m-20 text-3xl font-semibold", // 30px (1.875rem)
-      h3: "scroll-m-20 text-2xl font-semibold tracking-tight", // 24px (1.5rem)
+      h3: "scroll-m-20 text-base tracking-tight sm:text-2xl", // 16px (1rem), sm: 24px (1.5rem)
       h4: "scroll-m-20 text-xl font-semibold tracking-tight", // 20px (1.25rem)
 
       p: "leading-7", // line-height: 28px (1.75rem)
@@ -38,6 +40,7 @@ const typographyVariants = cva("text-ink-1", {
 type VariantPropType = VariantProps<typeof typographyVariants>;
 
 const variantElementMap: Record<NonNullable<VariantPropType["variant"]>, React.ElementType> = {
+  title: "h1",
   h1: "h1",
   h2: "h2",
   h3: "h3",

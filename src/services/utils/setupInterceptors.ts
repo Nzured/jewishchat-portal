@@ -26,8 +26,8 @@ const refreshAccessToken = async (): Promise<string | null> => {
   try {
     const response = await axios.post<ApiResponse<LoginData>>(
       `${process.env.NEXT_PUBLIC_API_URL || "/api"}${REFRESH_TOKEN_ENDPOINT}`,
-      { refreshToken },
-      { headers: { Authorization: `Bearer ${getAccessToken() ?? ""}` } },
+      undefined,
+      { headers: { Authorization: refreshToken } },
     );
     const { accessToken, refreshToken: newRefreshToken } = response.data.data;
     updateAccessToken(accessToken, newRefreshToken);

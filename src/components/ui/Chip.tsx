@@ -72,7 +72,7 @@ function Chip({
         className={cn(chipVariants({ variant, shape, type, className }))}
         {...rest}
       >
-        <Typography variant="xs" className="font-medium tabular-nums text-inherit">
+        <Typography variant="xs" className="truncate font-medium tabular-nums text-inherit">
           {count?.toLocaleString()} {label}
         </Typography>
       </span>
@@ -143,7 +143,7 @@ function Chip({
       {leftIcon && (
         <span className="flex size-4 shrink-0 items-center justify-center">{leftIcon}</span>
       )}
-      <Typography variant="xs" className="font-medium tabular-nums text-inherit">
+      <Typography variant="xs" className="truncate font-medium tabular-nums text-inherit">
         {label}
       </Typography>
     </button>

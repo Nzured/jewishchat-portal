@@ -1,25 +1,13 @@
 "use client";
 
 import { ReactNode } from "react";
-import { PlusCircle, X } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
-import { DatePicker } from "@/components/ui/DatePicker";
 import { Fab } from "@/components/ui/Fab";
-import { Input } from "@/components/ui/Input";
-import {
-  Popover,
-  PopoverClose,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/Popover";
-import { SearchDropdown } from "@/components/ui/SearchDropdown";
+import { SearchFilterChip } from "@/components/ui/SearchFilterChip";
 import { Typography } from "@/components/ui/Typography";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
-import { formatDate, parseDateKey, toDateKey } from "@/lib/date";
 import { FilterItem } from "@/types/Search";
 
 interface AppHeaderProps {
@@ -33,36 +21,6 @@ interface AppHeaderProps {
   buttonLabel?: string;
 }
 
-function formatRangeBound(value?: string) {
-  if (!value) return null;
-  const num = Number(value);
-  return Number.isNaN(num) ? value : num.toLocaleString();
-}
-
-function formatDateBound(value?: string) {
-  return value ? formatDate(parseDateKey(value)) : null;
-}
-
-function getFilterValueLabel(filter?: FilterItem) {
-  if (!filter || filter.value == null || filter.value === "") return null;
-
-  if (filter.component === "NUMBER_RANGE" || filter.component === "DATE_RANGE") {
-    const isDateRange = filter.component === "DATE_RANGE";
-    const [start, end] = Array.isArray(filter.value) ? filter.value : [filter.value, ""];
-    const startLabel = isDateRange ? formatDateBound(start) : formatRangeBound(start);
-    const endLabel = isDateRange ? formatDateBound(end) : formatRangeBound(end);
-    if (!startLabel && !endLabel) return null;
-    if (startLabel && endLabel) return `${startLabel} – ${endLabel}`;
-    if (isDateRange) return startLabel ? `From ${startLabel}` : `Until ${endLabel}`;
-    return startLabel ? `≥ ${startLabel}` : `≤ ${endLabel}`;
-  }
-
-  const values = Array.isArray(filter.value) ? filter.value : [filter.value];
-  return values
-    .map((value) => filter.options?.find((opt) => opt.value === value)?.label ?? value)
-    .join(", ");
-}
-
 export default function AppHeader({
   title,
   subtitle,
@@ -72,8 +30,7 @@ export default function AppHeader({
   onButtonPress,
   buttonLabel = "Add New",
 }: AppHeaderProps) {
-  const { appliedFilters, updateFilterValue, updateSearchValue, applyFilters, clearFilter } =
-    useSearchFilter();
+  const { appliedFilters, applyFilterValue, clearFilter } = useSearchFilter();
 
   return (
     <>
@@ -119,137 +76,15 @@ export default function AppHeader({
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mt-4">
-        {filters?.map((filter) => {
-          const appliedValueLabel = getFilterValueLabel(
-            appliedFilters.find((item) => item.key === filter.key),
-          );
-          const [rangeStart, rangeEnd] =
-            filter.component === "NUMBER_RANGE" || filter.component === "DATE_RANGE"
-              ? Array.isArray(filter.value)
-                ? filter.value
-                : ["", ""]
-              : ["", ""];
-
-          return (
-            <Popover key={filter.key}>
-              <PopoverTrigger asChild>
-                {appliedValueLabel ? (
-                  <Chip
-                    shape="rounded"
-                    label={
-                      <>
-                        <Typography variant={"small"} className="font-normal text-brand-deep">
-                          {filter.label} :
-                        </Typography>{" "}
-                        <Typography variant={"small"} className="font-semibold text-brand-deep">
-                          {appliedValueLabel}
-                        </Typography>
-                      </>
-                    }
-                    rightIcon={<X className="size-2.5" />}
-                    rightIconLabel={`Clear ${filter.label} filter`}
-                    onRightIconClick={() => clearFilter(filter.key)}
-                    className="border-state-success/20 bg-brand-soft text-state-success"
-                  />
-                ) : (
-                  <Chip
-                    label={filter.label}
-                    shape="rounded"
-                    type={"neutral"}
-                    leftIcon={<PlusCircle className="text-ink-3" />}
-                  />
-                )}
-              </PopoverTrigger>
-              <PopoverContent className="mt-2 w-[calc(100vw-2rem)] max-w-xs sm:w-72">
-                <PopoverHeader>
-                  <PopoverTitle>{`Filter by : ${filter.label}`}</PopoverTitle>
-                </PopoverHeader>
-                <div className="flex flex-row items-center gap-4">
-                  <PopoverDescription>
-                    {filter.component === "NUMBER_RANGE" || filter.component === "DATE_RANGE"
-                      ? "between"
-                      : "contains"}
-                  </PopoverDescription>
-                  {filter.component === "AUTOSELECT" || filter.component === "DROPDOWN" ? (
-                    <SearchDropdown
-                      items={(filter.options || []).filter((opt) =>
-                        opt.label.toLowerCase().includes((filter.searchValue || "").toLowerCase()),
-                      )}
-                      placeholder={"Search by " + filter.label}
-                      searchValue={filter.searchValue || ""}
-                      onSearchValueChange={(val) => updateSearchValue(filter.key, val)}
-                      value={filter.value as string | null}
-                      onValueChange={(val) => updateFilterValue(filter.key, val)}
-                    />
-                  ) : filter.component === "TEXT_INPUT" ? (
-                    <Input
-                      type="text"
-                      placeholder={"Enter " + filter.label}
-                      value={(filter.value as string) || ""}
-                      onChange={(e) => updateFilterValue(filter.key, e.target.value)}
-                    />
-                  ) : filter.component === "NUMBER_INPUT" ? (
-                    <Input
-                      type="number"
-                      placeholder={"Enter " + filter.label}
-                      value={(filter.value as string) || ""}
-                      onChange={(e) => updateFilterValue(filter.key, e.target.value)}
-                    />
-                  ) : filter.component === "NUMBER_RANGE" ? (
-                    <div className="flex w-full flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-                      <Input
-                        type="number"
-                        placeholder="Min"
-                        value={rangeStart || ""}
-                        onChange={(e) => updateFilterValue(filter.key, [e.target.value, rangeEnd])}
-                      />
-                      <Typography variant={"small"} className="shrink-0 self-center text-ink-3">
-                        to
-                      </Typography>
-                      <Input
-                        type="number"
-                        placeholder="Max"
-                        value={rangeEnd || ""}
-                        onChange={(e) =>
-                          updateFilterValue(filter.key, [rangeStart, e.target.value])
-                        }
-                      />
-                    </div>
-                  ) : filter.component === "DATE_RANGE" ? (
-                    <div className="flex w-full flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-                      <DatePicker
-                        value={rangeStart ? parseDateKey(rangeStart) : undefined}
-                        onChange={(date) =>
-                          updateFilterValue(filter.key, [date ? toDateKey(date) : "", rangeEnd])
-                        }
-                        placeholder="From"
-                        align="start"
-                        className="w-full sm:w-auto"
-                      />
-                      <Typography variant={"small"} className="shrink-0 self-center text-ink-3">
-                        to
-                      </Typography>
-                      <DatePicker
-                        value={rangeEnd ? parseDateKey(rangeEnd) : undefined}
-                        onChange={(date) =>
-                          updateFilterValue(filter.key, [rangeStart, date ? toDateKey(date) : ""])
-                        }
-                        placeholder="To"
-                        align="end"
-                        className="w-full sm:w-auto"
-                      />
-                    </div>
-                  ) : null}
-                </div>
-                <PopoverClose asChild>
-                  <Button className="mt-2" variant="default" onClick={applyFilters}>
-                    Apply Filter
-                  </Button>
-                </PopoverClose>
-              </PopoverContent>
-            </Popover>
-          );
-        })}
+        {filters?.map((filter) => (
+          <SearchFilterChip
+            key={filter.key}
+            filter={filter}
+            appliedFilter={appliedFilters.find((item) => item.key === filter.key)}
+            onApply={(value) => applyFilterValue(filter.key, value)}
+            onClear={() => clearFilter(filter.key)}
+          />
+        ))}
       </div>
     </>
   );
