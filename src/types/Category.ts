@@ -15,7 +15,6 @@ export interface Category {
   description?: string;
   icon: string;
   displayOrder?: number;
-
   color?: CategoryColor;
   groupsCount?: number;
 }

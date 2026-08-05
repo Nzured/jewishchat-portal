@@ -1,4 +1,9 @@
-import { ACCESS_TOKEN_COOKIE, COOKIE_MAX_AGE, USER_TYPE_COOKIE } from "@/configs/const";
+import {
+  ACCESS_TOKEN_COOKIE,
+  COOKIE_MAX_AGE,
+  EXTERNAL_HOME_PATH,
+  USER_TYPE_COOKIE,
+} from "@/configs/const";
 import { UserType } from "@/types/User";
 
 const AUTH_STORAGE_KEY = "auth";
@@ -21,7 +26,7 @@ function getStoredAuth(): StoredAuth | null {
 }
 
 export function getHomePathForUserType(userType: UserType) {
-  return userType === UserType.INTERNAL ? "/internal" : "/external";
+  return userType === UserType.INTERNAL ? "/internal" : EXTERNAL_HOME_PATH;
 }
 
 export function getAccessToken(): string | null {

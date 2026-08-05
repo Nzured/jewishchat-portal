@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/Tooltip";
+import { useCharacterCount } from "@/hooks/useCharacterCount";
 import { cn } from "@/lib/utils";
 
 interface InputProps extends React.ComponentProps<"input"> {
@@ -12,10 +13,25 @@ interface InputProps extends React.ComponentProps<"input"> {
   loading?: boolean;
 }
 
-function Input({ className, type, error, leftIcon, loading, ...props }: InputProps) {
+function Input({
+  className,
+  type,
+  error,
+  leftIcon,
+  loading,
+  maxLength,
+  onChange,
+  ...props
+}: InputProps) {
   const [showPassword, setShowPassword] = React.useState(false);
   const isPassword = type === "password";
   const showError = error && !loading;
+  const showCounter = typeof maxLength === "number";
+  const { length, handleChange } = useCharacterCount<HTMLInputElement>({
+    value: props.value,
+    defaultValue: props.defaultValue,
+    onChange,
+  });
 
   return (
     <div className="flex flex-col gap-1">
@@ -29,6 +45,8 @@ function Input({ className, type, error, leftIcon, loading, ...props }: InputPro
           type={isPassword && showPassword ? "text" : type}
           data-slot="input"
           aria-invalid={error ? "true" : undefined}
+          maxLength={maxLength}
+          onChange={showCounter ? handleChange : onChange}
           className={cn(
             "flex min-h-[46px] w-full self-stretch items-start justify-center min-w-0 rounded-[12px] border border-surface-line bg-surface-card px-3 py-3 text-base transition-colors outline-none focus-visible:border-brand-green file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-ink-1 placeholder:text-ink-4 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-surface-bg/50 disabled:opacity-50 aria-invalid:border-state-danger md:text-sm",
             leftIcon && "pl-10",
@@ -69,7 +87,16 @@ function Input({ className, type, error, leftIcon, loading, ...props }: InputPro
           </button>
         )}
       </div>
-      {showError && <p className="text-xs text-state-danger md:hidden">{error}</p>}
+      {(showError || showCounter) && (
+        <div className="flex items-start justify-between gap-2">
+          {showError && <p className="text-xs text-state-danger md:hidden">{error}</p>}
+          {showCounter && (
+            <span data-slot="input-counter" className="ml-auto text-xs text-ink-4 tabular-nums">
+              {length}/{maxLength}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

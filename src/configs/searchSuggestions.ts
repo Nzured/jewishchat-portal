@@ -1,0 +1,17 @@
+export const SEARCH_SUGGESTIONS: string[] = [
+  "Roofing contractors in Lakewood who offer financing",
+  "Contractors in Monsey for small repairs",
+  "Florida WhatsApp groups for selling cars with 200+ members",
+  "Kosher food deals in Boro Park",
+  "Torah shiurim groups in Flatbush",
+  "Business networking groups for Teaneck entrepreneurs",
+  "Babysitting and childcare groups in Passaic",
+  "Real estate groups for Miami with 100+ members",
+  "Carpool groups for Lakewood commuters",
+  "Simcha and event planning groups in Monsey",
+  "Camp programs for kids in Flatbush",
+  "Lost and found groups near Boro Park",
+  "Yom Tov info groups for Teaneck families",
+  "Plumbers in Lakewood who take emergency calls",
+  "Second-hand furniture groups in Passaic",
+];

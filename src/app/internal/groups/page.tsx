@@ -1,34 +1,19 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useCallback, useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import AppHeader from "@/components/layout/app/AppHeader";
-import { UnderConstruction } from "@/components/ui/UnderConstruction";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
 import { FilterItem } from "@/types/Search";
-import {
-  CATEGORY_FILTER_OPTIONS,
-  GROUP_NAME_FILTER_OPTIONS,
-  GroupsTable,
-  STATUS_FILTER_OPTIONS,
-  SUBMITTED_BY_FILTER_OPTIONS,
-} from "./_components/GroupsTable";
+import { GroupsTable, STATUS_FILTER_OPTIONS } from "./_components/GroupsTable";
+import { useAdminGroupContext } from "./_context/AdminGroupContext";
 
 const INITIAL_FILTERS: FilterItem[] = [
   {
     key: "groupName",
     label: "Group Name",
-    component: "AUTOSELECT",
+    component: "TEXT_INPUT",
     value: null,
-    options: [],
-    searchValue: "",
-  },
-  {
-    key: "members",
-    label: "Members",
-    component: "NUMBER_RANGE",
-    value: null,
-    options: [],
   },
   {
     key: "category",
@@ -43,23 +28,15 @@ const INITIAL_FILTERS: FilterItem[] = [
     label: "Status",
     component: "DROPDOWN",
     value: null,
-    options: [],
-    searchValue: "",
-  },
-  {
-    key: "submittedBy",
-    label: "Submitted By",
-    component: "AUTOSELECT",
-    value: null,
-    options: [],
+    options: STATUS_FILTER_OPTIONS,
     searchValue: "",
   },
 ];
 
-const isCompleted = false;
-
 function ExternalGroupsContent() {
   const { filters, resetFilters, updateFilterOptions } = useSearchFilter();
+  const { fetchCategories } = useAdminGroupContext();
+  const [totalGroups, setTotalGroups] = useState(0);
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category");
 
@@ -72,20 +49,27 @@ function ExternalGroupsContent() {
     });
 
     resetFilters(initialFilters);
-    updateFilterOptions("groupName", GROUP_NAME_FILTER_OPTIONS);
-    updateFilterOptions("category", CATEGORY_FILTER_OPTIONS);
-    updateFilterOptions("status", STATUS_FILTER_OPTIONS);
-    updateFilterOptions("submittedBy", SUBMITTED_BY_FILTER_OPTIONS);
-  }, [categoryParam, resetFilters, updateFilterOptions]);
+  }, [categoryParam, resetFilters]);
 
-  if (!isCompleted) {
-    return (
-      <UnderConstruction
-        title="Group management is under construction"
-        description="We're still building this out. Check back soon."
-      />
-    );
-  }
+  useEffect(() => {
+    let ignore = false;
+
+    void fetchCategories()
+      .then((categories) => {
+        if (ignore) return;
+        updateFilterOptions(
+          "category",
+          categories.map((category) => ({ label: category.name, value: category.slug })),
+        );
+      })
+      .catch(() => {});
+
+    return () => {
+      ignore = true;
+    };
+  }, [fetchCategories, updateFilterOptions]);
+
+  const handleCountChange = useCallback((total: number) => setTotalGroups(total), []);
 
   return (
     <div className="flex flex-col ">
@@ -94,11 +78,11 @@ function ExternalGroupsContent() {
         subtitle={
           "Every group in the directory, in one place. review, suspend or curate what the community actually sees."
         }
-        count={30}
+        count={totalGroups}
         filters={filters}
       />
       <div className="mt-6">
-        <GroupsTable />
+        <GroupsTable onCountChange={handleCountChange} />
       </div>
     </div>
   );

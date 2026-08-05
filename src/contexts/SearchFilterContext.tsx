@@ -17,6 +17,8 @@ interface SearchFilterContextType {
   updateFilterOptions: (key: string, options: FilterOption[]) => void;
   updateSearchValue: (key: string, searchValue: string) => void;
   applyFilters: () => void;
+  /** Sets and applies a single filter's value in one shot — for chips that stage their own draft locally. */
+  applyFilterValue: (key: string, value: string | string[] | null) => void;
   clearFilter: (key: string) => void;
   clearAllFilters: () => void;
 }
@@ -55,6 +57,12 @@ export function SearchFilterProvider({
     setAppliedFilters(filters);
   }, [filters]);
 
+  const applyFilterValue = React.useCallback((key: string, value: string | string[] | null) => {
+    const update = (item: FilterItem) => (item.key === key ? { ...item, value } : item);
+    setFilters((prev) => prev.map(update));
+    setAppliedFilters((prev) => prev.map(update));
+  }, []);
+
   const clearFilter = React.useCallback((key: string) => {
     const clear = (item: FilterItem) =>
       item.key === key ? { ...item, value: null, searchValue: "" } : item;
@@ -80,6 +88,7 @@ export function SearchFilterProvider({
         updateFilterOptions,
         updateSearchValue,
         applyFilters,
+        applyFilterValue,
         clearFilter,
         clearAllFilters,
       }}
