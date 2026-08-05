@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { PauseCircle, RefreshCw, X } from "lucide-react";
+import { Check, PauseCircle, RefreshCw, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import {
   Modal,
@@ -13,6 +13,7 @@ import {
   ModalTitle,
 } from "@/components/ui/Modal";
 import { ModerationActionItem, ModerationActionsCard } from "@/components/ui/ModerationActionsCard";
+import { Textarea } from "@/components/ui/Textarea";
 import { Group, GroupStatus } from "@/types/Group";
 import { useAdminGroupContext } from "../../_context/AdminGroupContext";
 
@@ -27,10 +28,13 @@ export default function GroupModerationCard({
   loading,
   onGroupChange,
 }: GroupModerationCardProps) {
-  const { suspendGroup, reactivateGroup } = useAdminGroupContext();
+  const { suspendGroup, reactivateGroup, approveGroup, rejectGroup } = useAdminGroupContext();
   const [suspendModalOpen, setSuspendModalOpen] = React.useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = React.useState(false);
+  const [rejectionReason, setRejectionReason] = React.useState("");
 
   const isSuspended = group?.status === GroupStatus.SUSPENDED;
+  const isManualReview = group?.status === GroupStatus.MANUAL_REVIEW;
 
   const handleSuspend = async () => {
     if (!group) return;
@@ -52,7 +56,61 @@ export default function GroupModerationCard({
     }
   };
 
+  const handleApprove = async () => {
+    if (!group) return;
+    try {
+      const updated = await approveGroup(group.uuid);
+      if (updated) onGroupChange?.(updated);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!group) return;
+    try {
+      const updated = await rejectGroup(group.uuid, rejectionReason.trim());
+      if (updated) onGroupChange?.(updated);
+      setRejectionReason("");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const actions: ModerationActionItem[] = [
+    ...(isManualReview
+      ? [
+          {
+            key: "approve",
+            primary: true,
+            node: (
+              <Button
+                size="sm"
+                leftIcon={<Check className="size-4" />}
+                variant="default"
+                color="primary"
+                onClick={() => void handleApprove()}
+              >
+                Approve Group
+              </Button>
+            ),
+          },
+          {
+            key: "reject",
+            node: (
+              <Button
+                size="sm"
+                leftIcon={<X className="size-4" />}
+                variant="secondary"
+                color="danger"
+                onClick={() => setRejectModalOpen(true)}
+              >
+                Reject Group
+              </Button>
+            ),
+          },
+        ]
+      : []),
     isSuspended
       ? {
           key: "reactivate",
@@ -123,6 +181,57 @@ export default function GroupModerationCard({
               }}
             >
               Suspend Group
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        open={rejectModalOpen}
+        onOpenChange={(open) => {
+          setRejectModalOpen(open);
+          if (!open) setRejectionReason("");
+        }}
+      >
+        <ModalContent variant="danger">
+          <ModalHeader icon={<X />}>
+            <ModalTitle>Reject this group?</ModalTitle>
+            <ModalDescription>
+              <span className="font-semibold text-ink-2">{group?.name}</span> will not be listed in
+              the public directory. Let the submitter know why.
+            </ModalDescription>
+          </ModalHeader>
+
+          <Textarea
+            placeholder="Reason for rejection"
+            value={rejectionReason}
+            onChange={(event) => setRejectionReason(event.target.value)}
+          />
+
+          <ModalFooter>
+            <ModalClose asChild>
+              <Button
+                size="sm"
+                leftIcon={<X />}
+                variant="secondary"
+                color="primary"
+                className="text-ink-2 hover:bg-surface-bg"
+              >
+                Cancel
+              </Button>
+            </ModalClose>
+            <Button
+              size="sm"
+              leftIcon={<X />}
+              variant="default"
+              color="danger"
+              disabled={!rejectionReason.trim()}
+              onClick={() => {
+                setRejectModalOpen(false);
+                void handleReject();
+              }}
+            >
+              Reject Group
             </Button>
           </ModalFooter>
         </ModalContent>

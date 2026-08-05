@@ -167,9 +167,13 @@ function GroupsDirectory() {
       ) : groups.length === 0 ? (
         <NoData description="Try a different search or check back soon." />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="flex flex-wrap gap-4">
           {groups.map((group) => (
-            <GroupCard key={group.uuid} group={group} />
+            <GroupCard
+              key={group.uuid}
+              group={group}
+              className="w-full sm:w-[calc(50%-0.5rem)] xl:w-[calc(33.333%-0.667rem)]"
+            />
           ))}
         </div>
       )}

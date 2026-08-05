@@ -34,17 +34,12 @@ export function GroupsProvider({ children }: { children: React.ReactNode }) {
     const res = await GroupService.getGroupBySlug(slug);
     return res.data;
   }, []);
-
-  // Categories are the same for every consumer and never change mid-session, so
-  // the request is shared: repeat callers (and React's dev double-effect) reuse
-  // the in-flight or already-resolved promise instead of hitting the API again.
   const categoriesRequest = React.useRef<Promise<Category[]> | null>(null);
 
   const fetchCategories = React.useCallback(() => {
     categoriesRequest.current ??= GroupService.getCategories()
       .then((res) => res.data)
       .catch((error) => {
-        // A failed fetch shouldn't be cached — let the next caller retry.
         categoriesRequest.current = null;
         throw error;
       });

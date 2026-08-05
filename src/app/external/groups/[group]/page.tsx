@@ -34,7 +34,6 @@ function GroupDetailsSkeleton() {
 
 function GroupPageContent({ slug }: { slug: string }) {
   const { fetchGroupBySlug } = useGroups();
-
   const [group, setGroup] = React.useState<Group | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
@@ -86,6 +85,5 @@ function GroupPageContent({ slug }: { slug: string }) {
 
 export default function GroupPage() {
   const params = useParams<{ group: string }>();
-  // Remount on slug change so the detail state (and its loading flag) resets cleanly.
   return <GroupPageContent key={params.group} slug={params.group} />;
 }
