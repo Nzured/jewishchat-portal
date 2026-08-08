@@ -4,10 +4,30 @@ import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Separator } from "@/components/ui/Separator";
 import { Typography } from "@/components/ui/Typography";
 import { cn } from "@/lib/utils";
-import { Group, GroupStatus } from "@/types/Group";
+import { GroupStatus } from "@/types/Group";
+
+/**
+ * Just what this summary screen renders. Built client-side from the form's
+ * own values right after submit — the submit-draft response only carries
+ * `status`, not a full `Group` (no slug/uuid yet, since moderation hasn't run).
+ */
+export interface GroupSubmissionSummary {
+  whatsappLink?: string;
+  name: string;
+  shortDesc?: string;
+  about?: string;
+  linkVisibilityLoggedInOnly?: boolean;
+  mainCategory?: { name: string };
+  categories?: { name: string }[];
+  locationCity?: string;
+  locationState?: string;
+  locationCountry?: string;
+  memberCount?: number;
+  status: GroupStatus;
+}
 
 interface GroupSubmissionSuccessProps {
-  group: Group;
+  group: GroupSubmissionSummary;
   onAddAnotherGroup: () => void;
   onViewListing: () => void;
 }
@@ -17,13 +37,13 @@ interface SummaryRow {
   value: React.ReactNode;
 }
 
-function formatLocation(group: Group) {
+function formatLocation(group: GroupSubmissionSummary) {
   return [group.locationCity, group.locationState, group.locationCountry]
     .filter(Boolean)
     .join(", ");
 }
 
-function buildSummaryRows(group: Group): SummaryRow[] {
+function buildSummaryRows(group: GroupSubmissionSummary): SummaryRow[] {
   const rows: SummaryRow[] = [
     { label: "Group Link", value: group.whatsappLink },
     { label: "Name", value: group.name },
@@ -96,11 +116,9 @@ export default function GroupSubmissionSuccess({
           <Button type="button" variant="secondary" onClick={onAddAnotherGroup}>
             Add another group
           </Button>
-          {!isPendingModeration && (
-            <Button type="button" onClick={onViewListing}>
-              View your listing
-            </Button>
-          )}
+          <Button type="button" onClick={onViewListing}>
+            View your listing
+          </Button>
         </div>
       </CardHeader>
 
@@ -113,11 +131,11 @@ export default function GroupSubmissionSuccess({
           {rows.map((row, index) => (
             <div key={row.label}>
               {index > 0 && <Separator />}
-              <div className="grid grid-cols-[minmax(0,140px)_1fr] gap-4 px-4 py-3">
+              <div className="grid grid-cols-[minmax(0,140px)_minmax(0,1fr)] gap-4 px-4 py-3">
                 <Typography variant="small" className="text-ink-3">
                   {row.label}
                 </Typography>
-                <Typography variant="small" className="font-medium text-ink-1">
+                <Typography variant="small" className="font-medium break-words text-ink-1">
                   {row.value}
                 </Typography>
               </div>

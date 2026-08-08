@@ -3,7 +3,7 @@
 import * as React from "react";
 import { GroupService } from "@/services/group/group.service";
 import { Category } from "@/types/Category";
-import { Group } from "@/types/Group";
+import { Group, GroupStatus } from "@/types/Group";
 
 interface HomeContextType {
   categories: Category[];
@@ -28,7 +28,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
           GroupService.getCategories(),
         ]);
         setCategories(categoriesRes?.data || []);
-        setGroups(groupRes?.data?.groups || []);
+        setGroups((groupRes?.data?.groups || []).filter((g) => g.status === GroupStatus.ACTIVE));
       } catch {
         if (!ignore) {
           setCategories([]);

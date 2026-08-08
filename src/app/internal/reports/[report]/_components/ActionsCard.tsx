@@ -106,7 +106,7 @@ export default function ActionsCard({ group, onSuspend, onRelist, onDelete }: Ac
               </Typography>{" "}
               It removes{" "}
               <Typography as="span" variant="small" className="font-semibold text-ink-2">
-                {group.groupName}
+                {group.name}
               </Typography>{" "}
               along with all of its reports, metrics and submission history. This is a
               high-privilege action.

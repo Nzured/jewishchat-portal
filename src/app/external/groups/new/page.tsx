@@ -18,6 +18,9 @@ import AuthRequiredModal from "./_components/AuthRequiredModal";
 import CategorizationForm from "./_components/CategorizationForm";
 import GroupDetailsForm from "./_components/GroupDetailsForm";
 import GroupImageUploader from "./_components/GroupImageUploader";
+import GroupSubmissionSuccess, {
+  type GroupSubmissionSummary,
+} from "./_components/GroupSubmissionSuccess";
 import type { FieldPath } from "react-hook-form";
 
 const STEP_1_FIELDS: FieldPath<CreateGroupFormValues>[] = [
@@ -37,13 +40,31 @@ const STEP_2_FIELDS: FieldPath<CreateGroupFormValues>[] = [
   "memberCount",
 ];
 
+const DEFAULT_FORM_VALUES = {
+  linkVisibilityLoggedInOnly: false,
+  mainCategoryId: null,
+  additionalCategoryIds: [],
+  locationCountry: "",
+  locationState: "",
+  locationCity: "",
+  image: null,
+};
+
 export default function CreateGroupPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [submittedGroup, setSubmittedGroup] = useState<GroupSubmissionSummary | null>(null);
   const router = useRouter();
-  const { draftId, restoreDraftId, saveDraftStep1, saveDraftStep2, uploadGroupImage, submitDraft } =
-    useGroups();
+  const {
+    draftId,
+    restoreDraftId,
+    saveDraftStep1,
+    saveDraftStep2,
+    uploadGroupImage,
+    submitDraft,
+    fetchCategories,
+  } = useGroups();
   const {
     register,
     control,
@@ -56,15 +77,7 @@ export default function CreateGroupPage() {
     subscribe,
     formState: { errors },
   } = useForm<CreateGroupFormValues>({
-    defaultValues: {
-      linkVisibilityLoggedInOnly: false,
-      mainCategoryId: null,
-      additionalCategoryIds: [],
-      locationCountry: "",
-      locationState: "",
-      locationCity: "",
-      image: null,
-    },
+    defaultValues: DEFAULT_FORM_VALUES,
   });
   const { user } = useUser();
 
@@ -191,7 +204,8 @@ export default function CreateGroupPage() {
       void requestAuthToContinue();
       return;
     }
-    void submitStep(["image"], async ({ image }) => {
+    void submitStep(["image"], async (values) => {
+      const { image } = values;
       if (image) {
         setUploadProgress(0);
         try {
@@ -201,22 +215,52 @@ export default function CreateGroupPage() {
         }
       }
 
-      await submitDraft();
+      const [draft, categories] = await Promise.all([submitDraft(), fetchCategories()]);
+
+      setSubmittedGroup({
+        whatsappLink: values.whatsappLink,
+        name: values.name,
+        shortDesc: values.shortDesc,
+        about: values.about,
+        linkVisibilityLoggedInOnly: values.linkVisibilityLoggedInOnly,
+        mainCategory: categories.find((category) => category.id === values.mainCategoryId),
+        categories: categories.filter((category) =>
+          values.additionalCategoryIds.includes(category.id),
+        ),
+        locationCity: values.locationCity,
+        locationState: values.locationState,
+        locationCountry: values.locationCountry,
+        memberCount: values.memberCount,
+        status: draft.status,
+      });
       toast.success("Your group has been submitted for review.");
-      router.push(EXTERNAL_GROUPS_PATH);
     });
+  };
+
+  const handleAddAnotherGroup = () => {
+    reset(DEFAULT_FORM_VALUES);
+    setSubmittedGroup(null);
+    setCurrentStep(1);
   };
 
   return (
     <div className="mx-auto w-full max-w-3xl pb-6">
-      <StepperCard
-        steps={steps}
-        currentStep={currentStep}
-        onBack={() => setCurrentStep((step) => Math.max(1, step - 1))}
-        onContinue={handleContinue}
-        isSubmitting={isSubmitting}
-        submitLabel="Create group"
-      />
+      {submittedGroup ? (
+        <GroupSubmissionSuccess
+          group={submittedGroup}
+          onAddAnotherGroup={handleAddAnotherGroup}
+          onViewListing={() => router.push(EXTERNAL_GROUPS_PATH)}
+        />
+      ) : (
+        <StepperCard
+          steps={steps}
+          currentStep={currentStep}
+          onBack={() => setCurrentStep((step) => Math.max(1, step - 1))}
+          onContinue={handleContinue}
+          isSubmitting={isSubmitting}
+          submitLabel="Create group"
+        />
+      )}
 
       <AuthRequiredModal
         open={showAuthModal}

@@ -1,17 +1,16 @@
+"use client";
+
 import * as React from "react";
 import NextLink from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
+import { Chip } from "@/components/ui/Chip";
 import { Typography } from "@/components/ui/Typography";
 import { EXTERNAL_GROUPS_PATH, NOT_APPLICABLE } from "@/configs/const";
+import { useUser } from "@/contexts/UserContext";
+import { formatDate } from "@/lib/date";
 import { cn } from "@/lib/utils";
 import { GroupStatus } from "@/types/Group";
 
-/**
- * Only what the card actually renders — satisfied structurally by both a
- * full `Group` (browse/admin listings) and the leaner `SearchGroupResult`
- * (search results, which has no `status` and a flat `mainCategoryName`
- * instead of a `mainCategory` object).
- */
 interface GroupCardData {
   slug: string;
   name: string;
@@ -21,6 +20,8 @@ interface GroupCardData {
   status?: GroupStatus;
   mainCategory?: { name: string } | null;
   mainCategoryName?: string;
+  createdBy?: string;
+  createdOn?: string;
 }
 
 interface GroupCardProps {
@@ -29,6 +30,9 @@ interface GroupCardProps {
 }
 
 function GroupCard({ group, className }: GroupCardProps) {
+  const { user } = useUser();
+  const addedByYou = Boolean(group.createdBy) && group.createdBy === user?.uuid;
+
   return (
     <NextLink
       href={`${EXTERNAL_GROUPS_PATH}/${group.slug}`}
@@ -37,26 +41,24 @@ function GroupCard({ group, className }: GroupCardProps) {
         className,
       )}
     >
-      <div className="flex flex-1 items-start justify-between gap-3">
-        <div className="flex items-flex-start gap-4">
-          <Avatar variant="tile" src={""} name={group.name} />
-          <div className="flex-col">
-            <Typography variant="h2" className="font-semibold text-ink-1">
+      <div className="flex flex-1 gap-4">
+        <Avatar variant="tile" src={""} name={group.name} />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <div className="flex items-start justify-between gap-3">
+            <Typography variant="h3" className="truncate font-semibold text-ink-1">
               {group?.name ?? NOT_APPLICABLE}
             </Typography>
-            <Typography variant="small" className="font-normal text-ink-3">
-              {group?.shortDesc ?? NOT_APPLICABLE}
-            </Typography>
+            {addedByYou && <Chip label="Added by you" variant="filter" color="secondary" />}
           </div>
-        </div>
-        {group.status === GroupStatus.ACTIVE && (
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-ink-1 px-3 py-1">
-            <span className="size-1.5 shrink-0 rounded-full bg-state-success" />
-            <Typography variant="xs" className="font-mono tracking-[1px] text-white uppercase">
-              Active
+          <Typography variant="small" className="font-normal text-ink-3">
+            {group?.shortDesc ?? NOT_APPLICABLE}
+          </Typography>
+          {group?.createdOn && (
+            <Typography variant="tiny" className="mt-auto self-end text-ink-4">
+              Since {formatDate(group.createdOn, "YYYY")}
             </Typography>
-          </span>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="h-px w-full bg-surface-line" />

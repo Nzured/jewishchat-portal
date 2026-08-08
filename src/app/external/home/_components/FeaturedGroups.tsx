@@ -14,11 +14,11 @@ export function FeaturedGroups() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: MAX_VISIBLE_GROUPS }).map((_, index) => (
           <Skeleton
             key={index}
-            className={cn("h-[132px] rounded-2xl", index === 0 && "sm:col-span-2 lg:col-span-2")}
+            className={cn("h-[132px] rounded-2xl", index === 0 && "sm:col-span-2 xl:col-span-2")}
           />
         ))}
       </div>
@@ -26,14 +26,14 @@ export function FeaturedGroups() {
   }
 
   return (
-    <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-3">
+    <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-3">
       {visibleGroups?.map((group, index) => (
         <GroupCard
           key={group.uuid}
           group={group}
           className={cn(
             "w-[80vw] max-w-[360px] shrink-0 snap-start sm:w-auto sm:max-w-none sm:shrink",
-            index === 0 && "sm:col-span-2 lg:col-span-2",
+            index === 0 && "sm:col-span-2 xl:col-span-2",
           )}
         />
       ))}

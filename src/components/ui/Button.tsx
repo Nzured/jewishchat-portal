@@ -134,22 +134,16 @@ function Button({
       )}
       {...props}
     >
-      {asChild ? (
-        children
-      ) : (
-        <>
-          {leftIcon && (
-            <span data-icon="inline-start" className="inline-flex items-center">
-              {leftIcon}
-            </span>
-          )}
-          {children}
-          {rightIcon && (
-            <span data-icon="inline-end" className="inline-flex items-center">
-              {rightIcon}
-            </span>
-          )}
-        </>
+      {leftIcon && (
+        <span data-icon="inline-start" className="inline-flex items-center">
+          {leftIcon}
+        </span>
+      )}
+      {asChild ? <Slot.Slottable>{children}</Slot.Slottable> : children}
+      {rightIcon && (
+        <span data-icon="inline-end" className="inline-flex items-center">
+          {rightIcon}
+        </span>
       )}
     </Comp>
   );
