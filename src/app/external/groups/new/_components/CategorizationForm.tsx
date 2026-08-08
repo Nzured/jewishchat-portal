@@ -1,18 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Search } from "lucide-react";
 import { Controller, useWatch } from "react-hook-form";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
+import { Combobox } from "@/components/ui/Combobox";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { Input } from "@/components/ui/Input";
 import { NoData } from "@/components/ui/NoData";
-import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
-import { findLocationCountry, findLocationRegion, LOCATION_COUNTRIES } from "@/configs/locations";
+import { findLocationCountry, LOCATION_COUNTRIES } from "@/configs/locations";
+import { fetchIpLocation } from "@/lib/geolocation";
 import { Category } from "@/types/Category";
 import type { CreateGroupFormValues } from "@/types/Group";
 import { useGroups } from "../../_context/GroupsContext";
@@ -32,10 +33,11 @@ function byDisplayOrder(a: Category, b: Category) {
   return orderA === orderB ? a.name.localeCompare(b.name) : orderA - orderB;
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
     <Typography variant="tiny" className="font-medium tracking-[0.08em] text-ink-4 uppercase">
       {children}
+      {required && <span className="text-state-danger"> *</span>}
     </Typography>
   );
 }
@@ -164,6 +166,11 @@ export default function CategorizationForm({
   const additionalIds = useWatch({ control, name: "additionalCategoryIds" }) ?? [];
   const country = useWatch({ control, name: "locationCountry" });
   const state = useWatch({ control, name: "locationState" });
+  const city = useWatch({ control, name: "locationCity" });
+  const locationRef = useRef({ country, state, city });
+  useEffect(() => {
+    locationRef.current = { country, state, city };
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -184,15 +191,40 @@ export default function CategorizationForm({
     };
   }, [fetchCategories]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchIpLocation()
+      .then((location) => {
+        if (cancelled || !location) return;
+        // Never clobber a value the user (or a resumed draft) already has.
+        const current = locationRef.current;
+        if (current.country || current.state || current.city) return;
+
+        const matchedCountry = findLocationCountry(location.country);
+        if (matchedCountry) {
+          setValue("locationCountry", matchedCountry.name);
+          const matchedRegion = matchedCountry.regions.find(
+            (region) => region.name.toLowerCase() === location.region.trim().toLowerCase(),
+          );
+          setValue("locationState", matchedRegion?.name ?? location.region);
+        }
+        if (location.city) setValue("locationCity", location.city);
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const sortedCategories = useMemo(() => [...categories].sort(byDisplayOrder), [categories]);
   const mainCategory = sortedCategories.find((category) => category.id === mainCategoryId);
 
-  const regions = findLocationCountry(country)?.regions;
-  const cities = findLocationRegion(country, state)?.cities;
+  const regions = findLocationCountry(country)?.regions ?? [];
 
   const selectMainCategory = (id: number) => {
     setValue("mainCategoryId", id);
-    // A category can't be both the main one and an extra.
     setValue(
       "additionalCategoryIds",
       additionalIds.filter((categoryId) => categoryId !== id),
@@ -216,7 +248,7 @@ export default function CategorizationForm({
         rules={{ validate: (value) => value != null || "Pick a main category" }}
         render={() => (
           <Field data-invalid={!!errors.mainCategoryId} className="gap-2.5">
-            <SectionLabel>Main category</SectionLabel>
+            <SectionLabel required>Main category</SectionLabel>
             <CategoryPicker
               categories={sortedCategories}
               isLoading={isLoading}
@@ -266,15 +298,15 @@ export default function CategorizationForm({
           name="locationCountry"
           rules={{ required: "Country is required" }}
           render={({ field }) => (
-            <SelectDropdown
+            <Combobox
               id="locationCountry"
               placeholder="Select a country"
+              searchPlaceholder="Search countries..."
               aria-invalid={errors.locationCountry ? "true" : undefined}
               items={LOCATION_COUNTRIES.map(({ name }) => ({ label: name, value: name }))}
               value={field.value}
               onValueChange={(value) => {
                 field.onChange(value);
-                // The region and city lists are country-scoped, so old picks can't carry over.
                 setValue("locationState", "");
                 setValue("locationCity", "");
               }}
@@ -293,10 +325,11 @@ export default function CategorizationForm({
           name="locationState"
           rules={{ required: "State or region is required" }}
           render={({ field }) =>
-            regions ? (
-              <SelectDropdown
+            regions && regions.length > 0 ? (
+              <Combobox
                 id="locationState"
                 placeholder="Select a state or region"
+                searchPlaceholder="Search states..."
                 disabled={!country}
                 aria-invalid={errors.locationState ? "true" : undefined}
                 items={regions.map(({ name }) => ({ label: name, value: name }))}
@@ -307,7 +340,6 @@ export default function CategorizationForm({
                 }}
               />
             ) : (
-              // No region list bundled for this country — let people type their own.
               <Input
                 {...field}
                 id="locationState"
@@ -329,20 +361,9 @@ export default function CategorizationForm({
         <Controller
           control={control}
           name="locationCity"
-          render={({ field }) =>
-            cities ? (
-              <SelectDropdown
-                id="locationCity"
-                placeholder="Select a city"
-                disabled={!state}
-                items={cities.map((city) => ({ label: city, value: city }))}
-                value={field.value}
-                onValueChange={field.onChange}
-              />
-            ) : (
-              <Input {...field} id="locationCity" placeholder="City" disabled={!state} />
-            )
-          }
+          render={({ field }) => (
+            <Input {...field} id="locationCity" placeholder="City" disabled={!state} />
+          )}
         />
         <FieldError errors={[errors.locationCity]} />
       </Field>
@@ -356,7 +377,6 @@ export default function CategorizationForm({
           min={0}
           placeholder="e.g. 250"
           {...register("memberCount", {
-            // An empty field means "not shared", not zero.
             setValueAs: (value: string) => (value === "" ? undefined : Number(value)),
             validate: (value) =>
               value === undefined ||

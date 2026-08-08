@@ -18,7 +18,13 @@ import {
   GroupsPage,
   GroupStatus,
 } from "@/types/Group";
+import { ReportCategories } from "@/types/Report";
 import api from "../axiosConfig";
+
+export interface ReportGroupPayload {
+  category: ReportCategories;
+  description?: string;
+}
 
 export const GroupService = {
   getAllGroups: (
@@ -114,4 +120,8 @@ export const GroupService = {
         globalLoader: true,
       },
     ),
+  reportGroup: (uuid: string, payload: ReportGroupPayload) =>
+    api.post<ApiResponse<void>>(`${GROUP_SERVICE}groups/${uuid}/report`, payload, {
+      globalLoader: true,
+    }),
 };

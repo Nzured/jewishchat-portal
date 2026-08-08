@@ -41,9 +41,13 @@ export function GroupSummary({ group, className }: GroupSummaryProps) {
 
   const location = formatLocation(group);
   const categories = collectCategories(group);
+  const isOwner = Boolean(user) && user?.uuid === group.submittedByUuid;
   // The owner can hide the invite link from logged-out visitors.
   const linkLocked = group.linkVisibilityLoggedInOnly && !user;
   const canJoin = Boolean(group.whatsappLink) && !linkLocked;
+  // Nothing to click if there's no link to open (or the link is locked, in
+  // which case the button prompts login instead) — hide rather than disable.
+  const showJoinButton = !isOwner && (canJoin || linkLocked);
 
   const handleJoin = () => {
     if (linkLocked) {
@@ -86,21 +90,22 @@ export function GroupSummary({ group, className }: GroupSummaryProps) {
         )}
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Button
-          className="w-fit bg-brand-deep hover:bg-brand-deep/90"
-          rightIcon={<ArrowRight />}
-          disabled={!canJoin && !linkLocked}
-          onClick={handleJoin}
-        >
-          {linkLocked ? "Log in to join" : "Join the group"}
-        </Button>
-        <Typography variant="tiny" className="text-ink-4">
-          {linkLocked
-            ? "The admin shares this link with logged-in members only"
-            : "Free to join • opens in WhatsApp"}
-        </Typography>
-      </div>
+      {showJoinButton && (
+        <div className="flex flex-col gap-2">
+          <Button
+            className="w-fit bg-brand-deep hover:bg-brand-deep/90"
+            rightIcon={<ArrowRight />}
+            onClick={handleJoin}
+          >
+            {linkLocked ? "Log in to join" : "Join the group"}
+          </Button>
+          <Typography variant="tiny" className="text-ink-4">
+            {linkLocked
+              ? "The admin shares this link with logged-in members only"
+              : "Free to join • opens in WhatsApp"}
+          </Typography>
+        </div>
+      )}
 
       {categories.length > 0 && (
         <div className="flex flex-wrap gap-2">

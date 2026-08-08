@@ -23,15 +23,23 @@ interface UserGroupsSectionProps {
 }
 
 const STATUS_TYPE = {
+  [GroupStatus.STARTED]: "neutral",
   [GroupStatus.ACTIVE]: "success",
   [GroupStatus.SUSPENDED]: "error",
   [GroupStatus.PENDING]: "warning",
+  [GroupStatus.IN_PROGRESS]: "info",
+  [GroupStatus.PENDING_MODERATION]: "warning",
+  [GroupStatus.MANUAL_REVIEW]: "warning",
 } as const;
 
 const STATUS_LABEL = {
+  [GroupStatus.STARTED]: "Started",
   [GroupStatus.ACTIVE]: "Active",
   [GroupStatus.SUSPENDED]: "Suspended",
   [GroupStatus.PENDING]: "Pending",
+  [GroupStatus.IN_PROGRESS]: "In Progress",
+  [GroupStatus.PENDING_MODERATION]: "Pending Moderation",
+  [GroupStatus.MANUAL_REVIEW]: "Manual Review",
 } as const;
 
 const columns: DataTableColumn<UserGroupEntry>[] = [
@@ -84,12 +92,12 @@ const columns: DataTableColumn<UserGroupEntry>[] = [
 
 export default function UserGroupsSection({ groups, loading }: UserGroupsSectionProps) {
   const entries: UserGroupEntry[] = (Array.isArray(groups) ? groups : []).map((group) => ({
-    id: group.id,
-    groupName: group.groupName,
-    path: group.path,
-    category: group.mainCategory,
+    id: group.uuid,
+    groupName: group.name,
+    path: group.slug,
+    category: group.mainCategory.name,
     status: group.status,
-    views: group.memborCount,
+    views: group.memberCount,
   }));
 
   return (

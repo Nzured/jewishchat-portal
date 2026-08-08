@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { PauseCircle, X } from "lucide-react";
+import { Flag, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/Field";
 import {
@@ -18,26 +19,26 @@ import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { Textarea } from "@/components/ui/Textarea";
 import { Typography } from "@/components/ui/Typography";
 import { NOT_APPLICABLE } from "@/configs/const";
-import { Group } from "@/types/Group";
+import { GroupService } from "@/services/group/group.service";
+import { ReportCategories } from "@/types/Report";
 
-const SUSPENSION_REASONS = [
-  { value: "inappropriate-content", label: "Inappropriate Content" },
-  { value: "spam-or-scams", label: "Spam or Scams" },
-  { value: "repeated-violations", label: "Repeated Violations" },
-  { value: "inactive-group", label: "Inactive Group" },
-  { value: "other", label: "Other" },
+const REPORT_REASONS = [
+  { value: ReportCategories.LINK_NOT_WORKING, label: "Link not working" },
+  { value: ReportCategories.INAPPROPRIATE_CONTENT, label: "Inappropriate content" },
+  { value: ReportCategories.RESUBMISSION_MESSAGE, label: "Resubmission message" },
 ];
 
-interface SuspendGroupModalProps {
-  group: Group;
+interface ReportGroupModalProps {
+  groupUuid: string;
+  groupName?: string;
   trigger: React.ReactNode;
-  onSuspend?: (data: { reason: string; reasonLabel: string; remark: string }) => void;
 }
 
-export function SuspendGroupModal({ group, trigger, onSuspend }: SuspendGroupModalProps) {
+export function ReportGroupModal({ groupUuid, groupName, trigger }: ReportGroupModalProps) {
   const [open, setOpen] = React.useState(false);
-  const [reason, setReason] = React.useState("");
+  const [reason, setReason] = React.useState<ReportCategories | "">("");
   const [remark, setRemark] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
@@ -47,36 +48,46 @@ export function SuspendGroupModal({ group, trigger, onSuspend }: SuspendGroupMod
     }
   };
 
-  const handleSuspend = () => {
+  const handleReport = async () => {
     if (!reason) return;
-    const reasonLabel = SUSPENSION_REASONS.find((item) => item.value === reason)?.label ?? reason;
-    onSuspend?.({ reason, reasonLabel, remark });
-    handleOpenChange(false);
+
+    setIsSubmitting(true);
+    try {
+      await GroupService.reportGroup(groupUuid, {
+        category: reason,
+        description: remark || undefined,
+      });
+      toast.success("Thanks — our moderators will take a look at this group.");
+      handleOpenChange(false);
+    } catch {
+      // The axios error interceptor already surfaces a toast for this.
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <Modal open={open} onOpenChange={handleOpenChange}>
       <ModalTrigger asChild>{trigger}</ModalTrigger>
-      <ModalContent variant="warning">
-        <ModalHeader icon={<PauseCircle />}>
-          <ModalTitle>Suspend this group?</ModalTitle>
+      <ModalContent variant="danger">
+        <ModalHeader icon={<Flag />}>
+          <ModalTitle>Report this group?</ModalTitle>
           <ModalDescription>
             <Typography as="span" variant="small" className="font-semibold text-ink-2">
-              {group?.name ?? NOT_APPLICABLE}
+              {groupName ?? NOT_APPLICABLE}
             </Typography>{" "}
-            {/* TODO: Group has no owner field yet; wire up once owner lookup (e.g. by submittedByUuid) is available. */}
-            will be hidden from the directory and search. The group owner will be emailed about the
-            suspension.
+            will be sent to our moderators for review. They&apos;ll take a look and follow up if
+            needed.
           </ModalDescription>
         </ModalHeader>
 
         <FieldGroup className="gap-4 mt-2">
           <Field>
-            <FieldLabel required>Reason for Suspension</FieldLabel>
+            <FieldLabel required>Reason for report</FieldLabel>
             <SelectDropdown
-              items={SUSPENSION_REASONS}
+              items={REPORT_REASONS}
               value={reason}
-              onValueChange={setReason}
+              onValueChange={(value) => setReason(value as ReportCategories)}
               placeholder="Select a reason"
             />
           </Field>
@@ -103,13 +114,13 @@ export function SuspendGroupModal({ group, trigger, onSuspend }: SuspendGroupMod
             </Button>
           </ModalClose>
           <Button
-            leftIcon={<PauseCircle />}
-            onClick={handleSuspend}
-            disabled={!reason}
+            leftIcon={<Flag />}
+            onClick={() => void handleReport()}
+            disabled={!reason || isSubmitting}
             variant="default"
-            color="warning"
+            color="danger"
           >
-            Suspend Group
+            Report Group
           </Button>
         </ModalFooter>
       </ModalContent>
