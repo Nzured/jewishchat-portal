@@ -5,19 +5,65 @@ import { CheckCheck, History, PauseCircle, RefreshCw, Trash2 } from "lucide-reac
 import { Button } from "@/components/ui/Button";
 import { DeleteModal } from "@/components/ui/DeleteModal";
 import { ModerationActionItem, ModerationActionsCard } from "@/components/ui/ModerationActionsCard";
+import { SuspendGroupModal } from "@/components/ui/SuspendGroupModal";
 import { Typography } from "@/components/ui/Typography";
+import { GroupService } from "@/services/group/group.service";
 import { Group, GroupStatus } from "@/types/Group";
-import { SuspendGroupModal } from "./SuspendGroupModal";
 
 interface ActionsCardProps {
-  group: Group;
+  /** The report-detail flow only has a thin group slice (uuid/slug/name/status), not the full `Group`. */
+  group: Partial<Group> & Pick<Group, "name" | "status" | "uuid">;
   onSuspend?: (data: { reason: string; reasonLabel: string; remark: string }) => void;
   onRelist?: () => void;
   onDelete?: () => void;
+  onResolveAll?: () => void;
 }
 
-export default function ActionsCard({ group, onSuspend, onRelist, onDelete }: ActionsCardProps) {
+export default function ActionsCard({
+  group,
+  onSuspend,
+  onRelist,
+  onDelete,
+  onResolveAll,
+}: ActionsCardProps) {
   const [deleteOpen, setDeleteOpen] = React.useState(false);
+  const [isResettingCount, setIsResettingCount] = React.useState(false);
+  const [isResolvingAll, setIsResolvingAll] = React.useState(false);
+
+  const handleResetReportCount = async () => {
+    if (!group?.uuid) return;
+    setIsResettingCount(true);
+    try {
+      await GroupService.resetReportCount(group.uuid);
+    } catch {
+      // The axios error interceptor already surfaces a toast for this.
+    } finally {
+      setIsResettingCount(false);
+    }
+  };
+
+  const handleResolveAll = async () => {
+    if (!group?.uuid) return;
+    setIsResolvingAll(true);
+    try {
+      await GroupService.resolveAllReports(group.uuid);
+      onResolveAll?.();
+    } catch {
+      // The axios error interceptor already surfaces a toast for this.
+    } finally {
+      setIsResolvingAll(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!group?.uuid) return;
+    try {
+      await GroupService.rejectGroup(group.uuid, "Permanently deleted by admin");
+      onDelete?.();
+    } catch {
+      // The axios error interceptor already surfaces a toast for this.
+    }
+  };
 
   const actions: ModerationActionItem[] = [
     group.status === GroupStatus.SUSPENDED
@@ -64,6 +110,8 @@ export default function ActionsCard({ group, onSuspend, onRelist, onDelete }: Ac
           leftIcon={<CheckCheck className="size-4" />}
           variant="secondary"
           color="primary"
+          disabled={isResolvingAll}
+          onClick={() => void handleResolveAll()}
         >
           Mark as reviewed
         </Button>
@@ -77,6 +125,8 @@ export default function ActionsCard({ group, onSuspend, onRelist, onDelete }: Ac
           leftIcon={<History className="size-4" />}
           variant="secondary"
           color="warning"
+          disabled={isResettingCount}
+          onClick={() => void handleResetReportCount()}
         >
           Reset Report Count
         </Button>
@@ -112,7 +162,7 @@ export default function ActionsCard({ group, onSuspend, onRelist, onDelete }: Ac
               high-privilege action.
             </>
           }
-          onConfirm={() => onDelete?.()}
+          onConfirm={() => void handleDelete()}
         />
       ),
     },

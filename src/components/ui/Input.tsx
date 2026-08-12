@@ -11,6 +11,8 @@ interface InputProps extends React.ComponentProps<"input"> {
   leftIcon?: React.ReactNode;
   /** Shows a spinner at the end of the field, e.g. while a debounced check is in flight. */
   loading?: boolean;
+  /** Set false to enforce `maxLength` without showing the `n/max` counter (e.g. per-digit OTP boxes). */
+  showCounter?: boolean;
 }
 
 function Input({
@@ -20,13 +22,14 @@ function Input({
   leftIcon,
   loading,
   maxLength,
+  showCounter: showCounterProp = true,
   onChange,
   ...props
 }: InputProps) {
   const [showPassword, setShowPassword] = React.useState(false);
   const isPassword = type === "password";
   const showError = error && !loading;
-  const showCounter = typeof maxLength === "number";
+  const showCounter = typeof maxLength === "number" && showCounterProp;
   const { length, handleChange } = useCharacterCount<HTMLInputElement>({
     value: props.value,
     defaultValue: props.defaultValue,

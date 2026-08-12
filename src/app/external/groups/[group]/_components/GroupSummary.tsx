@@ -61,7 +61,13 @@ export function GroupSummary({ group, className }: GroupSummaryProps) {
 
   return (
     <div className={cn("flex flex-col items-start gap-5", className)}>
-      <Avatar variant="tile" size="xl" name={group.name} className="rounded-2xl" />
+      <Avatar
+        variant="tile"
+        size="xl"
+        src={group.thumbnailUrl ?? undefined}
+        name={group.name}
+        className="rounded-2xl"
+      />
 
       <div className="flex flex-col gap-3">
         <Typography

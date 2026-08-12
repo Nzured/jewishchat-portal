@@ -7,6 +7,7 @@ import { EXTERNAL_GROUPS_PATH } from "@/configs/const";
 import { SEARCH_SUGGESTIONS } from "@/configs/searchSuggestions";
 import { useUser } from "@/contexts/UserContext";
 import { startGroupSearch } from "@/services/search/pendingGroupSearch";
+import { useHeroSearch } from "../_context/HeroSearchContext";
 
 const SUGGESTION_COUNT = 3;
 
@@ -19,14 +20,23 @@ export function HomeSearchBar() {
   const { user } = useUser();
   const [value, setValue] = React.useState("");
 
+  const heroSearch = useHeroSearch();
+  const publishQuery = heroSearch?.setQuery;
+
+  const handleValueChange = React.useCallback(
+    (next: string) => {
+      setValue(next);
+      publishQuery?.(next);
+    },
+    [publishQuery],
+  );
+
   const suggestions = React.useMemo(() => {
     return user
       ? pickRandom(SEARCH_SUGGESTIONS, SUGGESTION_COUNT)
       : SEARCH_SUGGESTIONS.slice(0, SUGGESTION_COUNT);
   }, [user]);
 
-  // Warm the groups route so submitting doesn't also pay for the bundle: the
-  // only thing left to wait on is the search request itself.
   React.useEffect(() => {
     router.prefetch(EXTERNAL_GROUPS_PATH);
   }, [router]);
@@ -35,16 +45,14 @@ export function HomeSearchBar() {
     <ConversationalSearchBar
       className="w-full max-w-3xl"
       value={value}
-      onValueChange={setValue}
+      onValueChange={handleValueChange}
       onSubmit={(query) => {
-        setValue(query);
-        // Order matters: the request goes out first so it runs *during* the
-        // route transition, and the groups page adopts it on mount.
+        handleValueChange(query);
         startGroupSearch(query);
         router.push(`${EXTERNAL_GROUPS_PATH}?q=${encodeURIComponent(query)}`);
       }}
       suggestions={suggestions}
-      onSuggestionSelect={setValue}
+      onSuggestionSelect={handleValueChange}
     />
   );
 }

@@ -1,3 +1,4 @@
+import { isValidPhone } from "@/components/ui/PhoneInput";
 import { EMAIL_REGEX, PASSWORD_REQUIREMENTS } from "@/configs/const";
 import { SignupRequest } from "@/services/auth/auth.types";
 import type { RegisterOptions } from "react-hook-form";
@@ -16,6 +17,11 @@ export const firstNameRules: RegisterOptions<SignupRequest, "firstName"> = {
 
 export const lastNameRules: RegisterOptions<SignupRequest, "lastName"> = {
   required: "Last name is required",
+};
+
+export const mobileRules = {
+  validate: (value: string) =>
+    !value || isValidPhone(value) || "Enter a valid phone number for the selected country",
 };
 
 export const passwordRules: RegisterOptions<SignupRequest, "password"> = {

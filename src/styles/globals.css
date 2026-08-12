@@ -95,6 +95,9 @@
 
 :root {
   --radius: 0.625rem;
+
+  --constellation-node: #6e9c90;
+  --constellation-link: #9bc6ba;
   /* --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -175,6 +178,22 @@
 }
 
 @layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .font-display-tight {
+    font-family: var(--font-display);
+    font-variation-settings:
+      "wdth" 92,
+      "opsz" 96;
+    letter-spacing: -0.045em;
+  }
+
   .disabled-primary-bg:disabled {
     background:
       linear-gradient(

@@ -6,12 +6,10 @@ import { Card } from "@/components/ui/Card";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
-import { EXTERNAL_GROUPS_PATH, NOT_APPLICABLE } from "@/configs/const";
+import { EXTERNAL_GROUPS_PATH, NOT_APPLICABLE, PUBLIC_HOST } from "@/configs/const";
 import { formatDate } from "@/lib/date";
 import { Group } from "@/types/Group";
 import { StatusPill } from "../../_components/StatusPill";
-
-const PUBLIC_HOST = "jewishchat.com";
 
 function formatLocation(group: Group) {
   return [group.locationCity, group.locationState].filter(Boolean).join(", ");
@@ -54,7 +52,7 @@ export default function GroupHeaderCard({ group, loading }: GroupHeaderCardProps
   return (
     <Card className="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex min-w-0 items-start gap-3">
-        <Avatar variant="tile" size="lg" name={group.name} />
+        <Avatar variant="tile" size="lg" src={group.thumbnailUrl ?? undefined} name={group.name} />
         <div className="flex min-w-0 flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-3">
             <Typography variant="h4" className="font-semibold text-ink-1">

@@ -19,10 +19,15 @@
       }
     ],
     "paths": {
+      "gsap/SplitText": ["./node_modules/gsap/types/split-text.d.ts"],
+      "gsap/ScrollTrigger": ["./node_modules/gsap/types/scroll-trigger.d.ts"],
       "@/*": ["./src/*"],
       "@public/*": ["./public/*"],
       "@components/*": ["./src/components/*"],
-      "@configs/*": ["./src/configs/*"]
+      "@configs/*": ["./src/configs/*"],
+      "@/lib/*": [
+        "./src/lib/*"
+      ]
     }
   },
   "include": [

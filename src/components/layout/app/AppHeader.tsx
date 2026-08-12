@@ -7,6 +7,7 @@ import { Chip } from "@/components/ui/Chip";
 import { Fab } from "@/components/ui/Fab";
 import { SearchFilterChip } from "@/components/ui/SearchFilterChip";
 import { Typography } from "@/components/ui/Typography";
+import { singularize } from "@/configs/functions/WordFormatter";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
 import { FilterItem } from "@/types/Search";
 
@@ -45,7 +46,7 @@ export default function AppHeader({
                 className="mt-1"
                 variant="count"
                 count={count}
-                label={countLabel}
+                label={count === 1 ? singularize(countLabel) : countLabel}
                 shape="pill"
               />
             ) : null}

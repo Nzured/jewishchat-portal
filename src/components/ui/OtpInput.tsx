@@ -99,6 +99,7 @@ export function OtpInput({
           inputMode="numeric"
           pattern="[0-9]*"
           maxLength={1}
+          showCounter={false}
           value={char}
           ref={(el) => {
             if (el) inputRefs.current[index] = el;

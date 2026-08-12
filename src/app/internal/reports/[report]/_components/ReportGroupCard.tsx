@@ -1,71 +1,90 @@
 "use client";
 
 import { CheckCheck, Flag, Quote, Unlink } from "lucide-react";
+import NextLink from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Card, CardDescription, CardHeader } from "@/components/ui/Card";
-import { Chip } from "@/components/ui/Chip";
-import { Link } from "@/components/ui/Link";
 import { Typography } from "@/components/ui/Typography";
-import { wordFormatter } from "@/configs/functions/WordFormatter";
-import { Report, ReportCategories } from "@/types/Report";
+import { NOT_APPLICABLE } from "@/configs/const";
+import { formatDate } from "@/lib/date";
+import { cn } from "@/lib/utils";
+import { REPORT_CATEGORY_LABELS, ReportCategories, ReportDetail } from "@/types/Report";
 
 interface ReportGroupCardProps {
-  report: Report;
+  report: ReportDetail;
   onMarkReviewed?: () => void;
 }
 
+const CATEGORY_TEXT_COLOR: Record<ReportCategories, string> = {
+  [ReportCategories.INAPPROPRIATE_CONTENT]: "text-state-danger",
+  [ReportCategories.LINK_NOT_WORKING]: "text-state-warn",
+  [ReportCategories.RESUBMISSION_MESSAGE]: "text-state-info",
+};
+
 export default function ReportGroupCard({ report, onMarkReviewed }: ReportGroupCardProps) {
+  const reporter = report.reporter;
+  const reporterName = reporter
+    ? `${reporter.firstName} ${reporter.lastName}`.trim()
+    : NOT_APPLICABLE;
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between border-b border-surface-line">
-        <div className="flex flex-row items-center gap-2">
-          <Avatar
-            variant={"circle"}
-            src={report.reportedBy.profilePic}
-            name={report.reportedBy.name}
-          />
-          <Typography variant={"p"} className="font-semibold">
-            {report.reportedBy.name}
+      <CardHeader className="flex flex-row items-center justify-between gap-3 border-b border-surface-line">
+        <NextLink
+          href={`/internal/users/${report.reporterUuid}`}
+          className="flex min-w-0 flex-row items-center gap-2"
+        >
+          <Avatar variant={"circle"} name={reporterName} />
+          <Typography
+            variant={"small"}
+            className="truncate font-semibold text-ink-1 transition-colors hover:text-brand-green"
+          >
+            {reporterName}
           </Typography>
-          <Link href="#" arrow>
-            View Profile
-          </Link>
-        </div>
-        {!report.reviewed && (
-          <Button size={"icon"} aria-label="Mark report as reviewed" onClick={onMarkReviewed}>
+        </NextLink>
+        {!report.resolved && (
+          <Button
+            size={"icon"}
+            aria-label="Mark report as reviewed"
+            onClick={onMarkReviewed}
+            className="shrink-0"
+          >
             <CheckCheck />
           </Button>
         )}
       </CardHeader>
-      <CardDescription className="flex flex-row items-start gap-4 px-4">
+      <CardDescription className="flex flex-col gap-3 px-4">
         {report.description && (
-          <div className="flex min-w-0 flex-1 flex-row items-start gap-2">
-            <Quote size={20} className="mt-0.5 shrink-0 text-ink-4" />
-            <div className="flex min-w-0 flex-col gap-1">
-              <Typography variant={"p"} className="text-ink-2" clampLines={2}>
-                {report.description}
-              </Typography>
-            </div>
+          <div className="flex min-w-0 flex-row items-start gap-2">
+            <Quote size={18} className="mt-0.5 shrink-0 text-ink-4" />
+            <Typography variant={"p"} className="min-w-0 text-ink-2" clampLines={3}>
+              {report.description}
+            </Typography>
           </div>
         )}
-        <div className="ml-auto flex shrink-0 flex-col items-end gap-3 self-end">
-          {report.reason && (
-            <Chip
-              shape="pill"
-              type={report.reason === ReportCategories.INAPPROPRIATE_CONTENT ? "error" : "warning"}
-              label={wordFormatter(report.reason)}
-              leftIcon={
-                report.reason === ReportCategories.INAPPROPRIATE_CONTENT ? (
-                  <Flag size={20} />
-                ) : (
-                  <Unlink size={20} />
-                )
-              }
-            />
+        <div className="flex flex-row flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          {report.category && (
+            <div
+              className={cn(
+                "flex shrink-0 flex-row items-center gap-1.5",
+                CATEGORY_TEXT_COLOR[report.category],
+              )}
+            >
+              {report.category === ReportCategories.INAPPROPRIATE_CONTENT ? (
+                <Flag size={14} />
+              ) : (
+                <Unlink size={14} />
+              )}
+              <Typography variant={"tiny"} className="font-medium">
+                {REPORT_CATEGORY_LABELS[report.category]}
+              </Typography>
+            </div>
           )}
-          <Typography variant={"tiny"} className="text-ink-4">
-            {report.reportedDate}
+          <Typography variant={"tiny"} className="shrink-0 text-ink-4">
+            {report.createdAt
+              ? formatDate(report.createdAt, "D MMM YYYY · h:mm A")
+              : NOT_APPLICABLE}
           </Typography>
         </div>
       </CardDescription>

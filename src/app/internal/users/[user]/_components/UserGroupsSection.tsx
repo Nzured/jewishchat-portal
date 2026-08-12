@@ -11,6 +11,7 @@ import { Group, GroupStatus } from "@/types/Group";
 export interface UserGroupEntry {
   id: string;
   groupName: string;
+  groupThumbnailUrl?: string | null;
   path: string;
   category: string;
   status: GroupStatus;
@@ -48,7 +49,12 @@ const columns: DataTableColumn<UserGroupEntry>[] = [
     header: "Group",
     cell: (row) => (
       <div className="flex items-center gap-3">
-        <Avatar variant="tile" size="md" name={row.groupName} />
+        <Avatar
+          variant="tile"
+          size="md"
+          src={row.groupThumbnailUrl ?? undefined}
+          name={row.groupName}
+        />
         <div className="flex flex-col">
           <Link href={row.path} className="text-sm">
             {row.groupName}
@@ -94,6 +100,7 @@ export default function UserGroupsSection({ groups, loading }: UserGroupsSection
   const entries: UserGroupEntry[] = (Array.isArray(groups) ? groups : []).map((group) => ({
     id: group.uuid,
     groupName: group.name,
+    groupThumbnailUrl: group.thumbnailUrl,
     path: group.slug,
     category: group.mainCategory.name,
     status: group.status,

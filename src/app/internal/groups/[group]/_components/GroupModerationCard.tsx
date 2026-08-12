@@ -13,6 +13,7 @@ import {
   ModalTitle,
 } from "@/components/ui/Modal";
 import { ModerationActionItem, ModerationActionsCard } from "@/components/ui/ModerationActionsCard";
+import { SuspendGroupModal } from "@/components/ui/SuspendGroupModal";
 import { Textarea } from "@/components/ui/Textarea";
 import { Group, GroupStatus } from "@/types/Group";
 import { useAdminGroupContext } from "../../_context/AdminGroupContext";
@@ -21,43 +22,42 @@ interface GroupModerationCardProps {
   group: Group | null;
   loading?: boolean;
   onGroupChange?: (group: Group) => void;
+  onSuspended?: (data: { reasonLabel: string; remark: string }) => void;
+  onRelisted?: () => void;
 }
 
 export default function GroupModerationCard({
   group,
   loading,
   onGroupChange,
+  onSuspended,
+  onRelisted,
 }: GroupModerationCardProps) {
-  const { suspendGroup, reactivateGroup, approveGroup, rejectGroup } = useAdminGroupContext();
-  const [suspendModalOpen, setSuspendModalOpen] = React.useState(false);
+  const { reactivateGroup, approveGroup, rejectGroup } = useAdminGroupContext();
   const [rejectModalOpen, setRejectModalOpen] = React.useState(false);
   const [rejectionReason, setRejectionReason] = React.useState("");
 
   const isSuspended = group?.status === GroupStatus.SUSPENDED;
   const isManualReview = group?.status === GroupStatus.MANUAL_REVIEW;
 
-  const handleSuspend = async () => {
-    if (!group) return;
-    try {
-      const updated = await suspendGroup(group.uuid);
-      if (updated) onGroupChange?.(updated);
-    } catch (error) {
-      console.error(error);
-    }
+  const handleSuspend = (data: { reasonLabel: string; remark: string; group?: Group }) => {
+    if (data.group) onGroupChange?.(data.group);
+    onSuspended?.({ reasonLabel: data.reasonLabel, remark: data.remark });
   };
 
   const handleReactivate = async () => {
-    if (!group) return;
+    if (!group?.uuid) return;
     try {
       const updated = await reactivateGroup(group.uuid);
       if (updated) onGroupChange?.(updated);
+      onRelisted?.();
     } catch (error) {
       console.error(error);
     }
   };
 
   const handleApprove = async () => {
-    if (!group) return;
+    if (!group?.uuid) return;
     try {
       const updated = await approveGroup(group.uuid);
       if (updated) onGroupChange?.(updated);
@@ -67,7 +67,7 @@ export default function GroupModerationCard({
   };
 
   const handleReject = async () => {
-    if (!group) return;
+    if (!group?.uuid) return;
     try {
       const updated = await rejectGroup(group.uuid, rejectionReason.trim());
       if (updated) onGroupChange?.(updated);
@@ -111,80 +111,51 @@ export default function GroupModerationCard({
           },
         ]
       : []),
-    isSuspended
-      ? {
-          key: "reactivate",
-          primary: true,
-          node: (
-            <Button
-              size="sm"
-              leftIcon={<RefreshCw className="size-4" />}
-              variant="default"
-              color="primary"
-              onClick={() => void handleReactivate()}
-            >
-              Reactivate Group
-            </Button>
-          ),
-        }
-      : {
-          key: "suspend",
-          primary: true,
-          node: (
-            <Button
-              size="sm"
-              leftIcon={<PauseCircle className="size-4" />}
-              variant="default"
-              color="warning"
-              onClick={() => setSuspendModalOpen(true)}
-            >
-              Suspend Group
-            </Button>
-          ),
-        },
+    ...(group
+      ? [
+          isSuspended
+            ? {
+                key: "reactivate",
+                primary: true,
+                node: (
+                  <Button
+                    size="sm"
+                    leftIcon={<RefreshCw className="size-4" />}
+                    variant="default"
+                    color="primary"
+                    onClick={() => void handleReactivate()}
+                  >
+                    Re-list Group
+                  </Button>
+                ),
+              }
+            : {
+                key: "suspend",
+                primary: true,
+                node: (
+                  <SuspendGroupModal
+                    group={group}
+                    onSuspend={handleSuspend}
+                    trigger={
+                      <Button
+                        size="sm"
+                        leftIcon={<PauseCircle className="size-4" />}
+                        variant="default"
+                        color="warning"
+                      >
+                        Suspend Group
+                      </Button>
+                    }
+                  />
+                ),
+              },
+        ]
+      : []),
   ];
 
   return (
     <>
       <ModerationActionsCard title="MODERATION" actions={actions} loading={loading || !group} />
-
-      <Modal open={suspendModalOpen} onOpenChange={setSuspendModalOpen}>
-        <ModalContent variant="warning">
-          <ModalHeader icon={<PauseCircle />}>
-            <ModalTitle>Suspend this group?</ModalTitle>
-            <ModalDescription>
-              <span className="font-semibold text-ink-2">{group?.name}</span> will be hidden from
-              the public directory until it is reactivated.
-            </ModalDescription>
-          </ModalHeader>
-
-          <ModalFooter>
-            <ModalClose asChild>
-              <Button
-                size="sm"
-                leftIcon={<X />}
-                variant="secondary"
-                color="primary"
-                className="text-ink-2 hover:bg-surface-bg"
-              >
-                Cancel
-              </Button>
-            </ModalClose>
-            <Button
-              size="sm"
-              leftIcon={<PauseCircle />}
-              variant="default"
-              color="warning"
-              onClick={() => {
-                setSuspendModalOpen(false);
-                void handleSuspend();
-              }}
-            >
-              Suspend Group
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
 
       <Modal
         open={rejectModalOpen}

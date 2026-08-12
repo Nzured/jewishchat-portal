@@ -1,7 +1,6 @@
 import { NOT_APPLICABLE } from "../const";
 
 export const wordFormatter = (str: string | null | undefined): string => {
-  //this outputs string values like "FY_3", like "Fy 3"
   if (!str || typeof str !== "string") {
     return NOT_APPLICABLE;
   }
@@ -19,7 +18,6 @@ export const wordFormatter = (str: string | null | undefined): string => {
 };
 
 export const dashRemover = (str: string | null | undefined): string => {
-  //this outputs string values like "FY_3", like "FY 3"
   if (!str || typeof str !== "string") {
     return NOT_APPLICABLE;
   }
@@ -27,4 +25,10 @@ export const dashRemover = (str: string | null | undefined): string => {
   const words = str.split("_");
 
   return words.join(" ");
+};
+
+export const singularize = (label: string): string => {
+  if (/ies$/i.test(label)) return label.replace(/ies$/i, "y");
+  if (/s$/i.test(label)) return label.replace(/s$/i, "");
+  return label;
 };

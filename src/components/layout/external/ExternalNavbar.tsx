@@ -31,11 +31,31 @@ const ADD_GROUP_LINK = EXTERNAL_NAV_LINKS.find((link) => link.label === "Add Gro
 const DRAWER_NAV_LINKS = EXTERNAL_NAV_LINKS.filter((link) => link !== ADD_GROUP_LINK);
 const MY_LISTINGS_LINK = { label: "My Listings", href: "/external/groups/mine" };
 
+const STUCK_AFTER_PX = 40;
+
 export function ExternalNavbar() {
   const { user, isLoading } = useUser();
   const { logout } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const headerRef = React.useRef<HTMLElement>(null);
+
+  React.useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+
+    let stuck: boolean | null = null;
+    const update = () => {
+      const next = window.scrollY > STUCK_AFTER_PX;
+      if (next === stuck) return;
+      stuck = next;
+      el.classList.toggle("is-stuck", next);
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
 
   const [prevPathname, setPrevPathname] = React.useState(pathname);
   if (pathname !== prevPathname) {
@@ -46,7 +66,14 @@ export function ExternalNavbar() {
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "";
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-surface-line bg-surface-card px-4 md:px-6">
+    <header
+      ref={headerRef}
+      className={cn(
+        "sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-transparent px-4 transition-[background-color,border-color,backdrop-filter] duration-500 md:px-6",
+        "[&.is-stuck]:border-surface-line [&.is-stuck]:bg-surface-bg/80 [&.is-stuck]:backdrop-blur-xl",
+        "motion-reduce:transition-none",
+      )}
+    >
       <Link
         href="/external/home"
         className="shrink-0 items-center gap-2 text-ink-1 no-underline hover:text-ink-1 hover:no-underline"

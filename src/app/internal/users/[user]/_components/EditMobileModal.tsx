@@ -2,10 +2,9 @@
 
 import * as React from "react";
 import { Phone, Save, X } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/Field";
-import { Input } from "@/components/ui/Input";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/Field";
 import {
   Modal,
   ModalClose,
@@ -15,20 +14,12 @@ import {
   ModalHeader,
   ModalTitle,
 } from "@/components/ui/Modal";
-import { SelectDropdown } from "@/components/ui/SelectDropdown";
+import { isValidPhone, PhoneInput } from "@/components/ui/PhoneInput";
 import { Typography } from "@/components/ui/Typography";
-import { COUNTRY_CODES } from "@/configs/const";
 import { User } from "@/types/User";
 
 interface EditMobileFormValues {
-  countryCode: string;
   mobile: string;
-}
-
-function splitMobile(mobile?: string) {
-  const match = COUNTRY_CODES.find((code) => mobile?.startsWith(code.value));
-  if (match) return { countryCode: match.value, mobile: mobile?.slice(match.value.length) ?? "" };
-  return { countryCode: COUNTRY_CODES[0].value, mobile: mobile ?? "" };
 }
 
 interface EditMobileModalProps {
@@ -40,32 +31,29 @@ interface EditMobileModalProps {
 
 export function EditMobileModal({ user, open, setOpen, onSave }: EditMobileModalProps) {
   const {
-    register,
+    control,
     handleSubmit,
     reset,
-    setValue,
     watch,
     formState: { errors },
   } = useForm<EditMobileFormValues>({
-    defaultValues: splitMobile(user.mobile),
+    defaultValues: { mobile: user.mobile ?? "" },
     mode: "onChange",
   });
 
   const [prevOpen, setPrevOpen] = React.useState(open);
   if (open !== prevOpen) {
     setPrevOpen(open);
-    if (open) reset(splitMobile(user.mobile));
+    if (open) reset({ mobile: user.mobile ?? "" });
   }
 
-  const countryCode = watch("countryCode");
   const mobile = watch("mobile");
-
-  const mobileChanged = `${countryCode}${mobile}` !== (user.mobile ?? "");
+  const mobileChanged = mobile !== (user.mobile ?? "");
 
   const handleOpenChange = (next: boolean) => setOpen(next);
 
   const onValid = async (values: EditMobileFormValues) => {
-    await onSave(`${values.countryCode}${values.mobile}`);
+    await onSave(values.mobile);
     handleOpenChange(false);
   };
 
@@ -86,21 +74,28 @@ export function EditMobileModal({ user, open, setOpen, onSave }: EditMobileModal
         <form id="edit-mobile-form" onSubmit={(e) => void handleSubmit(onValid)(e)}>
           <FieldGroup className="gap-4 mt-2">
             <Field data-invalid={!!errors.mobile}>
-              <FieldLabel required>Mobile Number</FieldLabel>
-              <div className="flex gap-2">
-                <SelectDropdown
-                  items={COUNTRY_CODES}
-                  value={countryCode}
-                  onValueChange={(value) => setValue("countryCode", value)}
-                  className="w-24 shrink-0"
-                />
-                <Input
-                  placeholder="7111223523"
-                  className="flex-1"
-                  {...register("mobile", { required: "Mobile number is required" })}
-                />
-              </div>
-              <FieldError errors={[errors.mobile]} />
+              <FieldLabel required htmlFor="edit-mobile">
+                Mobile Number
+              </FieldLabel>
+              <Controller
+                control={control}
+                name="mobile"
+                rules={{
+                  required: "Mobile number is required",
+                  validate: (value: string) =>
+                    isValidPhone(value) || "Enter a valid phone number for the selected country",
+                }}
+                render={({ field }) => (
+                  <PhoneInput
+                    id="edit-mobile"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onBlur={field.onBlur}
+                    error={errors.mobile?.message}
+                    placeholder="7111223523"
+                  />
+                )}
+              />
             </Field>
 
             {mobileChanged && (
@@ -108,12 +103,8 @@ export function EditMobileModal({ user, open, setOpen, onSave }: EditMobileModal
                 <Phone className="mt-0.5 size-4 shrink-0 text-state-warn" />
                 <Typography variant="small" className="text-state-warn">
                   Changing the mobile number to{" "}
-                  <span className="font-semibold">
-                    {countryCode}
-                    {mobile}
-                  </span>{" "}
-                  clears its WhatsApp verification — the user must re-verify before they can add
-                  groups.
+                  <span className="font-semibold">{mobile || "—"}</span> clears its WhatsApp
+                  verification — the user must re-verify before they can add groups.
                 </Typography>
               </div>
             )}

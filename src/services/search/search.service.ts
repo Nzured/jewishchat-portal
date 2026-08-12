@@ -14,6 +14,7 @@ export interface SearchGroupResult {
   uuid: string;
   slug: string;
   name: string;
+  thumbnailUrl?: string | null;
   shortDesc: string;
   locationCity: string;
   locationCountry: string;
