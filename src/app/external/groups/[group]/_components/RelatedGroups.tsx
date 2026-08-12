@@ -81,7 +81,12 @@ export function RelatedGroups({ group, className }: RelatedGroupsProps) {
               href={`${EXTERNAL_GROUPS_PATH}/${item.slug}`}
               className="flex items-center gap-3 rounded-xl border-t border-surface-line px-2 py-3 transition-colors first:border-t-0 hover:bg-brand-softer focus-visible:ring-2 focus-visible:ring-brand-green/40 focus-visible:outline-none"
             >
-              <Avatar variant="tile" size="md" name={item.name} />
+              <Avatar
+                variant="tile"
+                size="md"
+                src={item.thumbnailUrl ?? undefined}
+                name={item.name}
+              />
               <div className="flex min-w-0 flex-col gap-0.5">
                 <Typography variant="small" className="truncate font-semibold text-ink-1">
                   {item.name}

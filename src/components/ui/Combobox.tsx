@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 interface ComboboxItem {
   label: string;
   value: string;
+  triggerLabel?: string;
+  icon?: React.ReactNode;
 }
 
 interface ComboboxProps {
@@ -21,6 +23,8 @@ interface ComboboxProps {
   disabled?: boolean;
   id?: string;
   className?: string;
+  contentClassName?: string;
+  onBlur?: React.FocusEventHandler<HTMLButtonElement>;
   "aria-invalid"?: React.AriaAttributes["aria-invalid"];
 }
 
@@ -35,6 +39,7 @@ function Combobox({
   disabled,
   id,
   className,
+  contentClassName,
   ...props
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
@@ -67,13 +72,16 @@ function Combobox({
             className,
           )}
         >
-          <span className="truncate">{selected ? selected.label : placeholder}</span>
+          {selected?.icon}
+          <span className="truncate">
+            {selected ? (selected.triggerLabel ?? selected.label) : placeholder}
+          </span>
           <ChevronDown className="size-4 shrink-0 text-ink-3" />
         </button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-(--radix-popover-trigger-width) gap-0 p-0"
+        className={cn("w-(--radix-popover-trigger-width) gap-0 p-0", contentClassName)}
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           searchInputRef.current?.focus();
@@ -111,6 +119,7 @@ function Combobox({
                 <span className="flex size-4 shrink-0 items-center justify-center">
                   {item.value === value && <Check className="size-4" />}
                 </span>
+                {item.icon}
                 <span className="truncate">{item.label}</span>
               </button>
             ))

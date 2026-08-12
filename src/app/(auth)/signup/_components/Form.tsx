@@ -2,15 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { TransitionLink } from "@/components/layout/auth/TransitionLink";
 import { Button } from "@/components/ui/Button";
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
-import { SelectDropdown } from "@/components/ui/SelectDropdown";
+import { PhoneInput } from "@/components/ui/PhoneInput";
 import { Typography } from "@/components/ui/Typography";
 import {
-  COUNTRY_CODES,
   EMAIL_CHECK_DEBOUNCE_MS,
   EMAIL_EXISTS_MESSAGE,
   EMAIL_REGEX,
@@ -20,10 +19,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { AuthService } from "@/services/auth/auth.service";
 import type { SignupRequest } from "@/services/auth/auth.types";
-import { emailRules, firstNameRules, lastNameRules, passwordRules } from "./validation";
+import {
+  emailRules,
+  firstNameRules,
+  lastNameRules,
+  mobileRules,
+  passwordRules,
+} from "./validation";
 
 interface SignupFormValues extends Omit<SignupRequest, "mobile"> {
-  countryCode: string;
   mobile: string;
 }
 
@@ -37,7 +41,7 @@ export default function Form({ onSuccess }: FormProps) {
     register,
     handleSubmit,
     control,
-    setValue,
+
     setError,
     clearErrors,
     formState: { errors, isSubmitting },
@@ -46,7 +50,6 @@ export default function Form({ onSuccess }: FormProps) {
       email: "",
       firstName: "",
       lastName: "",
-      countryCode: COUNTRY_CODES[0].value,
       mobile: "",
       password: "",
     },
@@ -87,8 +90,6 @@ export default function Form({ onSuccess }: FormProps) {
     })();
   }, [debouncedEmail]);
 
-  const countryCode = useWatch({ control, name: "countryCode" });
-
   const onValid = async (values: SignupFormValues) => {
     try {
       const exists = await checkEmailExists(values.email);
@@ -97,8 +98,7 @@ export default function Form({ onSuccess }: FormProps) {
         return;
       }
 
-      const { countryCode, mobile, ...rest } = values;
-      await signup({ ...rest, mobile: mobile ? `${countryCode}${mobile}` : mobile });
+      await signup(values);
       onSuccess?.(values.email);
     } catch (error) {
       console.error(error);
@@ -164,22 +164,20 @@ export default function Form({ onSuccess }: FormProps) {
 
           <Field>
             <FieldLabel htmlFor="mobile">Mobile Number</FieldLabel>
-            <div className="flex gap-2">
-              <SelectDropdown
-                items={COUNTRY_CODES}
-                value={countryCode}
-                onValueChange={(value) => setValue("countryCode", value)}
-                className="w-24 shrink-0"
-              />
-              <Input
-                id="mobile"
-                type="tel"
-                placeholder="Enter your phone number"
-                error={errors.mobile?.message}
-                className="flex-1"
-                {...register("mobile")}
-              />
-            </div>
+            <Controller
+              control={control}
+              name="mobile"
+              rules={mobileRules}
+              render={({ field }) => (
+                <PhoneInput
+                  id="mobile"
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  onBlur={field.onBlur}
+                  error={errors.mobile?.message}
+                />
+              )}
+            />
           </Field>
 
           <Field>

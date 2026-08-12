@@ -18,26 +18,30 @@ import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { Textarea } from "@/components/ui/Textarea";
 import { Typography } from "@/components/ui/Typography";
 import { NOT_APPLICABLE } from "@/configs/const";
+import { GroupService } from "@/services/group/group.service";
 import { Group } from "@/types/Group";
+import { REPORT_CATEGORY_LABELS, REPORT_CATEGORY_OPTIONS, ReportCategories } from "@/types/Report";
 
-const SUSPENSION_REASONS = [
-  { value: "inappropriate-content", label: "Inappropriate Content" },
-  { value: "spam-or-scams", label: "Spam or Scams" },
-  { value: "repeated-violations", label: "Repeated Violations" },
-  { value: "inactive-group", label: "Inactive Group" },
-  { value: "other", label: "Other" },
-];
+const SUSPENSION_REASONS = REPORT_CATEGORY_OPTIONS.filter(
+  (option) => option.value !== ReportCategories.RESUBMISSION_MESSAGE,
+);
 
 interface SuspendGroupModalProps {
-  group: Group;
+  group: Partial<Group> & Pick<Group, "name" | "uuid">;
   trigger: React.ReactNode;
-  onSuspend?: (data: { reason: string; reasonLabel: string; remark: string }) => void;
+  onSuspend?: (data: {
+    reason: string;
+    reasonLabel: string;
+    remark: string;
+    group?: Group;
+  }) => void;
 }
 
 export function SuspendGroupModal({ group, trigger, onSuspend }: SuspendGroupModalProps) {
   const [open, setOpen] = React.useState(false);
   const [reason, setReason] = React.useState("");
   const [remark, setRemark] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
@@ -47,11 +51,23 @@ export function SuspendGroupModal({ group, trigger, onSuspend }: SuspendGroupMod
     }
   };
 
-  const handleSuspend = () => {
-    if (!reason) return;
-    const reasonLabel = SUSPENSION_REASONS.find((item) => item.value === reason)?.label ?? reason;
-    onSuspend?.({ reason, reasonLabel, remark });
-    handleOpenChange(false);
+  const handleSuspend = async () => {
+    if (!reason || !group?.uuid) return;
+    const reasonLabel = REPORT_CATEGORY_LABELS[reason as ReportCategories] ?? reason;
+
+    setIsSubmitting(true);
+    try {
+      const res = await GroupService.suspendGroup(group.uuid, {
+        category: reason,
+        reason: remark,
+      });
+      onSuspend?.({ reason, reasonLabel, remark, group: res?.data });
+      handleOpenChange(false);
+    } catch {
+      // The axios error interceptor already surfaces a toast for this.
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -64,7 +80,6 @@ export function SuspendGroupModal({ group, trigger, onSuspend }: SuspendGroupMod
             <Typography as="span" variant="small" className="font-semibold text-ink-2">
               {group?.name ?? NOT_APPLICABLE}
             </Typography>{" "}
-            {/* TODO: Group has no owner field yet; wire up once owner lookup (e.g. by submittedByUuid) is available. */}
             will be hidden from the directory and search. The group owner will be emailed about the
             suspension.
           </ModalDescription>
@@ -104,8 +119,8 @@ export function SuspendGroupModal({ group, trigger, onSuspend }: SuspendGroupMod
           </ModalClose>
           <Button
             leftIcon={<PauseCircle />}
-            onClick={handleSuspend}
-            disabled={!reason}
+            onClick={() => void handleSuspend()}
+            disabled={!reason || isSubmitting}
             variant="default"
             color="warning"
           >

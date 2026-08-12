@@ -14,6 +14,7 @@ import { GroupStatus } from "@/types/Group";
 interface GroupCardData {
   slug: string;
   name: string;
+  thumbnailUrl?: string | null;
   shortDesc?: string;
   memberCount?: number;
   locationCountry?: string;
@@ -42,7 +43,7 @@ function GroupCard({ group, className }: GroupCardProps) {
       )}
     >
       <div className="flex flex-1 gap-4">
-        <Avatar variant="tile" src={""} name={group.name} />
+        <Avatar variant="tile" src={group.thumbnailUrl ?? undefined} name={group.name} />
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex items-start justify-between gap-3">
             <Typography variant="h3" className="truncate font-semibold text-ink-1">

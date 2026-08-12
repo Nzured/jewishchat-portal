@@ -162,12 +162,39 @@
       "Bash(command -v npx)",
       "Bash(npm ls *)",
       "Bash(node \"C:/Users/NILUPU~1/AppData/Local/Temp/claude/d--Projects-jewishchat/33f1e8f1-7115-4d5e-be04-3202a2aacc77/scratchpad/svg-to-ico.js\")",
-      "Bash(node ./_svg-to-ico-tmp.js)"
+      "Bash(node ./_svg-to-ico-tmp.js)",
+      "Bash(gzip -c)",
+      "Bash(awk '{print $5, $9}')",
+      "Bash(gzip -c node_modules/country-flag-icons/react/3x2/index.js)",
+      "Bash(awk '{printf \"%.0f KB gzipped\\\\n\", $1/1024}')",
+      "Bash(xargs -I{} sh -c 'echo \"$\\(wc -c < {}\\) bytes  {}\"; gzip -c {} | wc -c | awk \"{printf \\\\\"  %.0f KB gzipped\\\\n\\\\\", \\\\$1/1024}\"')",
+      "Bash(grep -o \"is-stuck[^}]\\\\{0,120\\\\}\" .next/static/chunks/05n1778cup.az.css)",
+      "Bash(curl -s -m 60 \"http://localhost:4000/external/groups/education-study-group\")",
+      "Bash(grep -oiE \"error[^<]{0,200}|cannot [^<]{0,150}|is not [^<]{0,150}|undefined[^<]{0,100}\")",
+      "PowerShell($conns = Get-NetTCPConnection -LocalPort 4100 -State Listen -ErrorAction SilentlyContinue; if \\($conns\\) { $pids = $conns | Select-Object -ExpandProperty OwningProcess -Unique; foreach \\($p in $pids\\) { $proc = Get-Process -Id $p -ErrorAction SilentlyContinue; if \\($proc\\) { Write-Output \"Killing PID $p \\($\\($proc.ProcessName\\)\\)\"; Stop-Process -Id $p -Force -ErrorAction SilentlyContinue } } } else { Write-Output \"nothing listening on 4100\" })",
+      "Bash(curl -s -o /dev/null -m 4 -w \"%{http_code}\\\\n\" \"http://localhost:4100/external/home\")",
+      "Bash(curl -s -o /dev/null -m 6 -w \"%{http_code}\\\\n\" \"http://localhost:4000/external/home\")",
+      "PowerShell($conns = Get-NetTCPConnection -LocalPort 4000 -State Listen -ErrorAction SilentlyContinue; if \\($conns\\) { $pids = $conns | Select-Object -ExpandProperty OwningProcess -Unique; foreach \\($p in $pids\\) { $proc = Get-Process -Id $p -ErrorAction SilentlyContinue; if \\($proc\\) { Write-Output \"PID $p \\($\\($proc.ProcessName\\)\\) started $\\($proc.StartTime\\)\" } } } else { Write-Output \"nothing listening on 4000\" })",
+      "PowerShell($conns = Get-NetTCPConnection -LocalPort 4000 -State Listen -ErrorAction SilentlyContinue; if \\($conns\\) { $pids = $conns | Select-Object -ExpandProperty OwningProcess -Unique; foreach \\($p in $pids\\) { $proc = Get-Process -Id $p -ErrorAction SilentlyContinue; if \\($proc\\) { Write-Output \"Killing PID $p \\($\\($proc.ProcessName\\)\\)\"; Stop-Process -Id $p -Force -ErrorAction SilentlyContinue } } } else { Write-Output \"nothing listening on 4000\" })",
+      "Bash(curl -s -m 25 \"https://api.chatlist.link/group-service/api/v1/groups?page=0&pageSize=2\")",
+      "Bash(python -c ' *)",
+      "Bash(curl -s -m 25 \"https://api.chatlist.link/group-service/api/v1/groups/health-wellness-oro-first-few-projects\")",
+      "Bash(curl -s -m 25 \"https://api.chatlist.link/group-service/api/v1/admin/groups/reports?page=0&size=2\")",
+      "Bash(NODE_OPTIONS=--max-old-space-size=4096 npx eslint \"src/app/internal/reports\" src/types)",
+      "Bash(curl -s -o /dev/null -m 8 -w \"dev :4000 = %{http_code}\\\\n\" \"http://localhost:4000/internal/reports/3\")",
+      "Bash(NODE_OPTIONS=--max-old-space-size=4096 npx eslint \"src/app/internal/reports/[report]/_components/SuspendGroupModal.tsx\")",
+      "Bash(cd \"d:/Projects/jewishchat\" && sed -i 's/onRelist={handleRelist}/onRelist={\\(\\) => void handleRelist\\(\\)}/g' \"src/app/internal/reports/[report]/page.tsx\" && grep -n \"onRelist=\" \"src/app/internal/reports/[report]/page.tsx\")",
+      "Bash(mv \"src/app/internal/reports/[report]/_components/SuspendGroupModal.tsx\" \"src/components/ui/SuspendGroupModal.tsx\")",
+      "Bash(sed -i '/const \\\\[suspendModalOpen, setSuspendModalOpen\\\\] = React.useState\\(false\\);/d' \"src/app/internal/groups/[group]/_components/GroupModerationCard.tsx\")",
+      "Bash(sed -i 's/import { SuspendGroupModal } from \"@\\\\/components\\\\/ui\\\\/SuspendGroupModal\";//' /dev/null)",
+      "Bash(curl -s -m 25 \"https://api.chatlist.link/group-service/api/v1/admin/groups?page=0&size=20\")",
+      "Bash(curl -s -m 30 \"https://api.chatlist.link/group-service/api/v1/admin/groups?search=&category=&page=0&size=10&sort=createdOn,desc\" -o /tmp/g.json -w \"http=%{http_code} bytes=%{size_download}\\\\n\")"
     ],
     "additionalDirectories": [
       "d:\\Projects\\jewishchat\\src\\app\\external\\reports\\[report]\\_components",
       "d:\\Projects\\jewishchat\\src\\app\\internal\\roles\\[role]",
-      "d:\\Projects\\jewishchat\\src\\app\\internal\\roles\\[role]\\_components"
+      "d:\\Projects\\jewishchat\\src\\app\\internal\\roles\\[role]\\_components",
+      "D:\\Projects\\jewishchat\\src\\app\\internal\\reports\\[report]"
     ]
   }
 }

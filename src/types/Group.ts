@@ -1,5 +1,6 @@
 import { Category } from "./Category";
 import { Paginated } from "./Common";
+import { UserSummary } from "./User";
 
 export enum GroupStatus {
   STARTED = "STARTED",
@@ -11,10 +12,17 @@ export enum GroupStatus {
   MANUAL_REVIEW = "MANUAL_REVIEW",
 }
 
+export interface GroupOwnerRef {
+  uuid: string;
+  firstName: string;
+  lastName: string;
+}
+
 export interface Group {
   uuid: string;
   slug: string;
   name: string;
+  thumbnailUrl?: string | null;
   shortDesc: string;
   about: string;
   whatsappLink?: string;
@@ -32,10 +40,15 @@ export interface Group {
   totalJoinClicks: number;
   uniqueJoinClicks: number;
   reportCount: number;
-  isOwnGroup: boolean;
-  ownerProfileUrl: string;
+  createdBy: string;
+  updatedBy: string;
   createdOn: string;
   updatedOn: string;
+  owner?: GroupOwnerRef;
+  isOwnGroup?: boolean;
+  ownerProfileUrl?: string;
+  createdByUser?: UserSummary;
+  updatedByUser?: UserSummary;
 }
 
 export type GroupsPage = Paginated<"groups", Group>;

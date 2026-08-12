@@ -24,6 +24,7 @@ function toParagraphs(about?: string) {
 export function GroupAbout({ group, className }: GroupAboutProps) {
   const { user } = useUser();
   const isOwner = Boolean(user) && user?.uuid === group.submittedByUuid;
+  const canReport = Boolean(user) && !isOwner;
   const paragraphs = toParagraphs(group.about || group.shortDesc);
 
   return (
@@ -45,7 +46,7 @@ export function GroupAbout({ group, className }: GroupAboutProps) {
         </div>
       )}
 
-      {!isOwner && (
+      {canReport && (
         <ReportGroupModal
           groupUuid={group.uuid}
           groupName={group.name}

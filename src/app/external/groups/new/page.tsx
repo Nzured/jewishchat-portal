@@ -50,6 +50,9 @@ const DEFAULT_FORM_VALUES = {
   image: null,
 };
 
+// The "Review" step's backend support is still under construction — flip this once it's ready.
+const IS_REVIEW_STEP_ENABLED = false;
+
 export default function CreateGroupPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -95,7 +98,6 @@ export default function CreateGroupPage() {
     [subscribe, getFieldState, clearErrors],
   );
 
-  // Ids are derived from position so skipping a step can't leave gaps or duplicates.
   const steps: StepperCardStep[] = (
     [
       {
@@ -117,7 +119,7 @@ export default function CreateGroupPage() {
           />
         ),
       },
-      ...(user && !user.whatsappVerified
+      ...(IS_REVIEW_STEP_ENABLED && user && !user.whatsappVerified
         ? [
             {
               title: "Review",

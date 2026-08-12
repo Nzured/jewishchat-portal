@@ -25,7 +25,6 @@ import { ReportCategories } from "@/types/Report";
 const REPORT_REASONS = [
   { value: ReportCategories.LINK_NOT_WORKING, label: "Link not working" },
   { value: ReportCategories.INAPPROPRIATE_CONTENT, label: "Inappropriate content" },
-  { value: ReportCategories.RESUBMISSION_MESSAGE, label: "Resubmission message" },
 ];
 
 interface ReportGroupModalProps {

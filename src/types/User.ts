@@ -50,6 +50,21 @@ export interface UserTableData {
   mobile?: string;
   whatsappVerified: boolean;
 }
+export interface UserSummary {
+  uuid: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  emailVerified: boolean;
+  mobile?: string;
+  permissions: string[] | null;
+  profilePictureUrl?: string | null;
+  status: UserStatus;
+  superAdmin: boolean;
+  userType: UserType;
+  whatsappVerified: boolean;
+}
+
 export interface Admin {
   userType: UserType;
 }

@@ -5,7 +5,6 @@ import { Settings, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
 import { NoData } from "@/components/ui/NoData";
@@ -21,6 +20,7 @@ import { useSearchFilter } from "@/contexts/SearchFilterContext";
 import { formatDate } from "@/lib/date";
 import { Group, GroupStatus } from "@/types/Group";
 import type { FilterOption } from "@/types/Search";
+import { GroupCard } from "./GroupCard";
 import { StatusPill } from "./StatusPill";
 import { useAdminGroupContext } from "../_context/AdminGroupContext";
 
@@ -31,7 +31,6 @@ const STATUS_FILTER_OPTIONS: FilterOption[] = Object.values(GroupStatus).map((st
   value: status,
 }));
 
-/** `categories` repeats the main category, so only the extras count as overflow. */
 function countExtraCategories(group: Group) {
   return group.categories?.filter((category) => category.id !== group.mainCategory?.id).length ?? 0;
 }
@@ -43,7 +42,7 @@ function getColumns({ onEdit }: { onEdit: (group: Group) => void }): DataTableCo
       header: "Group Name",
       cell: (group) => (
         <div className="flex items-center gap-3">
-          <Avatar variant="tile" name={group.name} />
+          <Avatar variant="tile" src={group.thumbnailUrl ?? undefined} name={group.name} />
           <div className="flex flex-col">
             <Typography variant="small" className="font-semibold text-ink-1">
               {group.name}
@@ -93,9 +92,10 @@ function getColumns({ onEdit }: { onEdit: (group: Group) => void }): DataTableCo
     },
     {
       id: "submittedBy",
-      // The listing only carries `submittedByUuid`, not the submitter's name.
       header: "Submitted By",
-      cell: () => <Typography variant="small">{NOT_APPLICABLE}</Typography>,
+      cell: (group) => (
+        <Typography variant="small">{group.createdByUser?.firstName || NOT_APPLICABLE}</Typography>
+      ),
     },
     {
       id: "addedDate",
@@ -135,80 +135,6 @@ function getColumns({ onEdit }: { onEdit: (group: Group) => void }): DataTableCo
   ];
 }
 
-function renderGroupCard(group: Group, onEdit: (group: Group) => void) {
-  const category = group.mainCategory?.name ?? NOT_APPLICABLE;
-  const overflow = countExtraCategories(group);
-
-  return (
-    <Card key={group.uuid} size="sm" className="transition-shadow hover:shadow-md active:shadow-md">
-      <CardContent className="flex flex-col gap-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <Avatar variant="tile" name={group.name} />
-            <div className="flex flex-col">
-              <Typography variant="small" className="font-semibold text-ink-1">
-                {group.name}
-              </Typography>
-              <Typography variant="muted">{`${EXTERNAL_GROUPS_PATH}/${group.slug}`}</Typography>
-            </div>
-          </div>
-          <StatusPill status={group.status} />
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <Chip label={category} shape="pill" title={category} className="min-w-0 shrink" />
-          {overflow > 0 && (
-            <Typography variant="muted" className="shrink-0 whitespace-nowrap">
-              +{overflow}
-            </Typography>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between">
-          <Typography variant="muted">
-            <span className="font-medium tabular-nums text-ink-1">
-              {group.memberCount.toLocaleString()}
-            </span>{" "}
-            members
-          </Typography>
-          <Typography variant="muted">
-            Added {group.createdOn ? formatDate(group.createdOn) : NOT_APPLICABLE}
-          </Typography>
-        </div>
-
-        <div className="flex items-center justify-between border-t border-surface-line pt-3">
-          <Typography variant="muted">
-            <span className="font-medium text-ink-1">{NOT_APPLICABLE}</span> ·{" "}
-            {group.updatedOn ? formatDate(group.updatedOn) : NOT_APPLICABLE}
-          </Typography>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="icon"
-              size="icon-sm"
-              aria-label={`Edit ${group.name}`}
-              onClick={() => onEdit(group)}
-            >
-              <Settings className="text-ink-3 transition-colors group-hover/button:text-brand-green" />
-            </Button>
-            <Button
-              variant="icon"
-              size="icon-sm"
-              aria-label={`Delete ${group.name}`}
-              className="hover:bg-state-danger/10 hover:text-state-danger"
-            >
-              <Trash2 className="text-ink-3 transition-colors group-hover/button:text-state-danger" />
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-/**
- * Only filters the API can't apply are matched here — search, status and
- * category are sent as query params, so the returned page is already filtered.
- */
 function matchesFilter(group: Group, key: string, value: string | string[] | null) {
   if (value == null || value === "") return true;
 
@@ -312,7 +238,7 @@ export function GroupsTable({ onCountChange }: { onCountChange?: (total: number)
       columns={columns}
       data={filteredGroups}
       cardData={filteredMobileGroups}
-      renderCard={(group) => renderGroupCard(group, handleEdit)}
+      renderCard={(group) => <GroupCard group={group} onEdit={handleEdit} />}
       getRowId={(group) => group.uuid}
       loading={loading && page === FIRST_PAGE}
       emptyState={

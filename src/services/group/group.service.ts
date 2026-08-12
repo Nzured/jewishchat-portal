@@ -18,12 +18,12 @@ import {
   GroupsPage,
   GroupStatus,
 } from "@/types/Group";
-import { ReportCategories } from "@/types/Report";
+import { AdminGroupReportsPage, ReportDetailResponse, ReportGroupPayload } from "@/types/Report";
 import api from "../axiosConfig";
 
-export interface ReportGroupPayload {
-  category: ReportCategories;
-  description?: string;
+export interface SuspendGroupPayload {
+  category: string;
+  reason: string;
 }
 
 export const GroupService = {
@@ -36,7 +36,7 @@ export const GroupService = {
     sort: string = "totalViews,desc",
   ) =>
     api.get<ApiResponse<GroupsPage>>(`${GROUP_SERVICE}groups`, {
-      params: { search, location, category, page, pageSize, sort },
+      params: { search, location, category, page, size: pageSize, sort },
     }),
   getGroupBySlug: (slug: string) => api.get<ApiResponse<Group>>(`${GROUP_SERVICE}groups/${slug}`),
   getDraftId: () =>
@@ -80,13 +80,13 @@ export const GroupService = {
     sort: string = DEFAULT_SORT,
   ) =>
     api.get<ApiResponse<GroupsPage>>(`${GROUP_SERVICE}admin/groups`, {
-      params: { search, status, category, page, pageSize, sort },
+      params: { search, status, category, page, size: pageSize, sort },
     }),
   getGroupByUuidAdmin: (uuid: string) =>
     api.get<ApiResponse<Group>>(`${GROUP_SERVICE}admin/groups/${uuid}`),
   groupsForAdminReview: (page: number = DEFAULT_PAGE, pageSize: number = DEFAULT_PAGE_SIZE) =>
     api.get<ApiResponse<GroupsPage>>(`${GROUP_SERVICE}admin/groups/manual-review`, {
-      params: { page, pageSize },
+      params: { page, size: pageSize },
     }),
   approveGroup: (groupId: string) =>
     api.patch<ApiResponse<Group>>(
@@ -112,16 +112,37 @@ export const GroupService = {
       {},
       { globalLoader: true },
     ),
-  suspendGroup: (groupId: string) =>
+  suspendGroup: (groupId: string, payload?: SuspendGroupPayload) =>
     api.patch<ApiResponse<Group>>(
       `${GROUP_SERVICE}admin/groups/${groupId}/suspend`,
-      {},
-      {
-        globalLoader: true,
-      },
+      payload ?? {},
+      { globalLoader: true },
     ),
   reportGroup: (uuid: string, payload: ReportGroupPayload) =>
     api.post<ApiResponse<void>>(`${GROUP_SERVICE}groups/${uuid}/report`, payload, {
       globalLoader: true,
     }),
+  getAdminGroupReports: (
+    resolved: boolean = false,
+    page: number = DEFAULT_PAGE,
+    pageSize: number = DEFAULT_PAGE_SIZE,
+    sort?: string,
+  ) =>
+    api.get<ApiResponse<AdminGroupReportsPage>>(`${GROUP_SERVICE}admin/groups/reports`, {
+      params: { resolved, page, size: pageSize, sort },
+    }),
+  getReport: (reportId: string) =>
+    api.get<ApiResponse<ReportDetailResponse>>(`${GROUP_SERVICE}admin/groups/reports/${reportId}`),
+  resolveReport: (reportId: number, dismiss: boolean = false) =>
+    api.patch<ApiResponse<void>>(
+      `${GROUP_SERVICE}admin/groups/reports/${reportId}/resolve`,
+      {},
+      { params: { dismiss }, globalLoader: true },
+    ),
+  resolveAllReports: (uuid: string, dismiss: boolean = false) =>
+    api.patch<ApiResponse<void>>(
+      `${GROUP_SERVICE}admin/groups/${uuid}/reports/resolve-all`,
+      {},
+      { params: { dismiss }, globalLoader: true },
+    ),
 };

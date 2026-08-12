@@ -14,14 +14,6 @@ export const EMAIL_EXISTS_MESSAGE = "An account with this email already exists."
 export const SEARCH_AUTOCOMPLETE_DEBOUNCE_MS = 300;
 export const SEARCH_AUTOCOMPLETE_MIN_LENGTH = 2;
 
-export const COUNTRY_CODES = [
-  { value: "+972", label: "+972" },
-  { value: "+1", label: "+1" },
-  { value: "+44", label: "+44" },
-  { value: "+94", label: "+94" },
-  { value: "+91", label: "+91" },
-];
-
 export const RESEND_OTP_COOLDOWN_SECONDS = 120;
 
 // The public group directory landing page — also where external users land
@@ -35,6 +27,8 @@ export const EXTERNAL_GROUPS_PATH = "/external/groups";
 // sign in/up and bounced back here — see PendingGroupDraftRedirect.
 export const EXTERNAL_GROUPS_NEW_PATH = `${EXTERNAL_GROUPS_PATH}/new`;
 
+export const EXTERNAL_CATEGORIES_PATH = "/external/categories";
+
 export const ACCESS_TOKEN_COOKIE = "accessToken";
 export const USER_TYPE_COOKIE = "userType";
 
@@ -46,6 +40,10 @@ export const DEFAULT_PAGE = 0;
 export const DEFAULT_PAGE_SIZE = 10;
 export const NOT_APPLICABLE = "N/A";
 export const URL = "https://www.jewishchat.com/";
+export const PUBLIC_HOST = (process.env.NEXT_PUBLIC_API_URL ?? "")
+  .replace(/^https?:\/\//, "")
+  .replace(/\/$/, "")
+  .replace(/^api\./, "");
 export const NAME_PART_ONE = "Jewish";
 export const NAME_PART_TWO = "Chat";
 export const GROUP_SERVICE_ADMIN = "/group-service/api/v1/admin/groups";
