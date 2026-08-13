@@ -18,6 +18,7 @@ import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { Textarea } from "@/components/ui/Textarea";
 import { Typography } from "@/components/ui/Typography";
 import { NOT_APPLICABLE } from "@/configs/const";
+import { cn } from "@/lib/utils";
 import { GroupService } from "@/services/group/group.service";
 import { Group } from "@/types/Group";
 import { REPORT_CATEGORY_LABELS, REPORT_CATEGORY_OPTIONS, ReportCategories } from "@/types/Report";
@@ -29,6 +30,7 @@ const SUSPENSION_REASONS = REPORT_CATEGORY_OPTIONS.filter(
 interface SuspendGroupModalProps {
   group: Partial<Group> & Pick<Group, "name" | "uuid">;
   trigger: React.ReactNode;
+  className?: string;
   onSuspend?: (data: {
     reason: string;
     reasonLabel: string;
@@ -37,7 +39,12 @@ interface SuspendGroupModalProps {
   }) => void;
 }
 
-export function SuspendGroupModal({ group, trigger, onSuspend }: SuspendGroupModalProps) {
+export function SuspendGroupModal({
+  group,
+  trigger,
+  className,
+  onSuspend,
+}: SuspendGroupModalProps) {
   const [open, setOpen] = React.useState(false);
   const [reason, setReason] = React.useState("");
   const [remark, setRemark] = React.useState("");
@@ -72,7 +79,13 @@ export function SuspendGroupModal({ group, trigger, onSuspend }: SuspendGroupMod
 
   return (
     <Modal open={open} onOpenChange={handleOpenChange}>
-      <ModalTrigger asChild>{trigger}</ModalTrigger>
+      <ModalTrigger asChild>
+        {className && React.isValidElement<{ className?: string }>(trigger)
+          ? React.cloneElement(trigger, {
+              className: cn(className, trigger.props.className),
+            })
+          : trigger}
+      </ModalTrigger>
       <ModalContent variant="warning">
         <ModalHeader icon={<PauseCircle />}>
           <ModalTitle>Suspend this group?</ModalTitle>

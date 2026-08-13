@@ -234,11 +234,6 @@ function ReportPageContent({ reportId }: { reportId: string }) {
     <div className="flex flex-col gap-4 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
       <GroupNavigation />
 
-      {/* Mobile: details card right after nav. Desktop: shown in the right column below instead. */}
-      <div className="md:hidden">
-        <GroupDetailsCard group={group} />
-      </div>
-
       {group?.status === GroupStatus.SUSPENDED && suspension && (
         <Banner
           variant="warning"
@@ -249,11 +244,11 @@ function ReportPageContent({ reportId }: { reportId: string }) {
       )}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr] md:items-start">
-        <div className="flex flex-col gap-4">
+        <div className="order-2 flex flex-col gap-4 md:order-1">
           {summaryCard}
           {reportsList}
         </div>
-        <div className="hidden md:flex md:flex-col md:gap-4">
+        <div className="order-1 flex flex-col gap-4 md:order-2">
           <GroupDetailsCard group={group} />
           {group && (
             <ActionsCard
@@ -264,17 +259,6 @@ function ReportPageContent({ reportId }: { reportId: string }) {
             />
           )}
         </div>
-      </div>
-
-      {/* Mobile: mounted unwrapped so its own fixed bottom bar isn't caught behind a `hidden` ancestor. */}
-      <div className="md:hidden">
-        {group && (
-          <ActionsCard
-            group={group}
-            onSuspend={handleSuspend}
-            onRelist={() => void handleRelist()}
-          />
-        )}
       </div>
     </div>
   );

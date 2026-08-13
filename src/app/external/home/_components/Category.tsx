@@ -19,6 +19,7 @@ export const Category = ({
   description,
   count,
   color,
+  className,
 }: {
   icon?: string;
   name: string;
@@ -26,6 +27,7 @@ export const Category = ({
   description?: string;
   count?: number;
   color?: CategoryColor;
+  className?: string;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -65,7 +67,10 @@ export const Category = ({
   return (
     <div
       ref={ref}
-      className="group relative flex h-full flex-col justify-between overflow-hidden rounded-[22px] border border-surface-line bg-surface-card p-6 transition-colors duration-500 will-change-transform hover:border-brand-green/45"
+      className={cn(
+        "group relative flex h-full flex-col justify-between overflow-hidden rounded-[22px] border border-surface-line bg-surface-card p-6 transition-colors duration-500 will-change-transform hover:border-brand-green/45",
+        className,
+      )}
     >
       <span className="pointer-events-none absolute -top-16 -left-16 size-40 scale-0 rounded-full bg-brand-softer transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[3.2]" />
 
