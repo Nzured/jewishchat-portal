@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { AlertTriangle, History } from "lucide-react";
+import { NoData } from "@/components/ui/NoData";
 import { Tabs } from "@/components/ui/Tabs";
 import { TabsHeader } from "@/components/ui/TabsHeader";
 import { ReportDetail } from "@/types/Report";
@@ -41,13 +42,25 @@ export default function ReportsListSection({ reports, onMarkReviewed }: ReportsL
       />
 
       <div className="mt-4 flex flex-col gap-2">
-        {visibleReports?.map((report) => (
-          <ReportGroupCard
-            key={report.id}
-            report={report}
-            onMarkReviewed={() => onMarkReviewed(report)}
+        {visibleReports?.length ? (
+          visibleReports.map((report) => (
+            <ReportGroupCard
+              key={report.id}
+              report={report}
+              onMarkReviewed={() => onMarkReviewed(report)}
+            />
+          ))
+        ) : activeTab === "pending" ? (
+          <NoData
+            title="No pending reports"
+            description="Every report for this group has been reviewed."
           />
-        ))}
+        ) : (
+          <NoData
+            title="No reviewed reports"
+            description="Reports you mark as reviewed will show up here."
+          />
+        )}
       </div>
     </Tabs>
   );

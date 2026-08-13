@@ -188,7 +188,8 @@
       "Bash(sed -i '/const \\\\[suspendModalOpen, setSuspendModalOpen\\\\] = React.useState\\(false\\);/d' \"src/app/internal/groups/[group]/_components/GroupModerationCard.tsx\")",
       "Bash(sed -i 's/import { SuspendGroupModal } from \"@\\\\/components\\\\/ui\\\\/SuspendGroupModal\";//' /dev/null)",
       "Bash(curl -s -m 25 \"https://api.chatlist.link/group-service/api/v1/admin/groups?page=0&size=20\")",
-      "Bash(curl -s -m 30 \"https://api.chatlist.link/group-service/api/v1/admin/groups?search=&category=&page=0&size=10&sort=createdOn,desc\" -o /tmp/g.json -w \"http=%{http_code} bytes=%{size_download}\\\\n\")"
+      "Bash(curl -s -m 30 \"https://api.chatlist.link/group-service/api/v1/admin/groups?search=&category=&page=0&size=10&sort=createdOn,desc\" -o /tmp/g.json -w \"http=%{http_code} bytes=%{size_download}\\\\n\")",
+      "Bash(node -e \"console.log\\('node', process.version, 'WebSocket:', typeof globalThis.WebSocket\\)\")"
     ],
     "additionalDirectories": [
       "d:\\Projects\\jewishchat\\src\\app\\external\\reports\\[report]\\_components",

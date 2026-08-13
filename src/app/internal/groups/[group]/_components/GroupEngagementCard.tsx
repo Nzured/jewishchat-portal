@@ -14,12 +14,12 @@ interface GroupEngagementCardProps {
 
 function StatTile({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-surface-line bg-surface-bg p-4">
-      <div className="flex items-center gap-2 text-brand-green">
+    <div className="flex flex-col gap-2 rounded-xl border border-surface-line bg-surface-bg p-3 sm:p-4">
+      <div className="flex min-w-0 items-center gap-2 text-brand-green">
         {icon}
-        <SectionLabel className="text-ink-3">{label}</SectionLabel>
+        <SectionLabel className="min-w-0 truncate text-ink-3">{label}</SectionLabel>
       </div>
-      <Typography variant="h2" className="font-semibold tabular-nums text-ink-1">
+      <Typography variant="h3" className="font-semibold tabular-nums text-ink-1 sm:text-3xl">
         {value.toLocaleString()}
       </Typography>
     </div>
@@ -34,7 +34,7 @@ export default function GroupEngagementCard({ group, loading }: GroupEngagementC
         {/* The API exposes lifetime counters only, so this is deliberately not labelled "30-day". */}
         <SectionLabel className="text-ink-4">All time</SectionLabel>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <CardContent className="grid grid-cols-2 gap-3">
         {loading || !group ? (
           Array.from({ length: 4 }).map((_, index) => (
             <Skeleton key={index} className="h-24 w-full rounded-xl" />

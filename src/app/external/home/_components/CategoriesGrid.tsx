@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useReveal } from "@/lib/motion/useReveal";
 import { Category as CategoryType } from "@/types/Category";
@@ -12,10 +13,7 @@ function CategoriesRevealGrid({ categories }: { categories: CategoryType[] }) {
   const gridRef = useReveal<HTMLDivElement>({ selector: ":scope > *", y: 28, stagger: 0.045 });
 
   return (
-    <div
-      ref={gridRef}
-      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:pb-8 lg:[&>*:nth-child(4n+2)]:top-8 lg:[&>*:nth-child(4n+4)]:top-8"
-    >
+    <div ref={gridRef} className="flex snap-x snap-mandatory gap-4 overflow-x-auto">
       {categories.map((category) => (
         <Category
           key={category.id}
@@ -25,6 +23,7 @@ function CategoriesRevealGrid({ categories }: { categories: CategoryType[] }) {
           description={category.description}
           count={category.groupsCount}
           color={category.color}
+          className="w-[76vw] max-w-[300px] shrink-0 snap-start sm:w-[300px] sm:max-w-none"
         />
       ))}
     </div>
@@ -33,13 +32,22 @@ function CategoriesRevealGrid({ categories }: { categories: CategoryType[] }) {
 
 export function CategoriesGrid() {
   const { categories, isLoading } = useHome();
-  const visibleCategories = categories.slice(0, MAX_VISIBLE_CATEGORIES);
+
+  const visibleCategories = React.useMemo(() => {
+    const described = (category: CategoryType) => (category.description?.trim() ? 0 : 1);
+    return [...categories]
+      .sort((a, b) => described(a) - described(b))
+      .slice(0, MAX_VISIBLE_CATEGORIES);
+  }, [categories]);
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="flex gap-4 overflow-hidden">
         {Array.from({ length: MAX_VISIBLE_CATEGORIES }).map((_, index) => (
-          <Skeleton key={index} className="h-[212px] rounded-[22px]" />
+          <Skeleton
+            key={index}
+            className="h-[212px] w-[76vw] max-w-[300px] shrink-0 rounded-[22px] sm:w-[300px] sm:max-w-none"
+          />
         ))}
       </div>
     );
