@@ -1,0 +1,74 @@
+name: SEO Check — PR Preview
+
+# FR-SEO-MON-01: warns on SEO regressions before merge, but NEVER blocks
+# the PR — this workflow's job status is always success, since a template
+# bug shouldn't stop unrelated work from merging. The value is visibility:
+# a comment on the PR that's easy to miss is still far better than silently
+# shipping a broken canonical/schema to production.
+#
+# Triggers after Vercel has already built and deployed a preview for this
+# PR — waits for Vercel's own deployment-status check to report success,
+# then extracts that preview URL and runs the checker against it.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  seo-check:
+    name: seo-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Vercel posts a "Vercel — <project>" deployment status check on the
+      # PR once the preview build finishes. This polls the GitHub Deployments
+      # API for that specific PR's head SHA until Vercel reports the preview
+      # URL, rather than guessing a fixed wait time (preview build duration
+      # varies).
+      - name: Wait for Vercel preview deployment
+        id: vercel-preview
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          max_timeout: 300
+
+      - name: Run SEO check against preview
+        if: steps.vercel-preview.outputs.url != ''
+        run: |
+          node scripts/seo-check/seo-check.js \
+            --base-url "${{ steps.vercel-preview.outputs.url }}" \
+            --mode pr \
+            --api-base-url "https://api.chatlist.link/group-service"
+
+      - name: Skip notice (no preview URL found)
+        if: steps.vercel-preview.outputs.url == ''
+        run: echo "No Vercel preview URL detected within timeout — skipping SEO check for this run."
+
+      - name: Comment results on PR
+        if: always() && steps.vercel-preview.outputs.url != ''
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: seo-check
+          path: seo-check-report.md
+          recreate: true
+
+      - name: Upload full report as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-check-report-pr-${{ github.event.pull_request.number }}
+          path: seo-check-report.json
+          retention-days: 30
+
+    # No `if: failure()` gate anywhere above, and seo-check.js itself always
+    # exits 0 — this job cannot fail the PR's required-checks status by design.
