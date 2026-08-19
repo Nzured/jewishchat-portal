@@ -4,9 +4,10 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Typography } from "@/components/ui/Typography";
-import { EXTERNAL_GROUPS_PATH, NOT_APPLICABLE } from "@/configs/const";
+import { NOT_APPLICABLE } from "@/configs/const";
 import { wordFormatter } from "@/configs/functions/WordFormatter";
 import { formatDate } from "@/lib/date";
+import { getGroupPath } from "@/lib/publicPaths";
 import { AdminGroupReport, ReportCategories } from "@/types/Report";
 
 interface ReportCardProps {
@@ -42,9 +43,7 @@ export function ReportCard({ report, onView }: ReportCardProps) {
                 {report.group?.name ?? NOT_APPLICABLE}
               </Typography>
               <Typography variant="muted">
-                {report.group?.slug
-                  ? `${EXTERNAL_GROUPS_PATH}/${report.group.slug}`
-                  : NOT_APPLICABLE}
+                {report.group?.slug ? getGroupPath(report.group) : NOT_APPLICABLE}
               </Typography>
             </div>
           </div>

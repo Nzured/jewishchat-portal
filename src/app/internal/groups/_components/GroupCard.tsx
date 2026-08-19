@@ -2,8 +2,9 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Typography } from "@/components/ui/Typography";
-import { EXTERNAL_GROUPS_PATH, NOT_APPLICABLE } from "@/configs/const";
+import { NOT_APPLICABLE } from "@/configs/const";
 import { formatDate } from "@/lib/date";
+import { getGroupPath } from "@/lib/publicPaths";
 import { Group } from "@/types/Group";
 import { StatusPill } from "./StatusPill";
 
@@ -42,7 +43,7 @@ export function GroupCard({ group, onEdit }: GroupCardProps) {
               <Typography variant="small" className="font-semibold text-ink-1">
                 {group.name}
               </Typography>
-              <Typography variant="muted">{`${EXTERNAL_GROUPS_PATH}/${group.slug}`}</Typography>
+              <Typography variant="muted">{getGroupPath(group)}</Typography>
             </div>
           </div>
           <StatusPill status={group.status} />

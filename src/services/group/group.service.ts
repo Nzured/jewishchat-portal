@@ -38,7 +38,10 @@ export const GroupService = {
     api.get<ApiResponse<GroupsPage>>(`${GROUP_SERVICE}groups`, {
       params: { search, location, category, page, size: pageSize, sort },
     }),
-  getGroupBySlug: (slug: string) => api.get<ApiResponse<Group>>(`${GROUP_SERVICE}groups/${slug}`),
+  getGroupByCategoryAndSlug: (categorySlug: string, groupSlug: string) =>
+    api.get<ApiResponse<Group>>(`${GROUP_SERVICE}groups/${categorySlug}/${groupSlug}`),
+  getRelatedGroups: (uuid: string) =>
+    api.get<ApiResponse<Group[]>>(`${GROUP_SERVICE}groups/${uuid}/related`),
   getDraftId: () =>
     api.post<ApiResponse<GroupDraftRef>>(
       `${GROUP_SERVICE}groups/drafts`,

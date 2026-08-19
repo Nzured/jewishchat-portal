@@ -17,10 +17,10 @@ import {
 } from "@/components/ui/Modal";
 import { Textarea } from "@/components/ui/Textarea";
 import { Typography } from "@/components/ui/Typography";
-import { URL } from "@/configs/const";
+import { RESERVED_ROUTE_SLUGS, URL } from "@/configs/const";
 import { Category } from "@/types/Category";
-import { useCategories } from "../_context/CategoryContext";
 import { IconPicker } from "./IconPicker";
+import { useCategories } from "../_context/CategoryContext";
 
 interface CategoryFormValues {
   name: string;
@@ -134,6 +134,12 @@ export function AddCategoryModal({ open, setOpen, category }: AddCategoryModalPr
                 leftIcon={<Link />}
                 {...register("slug", {
                   required: "Slug is required",
+                  // FR-SEO-URL-06 — a category slug becomes the first path
+                  // segment of every group in it, so it must never collide
+                  // with a real (or planned) top-level route.
+                  validate: (value) =>
+                    !RESERVED_ROUTE_SLUGS.includes(value) ||
+                    "This slug is reserved for a site page and can't be used for a category",
                   onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                     setSlugEdited(true);
                     setValue("slug", slugify(e.target.value), { shouldValidate: true });
@@ -153,9 +159,7 @@ export function AddCategoryModal({ open, setOpen, category }: AddCategoryModalPr
                 control={control}
                 name="icon"
                 rules={{ required: "Please select an icon" }}
-                render={({ field }) => (
-                  <IconPicker value={field.value} onChange={field.onChange} />
-                )}
+                render={({ field }) => <IconPicker value={field.value} onChange={field.onChange} />}
               />
               <FieldError errors={[errors.icon]} />
             </Field>

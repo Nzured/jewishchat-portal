@@ -3,7 +3,7 @@
 import * as React from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import { NoData } from "@/components/ui/NoData";
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_SORT } from "@/configs/const";
+import { DEFAULT_PAGE_SIZE, DEFAULT_SORT, FIRST_PAGE } from "@/configs/const";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
 import { User, UserType } from "@/types/User";
 import { externalColumns, internalColumns } from "./columns";
@@ -38,7 +38,7 @@ export default function UserTable({
   const [mobileUsers, setMobileUsers] = React.useState<User[]>([]);
   const [totalUsers, setTotalUsers] = React.useState(0);
   const [loading, setLoading] = React.useState(true);
-  const [page, setPage] = React.useState(DEFAULT_PAGE);
+  const [page, setPage] = React.useState(FIRST_PAGE);
   const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_SIZE);
 
   const searchTerm =

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import { NoData } from "@/components/ui/NoData";
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "@/configs/const";
+import { DEFAULT_PAGE_SIZE, FIRST_PAGE } from "@/configs/const";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
 import { Role } from "@/types/Role";
 import { columns } from "./columns";
@@ -28,7 +28,7 @@ function matchesFilter(row: Role, key: string, value: string | string[] | null) 
 
 export default function RoleTable({ data, loading }: { data: Role[]; loading?: boolean }) {
   const { appliedFilters, hasActiveFilters, clearAllFilters } = useSearchFilter();
-  const [page, setPage] = React.useState(DEFAULT_PAGE);
+  const [page, setPage] = React.useState(FIRST_PAGE);
   const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_SIZE);
   const [mobileCount, setMobileCount] = React.useState(DEFAULT_PAGE_SIZE);
 

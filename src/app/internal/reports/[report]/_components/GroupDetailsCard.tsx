@@ -10,9 +10,10 @@ import { Link } from "@/components/ui/Link";
 import { LinkDisplay } from "@/components/ui/LinkDisplay";
 import { Separator } from "@/components/ui/Separator";
 import { Typography } from "@/components/ui/Typography";
-import { EXTERNAL_GROUPS_PATH, NOT_APPLICABLE, PUBLIC_HOST } from "@/configs/const";
+import { NOT_APPLICABLE, PUBLIC_HOST } from "@/configs/const";
 import { wordFormatter } from "@/configs/functions/WordFormatter";
 import { formatDate } from "@/lib/date";
+import { getGroupPath } from "@/lib/publicPaths";
 import { cn } from "@/lib/utils";
 import { Group, GroupStatus } from "@/types/Group";
 
@@ -72,7 +73,9 @@ export default function GroupDetailsCard({ group }: GroupDetailsCardProps) {
               <div className="flex flex-col gap-3">
                 <div></div>
                 <div>
-                  <LinkDisplay url={`${PUBLIC_HOST}${EXTERNAL_GROUPS_PATH}/${group.slug}`} />
+                  <LinkDisplay
+                    url={`${PUBLIC_HOST}${getGroupPath({ slug: group.slug, mainCategory: group.mainCategory })}`}
+                  />
                 </div>
               </div>
             )}

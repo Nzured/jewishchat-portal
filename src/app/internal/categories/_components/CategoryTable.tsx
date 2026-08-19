@@ -5,7 +5,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import { DeleteModal } from "@/components/ui/DeleteModal";
 import { NoData } from "@/components/ui/NoData";
 import { Typography } from "@/components/ui/Typography";
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "@/configs/const";
+import { DEFAULT_PAGE_SIZE, FIRST_PAGE } from "@/configs/const";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
 import { Category } from "@/types/Category";
 import { CategoryCard } from "./CategoryCard";
@@ -35,7 +35,7 @@ interface CategoryTableProps {
 export default function CategoryTable({ onEdit, data, loading }: CategoryTableProps) {
   const { deleteCategory } = useCategories();
   const { appliedFilters, hasActiveFilters, clearAllFilters } = useSearchFilter();
-  const [page, setPage] = React.useState(DEFAULT_PAGE);
+  const [page, setPage] = React.useState(FIRST_PAGE);
   const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_SIZE);
   const [mobileCount, setMobileCount] = React.useState(DEFAULT_PAGE_SIZE);
   const [categoryToDelete, setCategoryToDelete] = React.useState<Category | null>(null);

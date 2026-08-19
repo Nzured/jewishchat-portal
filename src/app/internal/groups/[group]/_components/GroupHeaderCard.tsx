@@ -6,8 +6,9 @@ import { Card } from "@/components/ui/Card";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
-import { EXTERNAL_GROUPS_PATH, NOT_APPLICABLE, PUBLIC_HOST } from "@/configs/const";
+import { NOT_APPLICABLE, PUBLIC_HOST } from "@/configs/const";
 import { formatDate } from "@/lib/date";
+import { getGroupPath } from "@/lib/publicPaths";
 import { Group } from "@/types/Group";
 import { StatusPill } from "../../_components/StatusPill";
 
@@ -46,7 +47,7 @@ export default function GroupHeaderCard({ group, loading }: GroupHeaderCardProps
     );
   }
 
-  const publicUrl = `${PUBLIC_HOST}${EXTERNAL_GROUPS_PATH}/${group.slug}`;
+  const publicUrl = `${PUBLIC_HOST}${getGroupPath(group)}`;
   const location = formatLocation(group);
 
   return (

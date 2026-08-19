@@ -77,10 +77,17 @@ function Avatar({
   const seed = name || alt || "";
   const { bg, text } = colorPalette[hashString(seed) % colorPalette.length];
   const showImage = Boolean(src) && !imageFailed;
+  // The initials fallback still needs a real accessible name (FR-SEO-META-05
+  // — "including the default two-letter placeholder avatar"). It moves to
+  // the wrapping span so it applies whether or not an image ever loads.
+  const accessibleName = alt || name;
 
   return (
     <span
       data-slot="avatar"
+      role={accessibleName ? "img" : undefined}
+      aria-label={accessibleName || undefined}
+      aria-hidden={accessibleName ? undefined : true}
       className={cn(
         avatarVariants({ variant, size }),
         !showImage && bg,
@@ -92,16 +99,12 @@ function Avatar({
       {showImage ? (
         <img
           src={src}
-          alt={alt ?? name}
+          alt=""
           className="size-full object-cover"
           onError={() => setImageFailed(true)}
         />
       ) : (
-        <Typography
-          as="span"
-          className="text-inherit leading-none"
-          aria-hidden={Boolean(alt || name) || undefined}
-        >
+        <Typography as="span" aria-hidden="true" className="text-inherit leading-none">
           {resolvedInitials}
         </Typography>
       )}

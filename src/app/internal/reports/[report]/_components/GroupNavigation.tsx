@@ -18,7 +18,7 @@ export default function GroupNavigation() {
   const hasPrevious = number > 1;
 
   const goToGroup = (targetNumber: number) => {
-    router.push(`/external/reports/${prefix}${targetNumber}`);
+    router.push(`/internal/reports/${prefix}${targetNumber}`);
   };
 
   const handlePrevious = () => {

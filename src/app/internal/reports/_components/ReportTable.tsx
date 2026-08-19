@@ -10,15 +10,14 @@ import { Button } from "@/components/ui/Button";
 import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
 import { NoData } from "@/components/ui/NoData";
 import { Typography } from "@/components/ui/Typography";
-import { DEFAULT_PAGE_SIZE, EXTERNAL_GROUPS_PATH, NOT_APPLICABLE } from "@/configs/const";
+import { DEFAULT_PAGE_SIZE, FIRST_PAGE, NOT_APPLICABLE } from "@/configs/const";
 import { wordFormatter } from "@/configs/functions/WordFormatter";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
 import { formatDate } from "@/lib/date";
+import { getGroupPath } from "@/lib/publicPaths";
 import { GroupService } from "@/services/group/group.service";
 import { AdminGroupReport } from "@/types/Report";
 import { ReportCard } from "./ReportCard";
-
-const FIRST_PAGE = 1;
 
 const columns: DataTableColumn<AdminGroupReport>[] = [
   {
@@ -32,7 +31,7 @@ const columns: DataTableColumn<AdminGroupReport>[] = [
             {row.group?.name ?? NOT_APPLICABLE}
           </Typography>
           <Typography variant="muted">
-            {row.group?.slug ? `${EXTERNAL_GROUPS_PATH}/${row.group.slug}` : NOT_APPLICABLE}
+            {row.group?.slug ? getGroupPath(row.group) : NOT_APPLICABLE}
           </Typography>
         </div>
       </div>

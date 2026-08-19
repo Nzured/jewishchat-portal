@@ -9,22 +9,16 @@ import { Chip } from "@/components/ui/Chip";
 import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
 import { NoData } from "@/components/ui/NoData";
 import { Typography } from "@/components/ui/Typography";
-import {
-  DEFAULT_PAGE_SIZE,
-  DEFAULT_SORT,
-  EXTERNAL_GROUPS_PATH,
-  NOT_APPLICABLE,
-} from "@/configs/const";
+import { DEFAULT_PAGE_SIZE, DEFAULT_SORT, FIRST_PAGE, NOT_APPLICABLE } from "@/configs/const";
 import { wordFormatter } from "@/configs/functions/WordFormatter";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
 import { formatDate } from "@/lib/date";
+import { getGroupPath } from "@/lib/publicPaths";
 import { Group, GroupStatus } from "@/types/Group";
 import type { FilterOption } from "@/types/Search";
 import { GroupCard } from "./GroupCard";
 import { StatusPill } from "./StatusPill";
 import { useAdminGroupContext } from "../_context/AdminGroupContext";
-
-const FIRST_PAGE = 1;
 
 const STATUS_FILTER_OPTIONS: FilterOption[] = Object.values(GroupStatus).map((status) => ({
   label: wordFormatter(status),
@@ -47,7 +41,7 @@ function getColumns({ onEdit }: { onEdit: (group: Group) => void }): DataTableCo
             <Typography variant="small" className="font-semibold text-ink-1">
               {group.name}
             </Typography>
-            <Typography variant="muted">{`${EXTERNAL_GROUPS_PATH}/${group.slug}`}</Typography>
+            <Typography variant="muted">{getGroupPath(group)}</Typography>
           </div>
         </div>
       ),

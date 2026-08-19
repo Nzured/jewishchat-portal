@@ -20,7 +20,12 @@ import {
   SheetTrigger,
 } from "@/components/ui/Sheet";
 import { Typography } from "@/components/ui/Typography";
-import { NAME_PART_ONE, NAME_PART_TWO } from "@/configs/const";
+import {
+  EXTERNAL_GROUPS_PATH,
+  EXTERNAL_HOME_PATH,
+  NAME_PART_ONE,
+  NAME_PART_TWO,
+} from "@/configs/const";
 import { EXTERNAL_NAV_LINKS } from "@/configs/externalNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUser } from "@/contexts/UserContext";
@@ -29,7 +34,7 @@ import { UserMenu } from "../app/UserMenu";
 
 const ADD_GROUP_LINK = EXTERNAL_NAV_LINKS.find((link) => link.label === "Add Group");
 const DRAWER_NAV_LINKS = EXTERNAL_NAV_LINKS.filter((link) => link !== ADD_GROUP_LINK);
-const MY_LISTINGS_LINK = { label: "My Listings", href: "/external/groups/mine" };
+const MY_LISTINGS_LINK = { label: "My Listings", href: `${EXTERNAL_GROUPS_PATH}/mine` };
 
 const STUCK_AFTER_PX = 40;
 
@@ -75,7 +80,7 @@ export function ExternalNavbar() {
       )}
     >
       <Link
-        href="/external/home"
+        href={EXTERNAL_HOME_PATH}
         className="shrink-0 items-center gap-2 text-ink-1 no-underline hover:text-ink-1 hover:no-underline"
       >
         <Image

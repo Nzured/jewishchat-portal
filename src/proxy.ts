@@ -1,32 +1,96 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getHomePathForUserType } from "@/lib/auth";
 import { UserType } from "@/types/User";
-import { ACCESS_TOKEN_COOKIE, EXTERNAL_HOME_PATH, USER_TYPE_COOKIE } from "./configs/const";
+import {
+  ACCESS_TOKEN_COOKIE,
+  GROUP_SERVICE,
+  RESERVED_ROUTE_SLUGS,
+  USER_TYPE_COOKIE,
+} from "./configs/const";
 
 const AUTH_PATHS = ["/login", "/signup", "/forgot-password", "/reset-password", "/accept-invite"];
 
-// Renders regardless of session state. Accepting an invite activates a
-// specific account tied to the token in the URL — unrelated to whichever
-// session (if any) already happens to be active in this browser, so it
-// shouldn't get bounced to that session's dashboard.
 const ALWAYS_ACCESSIBLE_PATHS = ["/accept-invite"];
 
-// The public-facing group directory — browsable without an account.
-// Auth-gated actions within it (e.g. adding a group) check auth client-side.
-const PUBLIC_PATHS = ["/external"];
+const INTERNAL_PATH = "/internal";
 
 const matchesPath = (pathname: string, paths: string[]) =>
   paths.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 
-export function proxy(request: NextRequest) {
+const STATIC_TOP_LEVEL_SEGMENTS = new Set([
+  "groups",
+  "internal",
+  "home",
+  "categories",
+  "login",
+  "signup",
+  "forgot-password",
+  "reset-password",
+  "accept-invite",
+]);
+
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+const GONE_CHECK_TIMEOUT_MS = 5000;
+
+const GONE_HTML = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Group no longer available | ChatList</title>
+<meta name="robots" content="noindex" />
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; color: #1a1a1a; background: #fafafa;
+    display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; }
+  main { max-width: 32rem; text-align: center; }
+  h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+  a { color: #16794c; }
+</style>
+</head>
+<body>
+<main>
+  <h1>This group has been removed</h1>
+  <p>The listing you're looking for was permanently taken down and is no longer available.</p>
+  <p><a href="/groups">Browse other groups</a></p>
+</main>
+</body>
+</html>`;
+
+async function checkGroupGone(category: string, groupSlug: string): Promise<boolean> {
+  if (!API_BASE) return false;
+
+  try {
+    const res = await fetch(
+      `${API_BASE}${GROUP_SERVICE}groups/${encodeURIComponent(category)}/${encodeURIComponent(groupSlug)}`,
+      { signal: AbortSignal.timeout(GONE_CHECK_TIMEOUT_MS) },
+    );
+    return res.status === 410;
+  } catch {
+    return false;
+  }
+}
+
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (matchesPath(pathname, ALWAYS_ACCESSIBLE_PATHS)) return NextResponse.next();
 
-  // Neither "/" nor "/external" renders anything of its own — both are just
-  // entry points into the public directory.
-  if (pathname === "/external") {
-    return NextResponse.redirect(new URL(EXTERNAL_HOME_PATH, request.url));
+  if (pathname === "/home") {
+    return NextResponse.redirect(new URL("/", request.url), 308);
+  }
+
+  const segments = pathname.split("/").filter(Boolean);
+  if (
+    segments.length === 2 &&
+    !STATIC_TOP_LEVEL_SEGMENTS.has(segments[0]) &&
+    !RESERVED_ROUTE_SLUGS.includes(segments[0])
+  ) {
+    const [category, groupSlug] = segments;
+    if (await checkGroupGone(category, groupSlug)) {
+      return new NextResponse(GONE_HTML, {
+        status: 410,
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    }
   }
 
   const accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
@@ -36,16 +100,15 @@ export function proxy(request: NextRequest) {
   );
 
   const isAuthPath = matchesPath(pathname, AUTH_PATHS);
-  const isPublicPath = matchesPath(pathname, PUBLIC_PATHS);
+  const isInternalPath = matchesPath(pathname, [INTERNAL_PATH]);
+  // Everything else — the homepage, the groups directory, and the root-level
+  // category/group detail pages (FR-SEO-URL-01/02) — is public, external
+  // content. Category and group slugs are arbitrary, so this can't be a
+  // fixed allowlist; it's whatever isn't an auth screen or the admin area.
+  const isPublicPath = !isAuthPath && !isInternalPath;
 
   if (!isAuthenticated) {
     if (isAuthPath || isPublicPath) return NextResponse.next();
-
-    // Landing on the site root without a session shows the public directory,
-    // not a login wall.
-    if (pathname === "/") {
-      return NextResponse.redirect(new URL(EXTERNAL_HOME_PATH, request.url));
-    }
 
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
@@ -54,15 +117,15 @@ export function proxy(request: NextRequest) {
 
   const homePath = getHomePathForUserType(userType as UserType);
 
-  if (isAuthPath || pathname === "/") {
+  if (isAuthPath) {
     return NextResponse.redirect(new URL(homePath, request.url));
   }
 
-  if (pathname.startsWith("/internal") && userType !== UserType.INTERNAL) {
+  if (isInternalPath && userType !== UserType.INTERNAL) {
     return NextResponse.redirect(new URL(homePath, request.url));
   }
 
-  if (pathname.startsWith("/external") && userType !== UserType.EXTERNAL) {
+  if (isPublicPath && userType !== UserType.EXTERNAL) {
     return NextResponse.redirect(new URL(homePath, request.url));
   }
 

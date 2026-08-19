@@ -4,6 +4,6 @@ export interface ExternalNavLink {
 }
 
 export const EXTERNAL_NAV_LINKS: ExternalNavLink[] = [
-  { label: "Find Groups", href: "/external/groups" },
-  { label: "Add Group", href: "/external/groups/new" },
+  { label: "Find Groups", href: "/groups" },
+  { label: "Add Group", href: "/groups/new" },
 ];
