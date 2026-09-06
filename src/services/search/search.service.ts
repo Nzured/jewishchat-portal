@@ -2,7 +2,7 @@ import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "@/configs/const";
 import { ApiResponse } from "@/types/Common";
 import api from "../axiosConfig";
 
-const SEARCH_SERVICE = "/search-service/api/v1";
+export const SEARCH_SERVICE = "/search-service/api/v1";
 
 export interface SearchSuggestion {
   term: string;
@@ -25,6 +25,7 @@ export interface SearchGroupResult {
 }
 
 export interface GroupSearchResults {
+  searchId?: string;
   results: SearchGroupResult[];
   totalResults: number;
   page: number;

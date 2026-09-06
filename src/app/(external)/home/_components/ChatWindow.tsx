@@ -11,6 +11,7 @@ import { EXTERNAL_GROUPS_PATH } from "@/configs/const";
 import { gsap, registerGsap, useIsomorphicLayoutEffect } from "@/lib/motion/gsap";
 import { getGroupPath } from "@/lib/publicPaths";
 import type { SearchGroupResult } from "@/services/search/search.service";
+import { trackSearchClick } from "@/services/search/searchClick";
 import { useHeroSearch } from "../_context/HeroSearchContext";
 
 type ChatMessage =
@@ -25,6 +26,8 @@ type ChatMessage =
       tiles: SearchGroupResult[];
       overflow: number;
       href: string;
+      query: string;
+      searchId?: string;
       time: string;
     };
 
@@ -61,6 +64,7 @@ export function ChatWindow() {
   const query = heroSearch?.query ?? "";
   const results = heroSearch?.results ?? [];
   const totalResults = heroSearch?.totalResults ?? 0;
+  const searchId = heroSearch?.searchId;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
@@ -73,10 +77,12 @@ export function ChatWindow() {
   const activeTurnRef = useRef<{ userId: string; assistantId: string } | null>(null);
   const resultsRef = useRef(results);
   const totalRef = useRef(totalResults);
+  const searchIdRef = useRef(searchId);
   useEffect(() => {
     resultsRef.current = results;
     totalRef.current = totalResults;
-  }, [results, totalResults]);
+    searchIdRef.current = searchId;
+  }, [results, totalResults, searchId]);
 
   useIsomorphicLayoutEffect(() => {
     registerGsap();
@@ -245,6 +251,8 @@ export function ChatWindow() {
       tiles: currentResults,
       overflow: Math.max(0, currentTotal - currentResults.length),
       href: `${EXTERNAL_GROUPS_PATH}?q=${encodeURIComponent(lastCommittedRef.current)}`,
+      query: lastCommittedRef.current,
+      searchId: searchIdRef.current,
       time: nowLabel(),
     };
 
@@ -399,12 +407,20 @@ function Bubble({
                 gridTemplateColumns: `repeat(${message.tiles.length + (message.overflow > 0 ? 1 : 0)}, 1fr)`,
               }}
             >
-              {message.tiles.map((group) => (
+              {message.tiles.map((group, index) => (
                 <NextLink
                   key={group.uuid}
                   data-part="tile"
                   href={getGroupPath(group)}
                   title={group.name}
+                  onClick={() =>
+                    trackSearchClick({
+                      searchId: message.searchId,
+                      groupUuid: group.uuid,
+                      query: message.query,
+                      position: index + 1,
+                    })
+                  }
                   className="flex aspect-square flex-col items-center justify-center gap-1 rounded-[11px] border border-brand-green/15 bg-brand-soft transition-colors hover:border-brand-green/40"
                 >
                   <span className="font-display text-sm leading-none tracking-tight text-brand-deep">

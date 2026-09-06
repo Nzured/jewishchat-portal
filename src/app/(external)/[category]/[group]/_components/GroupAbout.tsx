@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Flag } from "lucide-react";
+import NextLink from "next/link";
 import { Typography } from "@/components/ui/Typography";
 import { NOT_APPLICABLE } from "@/configs/const";
 import { useUser } from "@/contexts/UserContext";
@@ -14,10 +15,13 @@ interface GroupAboutProps {
   className?: string;
 }
 
+const REPORT_TRIGGER_CLASS =
+  "flex w-fit cursor-pointer items-center gap-2 rounded-sm text-ink-3 transition-colors hover:text-state-danger focus-visible:ring-2 focus-visible:ring-brand-green/40 focus-visible:outline-none";
+
 export function GroupAbout({ group, className }: GroupAboutProps) {
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
   const isOwner = Boolean(user) && user?.uuid === group.submittedByUuid;
-  const canReport = Boolean(user) && !isOwner;
+  const showReport = !isLoading && !isOwner;
 
   return (
     <div
@@ -31,25 +35,33 @@ export function GroupAbout({ group, className }: GroupAboutProps) {
           {group?.about || NOT_APPLICABLE}
         </Typography>
       </div>
-      {canReport && (
+      {showReport && (
         <div className="mt-5 flex w-full max-w-2xl flex-col gap-1 border-t border-surface-line pt-4">
-          <ReportGroupModal
-            groupUuid={group.uuid}
-            groupName={group.name}
-            trigger={
-              <button
-                type="button"
-                className="flex w-fit cursor-pointer items-center gap-2 rounded-sm text-ink-3 transition-colors hover:text-state-danger focus-visible:ring-2 focus-visible:ring-brand-green/40 focus-visible:outline-none"
-              >
-                <Flag className="size-3.5 shrink-0" />
-                <Typography variant="xs" className="text-inherit">
-                  Report this group
-                </Typography>
-              </button>
-            }
-          />
+          {user ? (
+            <ReportGroupModal
+              groupUuid={group.uuid}
+              groupName={group.name}
+              trigger={
+                <button type="button" className={REPORT_TRIGGER_CLASS}>
+                  <Flag className="size-3.5 shrink-0" />
+                  <Typography variant="xs" className="text-inherit">
+                    Report this group
+                  </Typography>
+                </button>
+              }
+            />
+          ) : (
+            <NextLink href="/login" className={REPORT_TRIGGER_CLASS}>
+              <Flag className="size-3.5 shrink-0" />
+              <Typography variant="xs" className="text-inherit">
+                Log in to report this group
+              </Typography>
+            </NextLink>
+          )}
           <Typography variant="tiny" className="text-ink-4">
-            Tell us if the join link is broken or the listing does not belong here.
+            {user
+              ? "Tell us if the join link is broken or the listing does not belong here."
+              : "Reporting is available to logged in members, which keeps the queue free of abuse."}
           </Typography>
         </div>
       )}

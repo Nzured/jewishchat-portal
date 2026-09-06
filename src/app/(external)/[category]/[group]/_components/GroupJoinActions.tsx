@@ -8,15 +8,17 @@ import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
 import { Typography } from "@/components/ui/Typography";
 import { useUser } from "@/contexts/UserContext";
+import { useJoinGroup } from "@/hooks/useJoinGroup";
 import { getGroupEditPath } from "@/lib/publicPaths";
 import { cn } from "@/lib/utils";
-import { Group } from "@/types/Group";
+import { Group, GroupStatus } from "@/types/Group";
 
 export function GroupJoinActions({ group, className }: { group: Group; className?: string }) {
   const { user, isLoading } = useUser();
+  const { join, isJoining } = useJoinGroup(group.slug);
   const linkLocked = group.linkVisibilityLoggedInOnly && !user;
   const isOwner = Boolean(group.isOwnGroup || (user && user.uuid === group.submittedByUuid));
-  const joinHref = group.whatsappLink || group.joinUrl;
+  const canJoin = !isOwner && group.status === GroupStatus.ACTIVE;
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -62,16 +64,15 @@ export function GroupJoinActions({ group, className }: { group: Group; className
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       <div className="flex flex-row flex-wrap items-center gap-3">
-        {joinHref && (
+        {canJoin && (
           <Button
             color="primary"
             leftIcon={<ExternalLink />}
             className="bg-brand-deep hover:bg-brand-deep/90"
-            asChild
+            disabled={isJoining}
+            onClick={() => void join()}
           >
-            <a href={joinHref} target="_blank" rel="noopener noreferrer">
-              Join group on WhatsApp
-            </a>
+            {isJoining ? "Opening WhatsApp..." : "Join group on WhatsApp"}
           </Button>
         )}
 
@@ -86,7 +87,7 @@ export function GroupJoinActions({ group, className }: { group: Group; className
         )}
       </div>
 
-      {joinHref && (
+      {canJoin && (
         <Typography variant="xs" className="text-ink-4">
           Free to join &middot; opens in WhatsApp
         </Typography>

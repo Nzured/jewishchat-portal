@@ -17,6 +17,9 @@ import {
   GroupDraftStep2Payload,
   GroupsPage,
   GroupStatus,
+  GroupViewPayload,
+  JoinRedirectResponse,
+  JoinTokenResponse,
   MyGroupsResponse,
   UpdateGroupPayload,
   WhatsappUrlCheckResponse,
@@ -50,6 +53,21 @@ export const GroupService = {
     }),
   getGroupByCategoryAndSlug: (categorySlug: string, groupSlug: string) =>
     api.get<ApiResponse<Group>>(`${GROUP_SERVICE}groups/${categorySlug}/${groupSlug}`),
+  recordGroupView: (uuid: string, payload: GroupViewPayload) =>
+    api.post<ApiResponse<void>>(`${GROUP_SERVICE}groups/${uuid}/view`, payload, {
+      silentError: true,
+    }),
+  startGroupJoin: (slug: string) =>
+    api.post<ApiResponse<JoinTokenResponse>>(
+      `${GROUP_SERVICE}groups/${encodeURIComponent(slug)}/join`,
+      {},
+      { silentError: true },
+    ),
+  redeemJoinToken: (token: string) =>
+    api.get<ApiResponse<JoinRedirectResponse>>(
+      `${GROUP_SERVICE}groups/join/${encodeURIComponent(token)}`,
+      { silentError: true },
+    ),
   getRelatedGroups: (uuid: string) =>
     api.get<ApiResponse<Group[]>>(`${GROUP_SERVICE}groups/by-uuid/${uuid}/related`),
   getGroupsBySubmitter: (

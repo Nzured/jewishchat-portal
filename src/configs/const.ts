@@ -77,3 +77,7 @@ export const IMAGE_ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 export const IMAGE_MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 export const GROUP_PHOTO_UPLOAD_CONTENT_TYPE = "image/png";
+
+export const GROUP_VIEW_DEDUPE_MS = 5 * 60 * 1000;
+
+export const SEARCH_ATTRIBUTION_TTL_MS = 5 * 60 * 1000;

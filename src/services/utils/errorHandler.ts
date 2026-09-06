@@ -11,6 +11,10 @@ export const createErrorHandler = () => {
       return Promise.reject(error);
     }
 
+    if (error.config?.silentError) {
+      return Promise.reject(error);
+    }
+
     const statusCode = error.response?.status;
     const statusMessage = (error.response?.data as ApiErrorData | undefined)?.message;
 

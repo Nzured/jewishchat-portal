@@ -6,6 +6,7 @@ declare module "axios" {
   export interface AxiosRequestConfig {
     globalLoader?: boolean;
     skipAuthRefresh?: boolean;
+    silentError?: boolean;
   }
 }
 

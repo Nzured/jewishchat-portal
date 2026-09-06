@@ -55,6 +55,21 @@ export interface Group {
   suspensionReason?: string;
 }
 
+export interface JoinTokenResponse {
+  token: string;
+  requiresAuth?: boolean;
+}
+
+export interface JoinRedirectResponse {
+  redirectUrl: string;
+}
+
+export interface GroupViewPayload {
+  fingerprint?: string;
+  referralSource?: string;
+  searchQuery?: string;
+}
+
 export type GroupsPage = Paginated<"groups", Group>;
 
 export interface MyGroupsResponse {

@@ -19,6 +19,8 @@ import { GroupStatus } from "@/types/Group";
 import { GroupAbout } from "./_components/GroupAbout";
 import { GroupAdminCard } from "./_components/GroupAdminCard";
 import { GroupHeader } from "./_components/GroupHeader";
+import { GroupStatsCard } from "./_components/GroupStatsCard";
+import { GroupViewTracker } from "./_components/GroupViewTracker";
 import { RelatedGroups } from "./_components/RelatedGroups";
 import type { Metadata } from "next";
 
@@ -151,6 +153,7 @@ export default async function GroupPage({ params }: GroupPageProps) {
   return (
     <div className=" flex w-full flex-col gap-8">
       <JsonLd data={jsonLd} />
+      {isActive && <GroupViewTracker group={group} />}
       <div className="flex flex-col gap-3">
         <Breadcrumbs
           items={[
@@ -171,6 +174,7 @@ export default async function GroupPage({ params }: GroupPageProps) {
         </div>
         <aside className="flex w-full flex-col gap-4 lg:w-[320px] lg:shrink-0">
           <GroupAdminCard group={group} />
+          <GroupStatsCard group={group} />
           <RelatedGroups group={group} related={related} />
         </aside>
       </div>

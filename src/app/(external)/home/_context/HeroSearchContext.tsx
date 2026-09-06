@@ -16,6 +16,8 @@ interface HeroSearchContextValue {
 
   totalResults: number;
 
+  searchId?: string;
+
   isSearching: boolean;
 }
 
@@ -23,6 +25,7 @@ type Settled = {
   query: string;
   results: SearchGroupResult[];
   totalResults: number;
+  searchId?: string;
 };
 
 const HeroSearchContext = React.createContext<HeroSearchContextValue | null>(null);
@@ -49,6 +52,7 @@ export function HeroSearchProvider({ children }: { children: React.ReactNode }) 
   const isCurrent = settled.query === trimmed;
   const results = isCurrent ? settled.results : NO_RESULTS;
   const totalResults = isCurrent ? settled.totalResults : 0;
+  const searchId = isCurrent ? settled.searchId : undefined;
   const isSearching = isSearchable && !isCurrent;
 
   React.useEffect(() => {
@@ -75,6 +79,7 @@ export function HeroSearchProvider({ children }: { children: React.ReactNode }) 
           query: trimmed,
           results: res?.data?.results ?? NO_RESULTS,
           totalResults: res?.data?.totalResults ?? 0,
+          searchId: res?.data?.searchId,
         });
       } catch {
         if (seq !== requestSeq.current) return;
@@ -84,8 +89,8 @@ export function HeroSearchProvider({ children }: { children: React.ReactNode }) 
   }, [trimmed, isSearchable]);
 
   const value = React.useMemo<HeroSearchContextValue>(
-    () => ({ query: debouncedQuery, setQuery, results, totalResults, isSearching }),
-    [debouncedQuery, results, totalResults, isSearching],
+    () => ({ query: debouncedQuery, setQuery, results, totalResults, searchId, isSearching }),
+    [debouncedQuery, results, totalResults, searchId, isSearching],
   );
 
   return <HeroSearchContext.Provider value={value}>{children}</HeroSearchContext.Provider>;
