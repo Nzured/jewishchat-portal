@@ -42,6 +42,7 @@ export const SearchService = {
     country?: string,
     page: number = DEFAULT_PAGE,
     pageSize: number = DEFAULT_PAGE_SIZE,
+    sort?: string,
   ) =>
     api.get<ApiResponse<GroupSearchResults>>(`${SEARCH_SERVICE}/search`, {
       params: {
@@ -51,6 +52,7 @@ export const SearchService = {
         country: country || undefined,
         page,
         pageSize,
+        sort: sort || undefined,
       },
     }),
   autoComplete: (prefix: string) =>

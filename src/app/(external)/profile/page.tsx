@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EXTERNAL_HOME_PATH } from "@/configs/const";
@@ -13,14 +12,9 @@ import ProfileGroups from "./_components/ProfileGroups";
 import YourDetails, { type ProfileDetailsDraft } from "./_components/YourDetails";
 
 export default function ProfilePage() {
-  const router = useRouter();
-  const { user: sessionUser, isLoading: isSessionLoading } = useUser();
+  const { user: sessionUser } = useUser();
   const [user, setUser] = React.useState<User | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    if (!isSessionLoading && !sessionUser) router.replace("/login");
-  }, [isSessionLoading, sessionUser, router]);
 
   React.useEffect(() => {
     const uuid = sessionUser?.uuid;
@@ -81,7 +75,7 @@ export default function ProfilePage() {
         whatsappNumber={details.mobile}
         whatsappVerified={details.whatsappVerified}
       />
-      {isLoading && !user ? (
+      {isLoading ? (
         <Skeleton className="h-80 w-full rounded-xl" />
       ) : (
         <YourDetails
