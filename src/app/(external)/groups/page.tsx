@@ -22,6 +22,7 @@ import {
 } from "@/services/search/search.service";
 import { Category } from "@/types/Category";
 import type { FilterItem } from "@/types/Search";
+import { GROUP_SEARCH_SORT_OPTIONS, SEARCH_SORT_RELEVANCE } from "./_components/searchSorting";
 import { useGroups } from "./_context/GroupsContext";
 
 const SKELETON_COUNT = 9;
@@ -48,6 +49,8 @@ function GroupsDirectory() {
   const category = searchParams.get("category") ?? "";
   const city = searchParams.get("city") ?? "";
   const country = searchParams.get("country") ?? "";
+  const sort = searchParams.get("sort") ?? SEARCH_SORT_RELEVANCE;
+  const sortParam = sort === SEARCH_SORT_RELEVANCE ? undefined : sort;
 
   const [value, setValue] = React.useState(query);
   const [groups, setGroups] = React.useState<SearchGroupResult[]>([]);
@@ -95,7 +98,7 @@ function GroupsDirectory() {
   const suggestedTerms = value.trim().length >= SEARCH_MIN_LENGTH ? autoCompleteResults : [];
 
   React.useEffect(() => {
-    const key = `${query}|${category}|${city}|${country}`;
+    const key = `${query}|${category}|${city}|${country}|${sort}`;
     if (loadedFilters.current === key) return;
     loadedFilters.current = key;
 
@@ -105,8 +108,16 @@ function GroupsDirectory() {
     revealedCount.current = 0;
 
     const request =
-      (!category && !city && !country && takePendingGroupSearch(query)) ||
-      SearchService.searchGroups(query, category, city, country, DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
+      (!category && !city && !country && !sortParam && takePendingGroupSearch(query)) ||
+      SearchService.searchGroups(
+        query,
+        category,
+        city,
+        country,
+        DEFAULT_PAGE,
+        DEFAULT_PAGE_SIZE,
+        sortParam,
+      );
 
     request
       .then((res) => {
@@ -123,7 +134,7 @@ function GroupsDirectory() {
         setSearchId(undefined);
         setIsLoading(false);
       });
-  }, [query, category, city, country]);
+  }, [query, category, city, country, sort, sortParam]);
 
   const loadMore = React.useCallback(() => {
     if (isLoading || isLoadingMore || !hasMore) return;
@@ -132,7 +143,15 @@ function GroupsDirectory() {
     const nextPage = loadedPage.current + 1;
     setIsLoadingMore(true);
 
-    SearchService.searchGroups(query, category, city, country, nextPage, DEFAULT_PAGE_SIZE)
+    SearchService.searchGroups(
+      query,
+      category,
+      city,
+      country,
+      nextPage,
+      DEFAULT_PAGE_SIZE,
+      sortParam,
+    )
       .then((res) => {
         if (loadedFilters.current !== key) return;
         loadedPage.current = nextPage;
@@ -149,7 +168,7 @@ function GroupsDirectory() {
         if (loadedFilters.current !== key) return;
         setIsLoadingMore(false);
       });
-  }, [isLoading, isLoadingMore, hasMore, query, category, city, country]);
+  }, [isLoading, isLoadingMore, hasMore, query, category, city, country, sortParam]);
 
   const loadMoreRef = React.useRef(loadMore);
   React.useEffect(() => {
@@ -261,6 +280,11 @@ function GroupsDirectory() {
           updateSearchParams({ [key]: flatValue ?? undefined });
         }}
         onFilterClear={(key) => updateSearchParams({ [key]: undefined })}
+        sort={sort}
+        sortOptions={GROUP_SEARCH_SORT_OPTIONS}
+        onSortChange={(value) =>
+          updateSearchParams({ sort: value === SEARCH_SORT_RELEVANCE ? undefined : value })
+        }
         onSubmit={(search) => {
           updateSearchParams({ q: search });
         }}

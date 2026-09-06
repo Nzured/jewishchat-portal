@@ -1,13 +1,25 @@
 "use client";
 
 import * as React from "react";
-import { ArrowRight, ArrowUp, Sparkles, X } from "lucide-react";
+import { ArrowRight, ArrowUp, ArrowUpDown, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { SearchFilterChip } from "@/components/ui/SearchFilterChip";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/Select";
 import { Typography } from "@/components/ui/Typography";
 import { cn } from "@/lib/utils";
 import type { FilterItem } from "@/types/Search";
+
+interface SortOption {
+  label: string;
+  value: string;
+}
 
 interface UnderstoodTag {
   key: string;
@@ -32,6 +44,9 @@ interface ConversationalSearchBarProps {
   onFilterApply?: (key: string, value: string | string[] | null) => void;
   onFilterClear?: (key: string) => void;
   filtersLabel?: string;
+  sort?: string;
+  sortOptions?: SortOption[];
+  onSortChange?: (value: string) => void;
   loading?: boolean;
   compact?: boolean;
   className?: string;
@@ -54,11 +69,16 @@ function ConversationalSearchBar({
   onFilterApply,
   onFilterClear,
   filtersLabel = "Filter by",
+  sort,
+  sortOptions = [],
+  onSortChange,
   loading = false,
   compact = false,
   className,
 }: ConversationalSearchBarProps) {
   const tags = understoodTags ?? [];
+  const hasFilters = Boolean(filters && filters.length > 0);
+  const hasSort = sortOptions.length > 0;
   const isUnderstood = tags.length > 0;
   const showInlineButton = compact || isUnderstood;
 
@@ -204,22 +224,42 @@ function ConversationalSearchBar({
         )}
       </form>
 
-      {filters && filters.length > 0 && (
+      {(hasFilters || hasSort) && (
         <div className="flex flex-wrap items-center gap-2">
-          <Typography
-            variant="xs"
-            className="font-mono font-medium tracking-[1.5px] text-ink-3 uppercase"
-          >
-            {filtersLabel}
-          </Typography>
-          {filters.map((filter) => (
-            <SearchFilterChip
-              key={filter.key}
-              filter={filter}
-              onApply={(value) => onFilterApply?.(filter.key, value)}
-              onClear={() => onFilterClear?.(filter.key)}
-            />
-          ))}
+          {hasFilters && (
+            <>
+              <Typography
+                variant="xs"
+                className="font-mono font-medium tracking-[1.5px] text-ink-3 uppercase"
+              >
+                {filtersLabel}
+              </Typography>
+              {filters?.map((filter) => (
+                <SearchFilterChip
+                  key={filter.key}
+                  filter={filter}
+                  onApply={(value) => onFilterApply?.(filter.key, value)}
+                  onClear={() => onFilterClear?.(filter.key)}
+                />
+              ))}
+            </>
+          )}
+
+          {hasSort && (
+            <Select value={sort} onValueChange={(value) => onSortChange?.(value)}>
+              <SelectTrigger size="sm" className="ml-auto" aria-label="Sort results">
+                <ArrowUpDown className="size-3.5 text-ink-3" />
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent>
+                {sortOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       )}
 
@@ -271,4 +311,4 @@ function ConversationalSearchBar({
 }
 
 export { ConversationalSearchBar };
-export type { ConversationalSearchBarProps, UnderstoodTag };
+export type { ConversationalSearchBarProps, SortOption, UnderstoodTag };
