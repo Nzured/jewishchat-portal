@@ -52,6 +52,7 @@ function GroupsDirectory() {
   const [value, setValue] = React.useState(query);
   const [groups, setGroups] = React.useState<SearchGroupResult[]>([]);
   const [totalResults, setTotalResults] = React.useState(0);
+  const [searchId, setSearchId] = React.useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isLoadingMore, setIsLoadingMore] = React.useState(false);
   const [categories, setCategories] = React.useState<Category[]>([]);
@@ -112,12 +113,14 @@ function GroupsDirectory() {
         if (loadedFilters.current !== key) return;
         setGroups(res?.data?.results ?? []);
         setTotalResults(res?.data?.totalResults ?? 0);
+        setSearchId(res?.data?.searchId);
         setIsLoading(false);
       })
       .catch(() => {
         if (loadedFilters.current !== key) return;
         setGroups([]);
         setTotalResults(0);
+        setSearchId(undefined);
         setIsLoading(false);
       });
   }, [query, category, city, country]);
@@ -139,6 +142,7 @@ function GroupsDirectory() {
           return [...prev, ...incoming.filter((group) => !seen.has(group.uuid))];
         });
         setTotalResults(res?.data?.totalResults ?? 0);
+        setSearchId(res?.data?.searchId);
         setIsLoadingMore(false);
       })
       .catch(() => {
@@ -269,8 +273,13 @@ function GroupsDirectory() {
       ) : (
         <>
           <div ref={gridRef} className="flex flex-wrap gap-4">
-            {groups.map((group) => (
-              <GroupCard key={group.uuid} group={group} className={CARD_WIDTH} />
+            {groups.map((group, index) => (
+              <GroupCard
+                key={group.uuid}
+                group={group}
+                className={CARD_WIDTH}
+                search={{ searchId, query, position: index + 1 }}
+              />
             ))}
           </div>
 

@@ -2,7 +2,7 @@ import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "@/configs/const";
 import { ApiResponse } from "@/types/Common";
 import api from "../axiosConfig";
 
-const SEARCH_SERVICE = "/search-service/api/v1";
+export const SEARCH_SERVICE = "/search-service/api/v1";
 
 export interface SearchSuggestion {
   term: string;
@@ -25,6 +25,7 @@ export interface SearchGroupResult {
 }
 
 export interface GroupSearchResults {
+  searchId?: string;
   results: SearchGroupResult[];
   totalResults: number;
   page: number;
@@ -43,10 +44,6 @@ export const SearchService = {
     pageSize: number = DEFAULT_PAGE_SIZE,
   ) =>
     api.get<ApiResponse<GroupSearchResults>>(`${SEARCH_SERVICE}/search`, {
-      // Axios sends "" as a real (empty) param rather than omitting it, and
-      // the backend appears to treat a present-but-empty category/city/country
-      // as "match nothing" rather than "no filter" — so blank values are left
-      // out of the request entirely instead of being sent as "".
       params: {
         q: search || undefined,
         category: category || undefined,

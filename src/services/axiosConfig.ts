@@ -4,24 +4,12 @@ import { setupInterceptors } from "./utils/setupInterceptors";
 
 declare module "axios" {
   export interface AxiosRequestConfig {
-    /** Opt a single request into the full-screen GlobalLoader overlay. */
     globalLoader?: boolean;
-    /**
-     * Marks a request as unauthenticated-by-design (login, signup, invite
-     * validation, etc). A 401 from these means "bad credentials/token", not
-     * "session expired" — skip the token-refresh + force-logout flow and let
-     * the error surface normally to the caller.
-     */
     skipAuthRefresh?: boolean;
+    silentError?: boolean;
   }
 }
 
-/**
- * The response interceptor (setupInterceptors) unwraps AxiosResponse and
- * resolves with `response.data` directly, so at runtime these methods
- * resolve to `T`, not `AxiosResponse<T>`. This type override keeps the
- * compiler in sync with that runtime behavior.
- */
 type UnwrappedMethods = "get" | "post" | "put" | "patch" | "delete";
 
 interface TypedAxiosInstance extends Omit<AxiosInstance, UnwrappedMethods> {

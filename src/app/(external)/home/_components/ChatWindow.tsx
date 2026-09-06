@@ -11,6 +11,7 @@ import { EXTERNAL_GROUPS_PATH } from "@/configs/const";
 import { gsap, registerGsap, useIsomorphicLayoutEffect } from "@/lib/motion/gsap";
 import { getGroupPath } from "@/lib/publicPaths";
 import type { SearchGroupResult } from "@/services/search/search.service";
+import { trackSearchClick } from "@/services/search/searchClick";
 import { useHeroSearch } from "../_context/HeroSearchContext";
 
 type ChatMessage =
@@ -25,6 +26,8 @@ type ChatMessage =
       tiles: SearchGroupResult[];
       overflow: number;
       href: string;
+      query: string;
+      searchId?: string;
       time: string;
     };
 
@@ -40,9 +43,9 @@ function introMessage(): ChatMessage {
 }
 
 function replyText(count: number): string {
-  if (count === 0) return "No matches yet — try a trade, a place, or a topic.";
+  if (count === 0) return "No matches yet - try a trade, a place, or a topic.";
   if (count === 1) return "Found one strong match:";
-  return `Found ${count} matches — here are the closest:`;
+  return `Found ${count} matches - here are the closest:`;
 }
 
 function nowLabel(): string {
@@ -61,6 +64,7 @@ export function ChatWindow() {
   const query = heroSearch?.query ?? "";
   const results = heroSearch?.results ?? [];
   const totalResults = heroSearch?.totalResults ?? 0;
+  const searchId = heroSearch?.searchId;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
@@ -70,16 +74,15 @@ export function ChatWindow() {
   const reducedRef = useRef(false);
 
   const lastCommittedRef = useRef("");
-  // The user+assistant bubble pair for the search currently being refined —
-  // reused (in place) across debounce commits so typing "te" then "test"
-  // updates one turn instead of stacking a new pair per commit.
   const activeTurnRef = useRef<{ userId: string; assistantId: string } | null>(null);
   const resultsRef = useRef(results);
   const totalRef = useRef(totalResults);
+  const searchIdRef = useRef(searchId);
   useEffect(() => {
     resultsRef.current = results;
     totalRef.current = totalResults;
-  }, [results, totalResults]);
+    searchIdRef.current = searchId;
+  }, [results, totalResults, searchId]);
 
   useIsomorphicLayoutEffect(() => {
     registerGsap();
@@ -121,9 +124,6 @@ export function ChatWindow() {
           { opacity: 0, y: 18, scale: 0.96 },
           { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" },
         );
-        // A reply with no matches renders neither the tile grid nor the "See
-        // more" button — only animate targets that actually exist, or GSAP
-        // warns on the empty NodeList / null selector.
         if (text) {
           tl.fromTo(
             text,
@@ -197,10 +197,6 @@ export function ChatWindow() {
 
   const isSearching = heroSearch?.isSearching ?? false;
 
-  // Commits the debounced query as a chat turn. While the user keeps
-  // refining the same search (activeTurnRef is still set), this updates the
-  // existing user bubble's text and swaps in a fresh "typing" bubble instead
-  // of stacking a new pair — otherwise every debounce tick posts a new turn.
   useEffect(() => {
     const trimmed = query.trim();
     if (trimmed === lastCommittedRef.current) return;
@@ -239,8 +235,6 @@ export function ChatWindow() {
     });
   }, [query]);
 
-  // Swaps the pending "typing" bubble for the real reply once the search for
-  // the current turn settles — a replacement, never an additional message.
   useEffect(() => {
     if (isSearching) return;
     const turn = activeTurnRef.current;
@@ -257,6 +251,8 @@ export function ChatWindow() {
       tiles: currentResults,
       overflow: Math.max(0, currentTotal - currentResults.length),
       href: `${EXTERNAL_GROUPS_PATH}?q=${encodeURIComponent(lastCommittedRef.current)}`,
+      query: lastCommittedRef.current,
+      searchId: searchIdRef.current,
       time: nowLabel(),
     };
 
@@ -411,12 +407,20 @@ function Bubble({
                 gridTemplateColumns: `repeat(${message.tiles.length + (message.overflow > 0 ? 1 : 0)}, 1fr)`,
               }}
             >
-              {message.tiles.map((group) => (
+              {message.tiles.map((group, index) => (
                 <NextLink
                   key={group.uuid}
                   data-part="tile"
                   href={getGroupPath(group)}
                   title={group.name}
+                  onClick={() =>
+                    trackSearchClick({
+                      searchId: message.searchId,
+                      groupUuid: group.uuid,
+                      query: message.query,
+                      position: index + 1,
+                    })
+                  }
                   className="flex aspect-square flex-col items-center justify-center gap-1 rounded-[11px] border border-brand-green/15 bg-brand-soft transition-colors hover:border-brand-green/40"
                 >
                   <span className="font-display text-sm leading-none tracking-tight text-brand-deep">

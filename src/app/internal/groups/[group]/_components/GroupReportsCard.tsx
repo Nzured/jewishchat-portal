@@ -33,8 +33,6 @@ export default function GroupReportsCard({ group, loading }: GroupReportsCardPro
         ) : reportCount === 0 ? (
           <NoData title="No reports" description="No reports have been filed against this group." />
         ) : (
-          // The individual reports live behind the reports service, which has no
-          // per-group endpoint yet — so this links out rather than listing them.
           <div className="flex items-center gap-3 rounded-xl border border-surface-line bg-surface-bg p-3 px-4">
             <ShieldAlert className="size-4 shrink-0 text-state-warn" />
             <Typography variant="small" className="text-ink-2">

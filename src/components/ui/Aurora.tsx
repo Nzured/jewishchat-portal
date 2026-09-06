@@ -2,14 +2,6 @@
 
 import { Grainient } from "@/components/ui/Grainient";
 
-/**
- * The site-wide drifting gradient, fixed behind every section. `html` carries
- * the flat background colour and `body` is transparent, which is what lets a
- * negative z-index layer show through.
- *
- * Sections that set their own opaque background (the dark trust band, the
- * green add-group band, the footer) deliberately paint over it.
- */
 export function GradientBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">

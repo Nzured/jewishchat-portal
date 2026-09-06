@@ -76,3 +76,16 @@ export interface ReportDetailResponse {
   report: ReportDetail;
   allGroupReports: ReportDetail[];
 }
+
+export type ReportThresholds = Partial<Record<ReportCategories, number>>;
+
+export interface ReportThresholdEntry {
+  category: ReportCategories;
+  thresholdValue: number;
+}
+
+export type ReportThresholdsResponse = ReportThresholdEntry[];
+
+export interface UpdateReportThresholdsPayload {
+  thresholds: Record<string, number>;
+}

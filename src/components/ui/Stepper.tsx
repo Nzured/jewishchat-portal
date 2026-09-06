@@ -64,7 +64,7 @@ export default function Stepper({
               {index < items.length - 1 && (
                 <div
                   className={cn(
-                    "mx-2 h-px flex-1 transition-colors duration-200 sm:hidden",
+                    "mx-2 h-px flex-1 transition-colors duration-200",
                     isCompleted ? "bg-brand-green" : "bg-surface-line-strong",
                   )}
                 />

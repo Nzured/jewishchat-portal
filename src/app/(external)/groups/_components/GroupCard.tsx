@@ -10,9 +10,11 @@ import { useUser } from "@/contexts/UserContext";
 import { formatDate } from "@/lib/date";
 import { getGroupPath } from "@/lib/publicPaths";
 import { cn } from "@/lib/utils";
+import { trackSearchClick } from "@/services/search/searchClick";
 import { GroupStatus } from "@/types/Group";
 
 interface GroupCardData {
+  uuid?: string;
   slug: string;
   name: string;
   thumbnailUrl?: string | null;
@@ -27,18 +29,31 @@ interface GroupCardData {
   createdOn?: string;
 }
 
+interface GroupCardSearchContext {
+  searchId?: string;
+  query: string;
+  position: number;
+}
+
 interface GroupCardProps {
   group: GroupCardData;
   className?: string;
+  search?: GroupCardSearchContext;
 }
 
-function GroupCard({ group, className }: GroupCardProps) {
+function GroupCard({ group, className, search }: GroupCardProps) {
   const { user } = useUser();
   const addedByYou = Boolean(group.createdBy) && group.createdBy === user?.uuid;
+
+  const handleClick = () => {
+    if (!search || !group.uuid) return;
+    trackSearchClick({ ...search, groupUuid: group.uuid });
+  };
 
   return (
     <NextLink
       href={getGroupPath(group)}
+      onClick={handleClick}
       className={cn(
         "flex cursor-pointer flex-col gap-4 rounded-2xl border border-surface-line bg-surface-card p-5 text-left transition-shadow hover:shadow-md active:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-green/40",
         className,

@@ -9,6 +9,7 @@ import { ChatWindow } from "./ChatWindow";
 import { Constellation } from "./Constellation";
 import { HomeSearchBar } from "./HomeSearchBar";
 import { HeroSearchProvider } from "../_context/HeroSearchContext";
+import { useHome } from "../_context/HomeContext";
 
 export function Hero() {
   return (
@@ -20,6 +21,7 @@ export function Hero() {
 
 function HeroSection() {
   const ref = useRef<HTMLElement>(null);
+  const { stats } = useHome();
 
   useIsomorphicLayoutEffect(() => {
     registerGsap();
@@ -95,7 +97,7 @@ function HeroSection() {
               className="text-ink-2 mt-4 max-w-xl text-sm leading-relaxed lg:text-base"
             >
               WhatsApp groups for Jewish business, learning, shuls and chesed. Ask the way
-              you&rsquo;d ask a friend — results come back ranked by how well they fit.
+              you&rsquo;d ask a friend - results come back ranked by how well they fit.
             </Typography>
 
             <div data-hero-item className="mt-7 w-full max-w-[560px]">
@@ -103,7 +105,10 @@ function HeroSection() {
             </div>
 
             <Typography data-hero-item variant="tiny" className="text-ink-4 mt-6 block">
-              Free to browse · No account needed to search · 3,961 groups across 46 cities
+              Free to browse · No account needed to search
+              {stats
+                ? ` · ${stats.groupsListed.toLocaleString("en-US")} groups across ${stats.countriesWorldwide.toLocaleString("en-US")} countries`
+                : ""}
             </Typography>
           </div>
 

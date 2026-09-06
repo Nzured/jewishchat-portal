@@ -1,17 +1,17 @@
-name: SEO Check — Production Monitoring
+name: SEO Check - Production Monitoring
 
 # FR-SEO-MON-01/02: ongoing regression protection for the live site, not
-# just at merge time — a working template can still degrade later (e.g. a
+# just at merge time - a working template can still degrade later (e.g. a
 # category's group count drops below threshold and the noindex logic has
 # a bug, or a CDN/Cloudflare config change strips a header). Runs daily and
 # after every production deploy. Same warn-only contract as the PR check:
-# this workflow's own job status is always success — regressions are
+# this workflow's own job status is always success - regressions are
 # surfaced via a GitHub issue, not by failing a pipeline that no one is
 # watching for a scheduled run.
 
 on:
   schedule:
-    # Daily at 09:00 UTC — adjust to whenever someone actually reads issues
+    # Daily at 09:00 UTC - adjust to whenever someone actually reads issues
     - cron: '0 9 * * *'
   workflow_dispatch: {}   # manual trigger for on-demand checks
   repository_dispatch:
@@ -55,7 +55,7 @@ jobs:
             seo-check-report.md
           retention-days: 90
 
-      # Only opens/updates an issue when there's something to report —
+      # Only opens/updates an issue when there's something to report -
       # a clean run produces no issue at all, so the issues list only ever
       # shows genuine, current regressions, not a growing pile of "all good"
       # noise. Uses a fixed title so subsequent runs update the SAME issue
@@ -67,7 +67,7 @@ jobs:
           script: |
             const fs = require('fs');
             const body = fs.readFileSync('seo-check-report.md', 'utf8');
-            const title = 'SEO Check — production regression detected';
+            const title = 'SEO Check - production regression detected';
 
             const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
@@ -96,13 +96,13 @@ jobs:
             }
 
       # Closes the tracking issue automatically once a clean run confirms
-      # the regression is resolved — no manual bookkeeping needed.
+      # the regression is resolved - no manual bookkeeping needed.
       - name: Close tracking issue if now clean
         if: steps.report.outputs.count == '0'
         uses: actions/github-script@v7
         with:
           script: |
-            const title = 'SEO Check — production regression detected';
+            const title = 'SEO Check - production regression detected';
             const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -115,7 +115,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: existing.number,
-                body: 'Latest run found 0 issues — closing.',
+                body: 'Latest run found 0 issues - closing.',
               });
               await github.rest.issues.update({
                 owner: context.repo.owner,

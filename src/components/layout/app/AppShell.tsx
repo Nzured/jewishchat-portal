@@ -24,7 +24,7 @@ export function AppShell({ title, userType, notifications = [], children }: AppS
       />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <Navbar title="" notifications={notifications} onMenuClick={() => setMobileNavOpen(true)} />
-        <main className="min-h-0 flex-1 overflow-y-auto px-6 py-8">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto px-6 pb-8">{children}</main>
       </div>
     </div>
   );

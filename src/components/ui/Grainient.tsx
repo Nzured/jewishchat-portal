@@ -3,16 +3,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
-/**
- * React Bits' Grainient, vendored into the project (React Bits ships source in
- * the shadcn style rather than an npm package, so there is nothing to install).
- *
- * The fragment shader, prop names and defaults are the published ones,
- * unchanged. The only deviation is the renderer: upstream drives it with `ogl`,
- * which is not installable in this environment, so it runs on `three` — already
- * a dependency here. Same GLSL, same output.
- */
-
 type GrainientProps = {
   timeSpeed?: number;
   colorBalance?: number;
@@ -39,11 +29,6 @@ type GrainientProps = {
   className?: string;
 };
 
-/**
- * three's `RawShaderMaterial.uniforms` is typed as `{ [key: string]: IUniform }`
- * with `value: any`, since uniforms can hold any GLSL type. This is what this
- * component's shader actually expects, for typed access at the call sites.
- */
 interface GrainientUniforms {
   iTime: { value: number };
   iResolution: { value: THREE.Vector2 };
@@ -74,7 +59,6 @@ function getUniforms(material: THREE.RawShaderMaterial): GrainientUniforms {
   return material.uniforms as unknown as GrainientUniforms;
 }
 
-
 function hexToRgb(hex: string): [number, number, number] {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   if (!result) return [1, 1, 1];
@@ -85,8 +69,6 @@ function hexToRgb(hex: string): [number, number, number] {
   ];
 }
 
-// three prepends `#version 300 es` itself when glslVersion is GLSL3, so the
-// directive must not appear in the source.
 const vertex = /* glsl */ `
 in vec3 position;
 void main() {
@@ -219,7 +201,6 @@ export function Grainient({
     canvas.style.display = "block";
     container.appendChild(canvas);
 
-    // Full-screen triangle, the same primitive ogl's Triangle provides.
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute(
       "position",
@@ -260,7 +241,6 @@ export function Grainient({
 
     const scene = new THREE.Scene();
     scene.add(new THREE.Mesh(geometry, material));
-    // Vertices are already in clip space, so the camera is never consulted.
     const camera = new THREE.Camera();
 
     const setSize = () => {
@@ -334,7 +314,6 @@ export function Grainient({
     };
   }, []);
 
-  // Effect 2: sync props to uniforms — no teardown, no context rebuild.
   useEffect(() => {
     const material = materialRef.current;
     if (!material) return;

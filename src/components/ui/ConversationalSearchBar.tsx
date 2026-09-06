@@ -24,30 +24,15 @@ interface ConversationalSearchBarProps {
   suggestions?: string[];
   onSuggestionSelect?: (suggestion: string) => void;
   suggestionsLabel?: string;
-  /**
-   * Live typeahead results for the current `value` (e.g. from a search
-   * autocomplete API), distinct from the static `suggestions` chips above.
-   * A single result that extends `value` shows as inline ghost text,
-   * completed with Tab; more than one renders as a dropdown with the typed
-   * prefix highlighted in each row.
-   */
   autoCompleteSuggestions?: string[];
   understoodTags?: UnderstoodTag[];
   onRemoveTag?: (key: string) => void;
   understoodLabel?: string;
-  /**
-   * Quick filters rendered as chips below the input — the same chip/popover
-   * pattern as the admin AppHeader. An unset filter shows as a "+ Label"
-   * chip; clicking it opens a popover with the field for that filter, and
-   * "Apply Filter" commits the value. A set filter shows its value with a
-   * clear (×) button.
-   */
   filters?: FilterItem[];
   onFilterApply?: (key: string, value: string | string[] | null) => void;
   onFilterClear?: (key: string) => void;
   filtersLabel?: string;
   loading?: boolean;
-  /** Renders as a single-row search bar instead of the two-row "ask in plain English" composer. */
   compact?: boolean;
   className?: string;
 }
@@ -87,10 +72,6 @@ function ConversationalSearchBar({
     const textarea = textareaRef.current;
     textarea?.setSelectionRange(value.length, value.length);
   }, [value]);
-
-  // A single hit that actually extends what's typed becomes inline ghost
-  // text; matching is prefix-based since that's what the completion (and its
-  // highlight in the dropdown case below) both rely on.
   const ghostSuggestion =
     autoCompleteSuggestions.length === 1 &&
     value.length > 0 &&
@@ -210,7 +191,6 @@ function ConversationalSearchBar({
                   type="button"
                   role="option"
                   aria-selected={false}
-                  // Fires before the textarea's blur, so the click still lands.
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => selectSuggestion(term)}
                   className="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm text-ink-3 hover:bg-brand-soft"

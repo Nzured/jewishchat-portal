@@ -4,7 +4,6 @@ import { SearchFilterProvider } from "@/contexts/SearchFilterContext";
 import { UserType } from "@/types/User";
 import type { Metadata } from "next";
 
-// FR-SEO-CAN-03 — the internal admin dashboard carries no crawling value.
 export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };

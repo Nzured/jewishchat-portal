@@ -1,21 +1,55 @@
 "use client";
 
-import { Controller } from "react-hook-form";
+import * as React from "react";
+import { Controller, useWatch } from "react-hook-form";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { SwitchBanner } from "@/components/ui/SwitchBanner";
 import { Textarea } from "@/components/ui/Textarea";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { normalizeWhatsappGroupLink, validateWhatsappGroupLink } from "@/lib/whatsapp";
+import { checkWhatsappLink } from "@/services/group/whatsappLink";
 import type { CreateGroupFormValues } from "@/types/Group";
-import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
+import { useGroups } from "../../_context/GroupsContext";
+import type { Control, FieldErrors, UseFormRegister, UseFormTrigger } from "react-hook-form";
+
+const LINK_CHECK_DEBOUNCE_MS = 500;
 
 interface GroupDetailsFormProps {
   register: UseFormRegister<CreateGroupFormValues>;
   control: Control<CreateGroupFormValues>;
   errors: FieldErrors<CreateGroupFormValues>;
+  trigger: UseFormTrigger<CreateGroupFormValues>;
 }
 
-export default function GroupDetailsForm({ register, control, errors }: GroupDetailsFormProps) {
+export default function GroupDetailsForm({
+  register,
+  control,
+  errors,
+  trigger,
+}: GroupDetailsFormProps) {
+  const { draftId } = useGroups();
+  const whatsappLink = useWatch({ control, name: "whatsappLink" });
+  const debouncedLink = useDebouncedValue(whatsappLink, LINK_CHECK_DEBOUNCE_MS);
+  const [isCheckingLink, setIsCheckingLink] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!normalizeWhatsappGroupLink(debouncedLink ?? "")) return;
+    let ignore = false;
+
+    const runCheck = async () => {
+      setIsCheckingLink(true);
+      await trigger("whatsappLink");
+      if (!ignore) setIsCheckingLink(false);
+    };
+
+    void runCheck();
+
+    return () => {
+      ignore = true;
+    };
+  }, [debouncedLink, trigger]);
+
   return (
     <FieldGroup className="gap-4">
       <Field data-invalid={!!errors.whatsappLink}>
@@ -26,11 +60,21 @@ export default function GroupDetailsForm({ register, control, errors }: GroupDet
           type="url"
           id="whatsappLink"
           placeholder="https://chat.whatsapp.com/"
+          loading={isCheckingLink}
           {...register("whatsappLink", {
             required: "Whatsapp link is required",
-            // Store the canonical link so pasted query params / missing scheme never reach the API.
             setValueAs: (value: string) => normalizeWhatsappGroupLink(value) ?? value.trim(),
-            validate: validateWhatsappGroupLink,
+            validate: async (value: string) => {
+              const format = validateWhatsappGroupLink(value);
+              if (format !== true) return format;
+
+              const normalized = normalizeWhatsappGroupLink(value) ?? value.trim();
+              const { available, message } = await checkWhatsappLink(
+                normalized,
+                draftId ?? undefined,
+              );
+              return available ? true : (message ?? "This WhatsApp group is already listed.");
+            },
           })}
         />
         <FieldError errors={[errors.whatsappLink]} />

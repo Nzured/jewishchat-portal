@@ -8,22 +8,17 @@ import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { Typography } from "@/components/ui/Typography";
 import { useUser } from "@/contexts/UserContext";
+import { useJoinGroup } from "@/hooks/useJoinGroup";
+import { formatLocation } from "@/lib/location";
 import { cn } from "@/lib/utils";
 import { Category } from "@/types/Category";
-import { Group } from "@/types/Group";
+import { Group, GroupStatus } from "@/types/Group";
 
 interface GroupSummaryProps {
   group: Group;
   className?: string;
 }
 
-function formatLocation(group: Group) {
-  return [group.locationCity, group.locationState, group.locationCountry]
-    .filter(Boolean)
-    .join(", ");
-}
-
-/** Main category first, then the rest, with duplicates dropped. */
 function collectCategories(group: Group): Category[] {
   const all = [group.mainCategory, ...(group.categories ?? [])].filter(Boolean);
   const seen = new Set<number>();
@@ -38,15 +33,13 @@ function collectCategories(group: Group): Category[] {
 export function GroupSummary({ group, className }: GroupSummaryProps) {
   const router = useRouter();
   const { user } = useUser();
+  const { join, isJoining } = useJoinGroup(group.slug);
 
   const location = formatLocation(group);
   const categories = collectCategories(group);
   const isOwner = Boolean(user) && user?.uuid === group.submittedByUuid;
-  // The owner can hide the invite link from logged-out visitors.
   const linkLocked = group.linkVisibilityLoggedInOnly && !user;
-  const canJoin = Boolean(group.whatsappLink) && !linkLocked;
-  // Nothing to click if there's no link to open (or the link is locked, in
-  // which case the button prompts login instead) — hide rather than disable.
+  const canJoin = group.status === GroupStatus.ACTIVE && !linkLocked;
   const showJoinButton = !isOwner && (canJoin || linkLocked);
 
   const handleJoin = () => {
@@ -54,9 +47,7 @@ export function GroupSummary({ group, className }: GroupSummaryProps) {
       router.push("/login");
       return;
     }
-    if (group.whatsappLink) {
-      window.open(group.whatsappLink, "_blank", "noopener,noreferrer");
-    }
+    void join();
   };
 
   return (
@@ -101,9 +92,10 @@ export function GroupSummary({ group, className }: GroupSummaryProps) {
           <Button
             className="w-fit bg-brand-deep hover:bg-brand-deep/90"
             rightIcon={<ArrowRight />}
+            disabled={isJoining}
             onClick={handleJoin}
           >
-            {linkLocked ? "Log in to join" : "Join the group"}
+            {linkLocked ? "Log in to join" : isJoining ? "Opening WhatsApp..." : "Join the group"}
           </Button>
           <Typography variant="tiny" className="text-ink-4">
             {linkLocked

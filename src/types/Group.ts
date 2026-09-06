@@ -16,6 +16,7 @@ export interface GroupOwnerRef {
   uuid: string;
   firstName: string;
   lastName: string;
+  joinedOn?: string;
 }
 
 export interface Group {
@@ -26,6 +27,7 @@ export interface Group {
   shortDesc: string;
   about: string;
   whatsappLink?: string;
+  joinUrl?: string;
   locationCity: string;
   locationState: string;
   locationCountry: string;
@@ -49,19 +51,44 @@ export interface Group {
   ownerProfileUrl?: string;
   createdByUser?: UserSummary;
   updatedByUser?: UserSummary;
+  suspensionCategory?: string;
+  suspensionReason?: string;
+}
+
+export interface JoinTokenResponse {
+  token: string;
+  requiresAuth?: boolean;
+}
+
+export interface JoinRedirectResponse {
+  redirectUrl: string;
+}
+
+export interface GroupViewPayload {
+  fingerprint?: string;
+  referralSource?: string;
+  searchQuery?: string;
 }
 
 export type GroupsPage = Paginated<"groups", Group>;
 
-/** Newly created (or resumed) group draft the step endpoints are keyed by. */
+export interface MyGroupsResponse {
+  groups: Group[];
+  drafts: GroupDraft[];
+  totalPages: number;
+  currentPage: number;
+  totalGroups: number;
+}
+
 export interface GroupDraftRef {
   draftId: string;
   status: GroupStatus;
   createdAt: string;
   lastUpdatedAt: string;
+  expiresAt?: string;
+  expiresInSeconds?: number;
 }
 
-/** Group details captured on step 1 of the create-group stepper. */
 export interface GroupDraftStep1Payload {
   whatsappLink: string;
   name: string;
@@ -70,7 +97,6 @@ export interface GroupDraftStep1Payload {
   linkVisibilityLoggedInOnly: boolean;
 }
 
-/** Categorization + location captured on step 2 of the create-group stepper. */
 export interface GroupDraftStep2Payload {
   mainCategoryId: number;
   additionalCategoryIds: number[];
@@ -80,20 +106,20 @@ export interface GroupDraftStep2Payload {
   memberCount: number;
 }
 
-/** Draft echoed back by the step endpoints. Each `stepNData` is the saved payload as a JSON string. */
+export interface WhatsappUrlCheckResponse {
+  message: string;
+  statusCode: number;
+  errorCode: string;
+}
+
+export interface UpdateGroupPayload extends GroupDraftStep1Payload, GroupDraftStep2Payload {
+  resubmissionMessage?: string;
+}
 export interface GroupDraft extends GroupDraftRef {
   step1Data?: string;
   step2Data?: string;
 }
 
-/**
- * Field shapes for the create-group stepper. All steps share a single
- * react-hook-form instance, so every step component is typed against
- * `CreateGroupFormValues` rather than its own slice — `Control<A & B>` is not
- * assignable to `Control<B>`.
- */
-
-/** Step 1 — group details. */
 export interface GroupDetailsFormValues {
   whatsappLink: string;
   name: string;
@@ -102,10 +128,8 @@ export interface GroupDetailsFormValues {
   linkVisibilityLoggedInOnly: boolean;
 }
 
-/** Step 2 — categorization and location. */
 export interface CategorizationFormValues {
   mainCategoryId: number | null;
-  /** Extra categories, never including the main one. */
   additionalCategoryIds: number[];
   locationCountry: string;
   locationState: string;
@@ -113,7 +137,6 @@ export interface CategorizationFormValues {
   memberCount?: number;
 }
 
-/** Final step — the group photo, chosen in the browser and uploaded on submit. */
 export interface GroupPhotoFormValues {
   image: File | null;
 }

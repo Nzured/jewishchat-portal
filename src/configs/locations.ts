@@ -1,14 +1,3 @@
-/**
- * Country and state/region options for the create-group flow, sourced from
- * `country-region-data` (ISO-3166-1/2 based) instead of a hand-maintained list.
- *
- * The API stores `locationCountry` / `locationState` as plain strings, so the
- * option values here are the display names themselves — no id mapping to
- * keep in sync. Countries with no bundled regions (`regions.length === 0`)
- * fall back to free-text entry in the form, same as city, which this package
- * doesn't cover at all.
- */
-
 import { allCountries } from "country-region-data";
 
 export interface LocationRegion {

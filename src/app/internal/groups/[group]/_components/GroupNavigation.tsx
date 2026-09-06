@@ -8,8 +8,6 @@ import { useAdminGroupContext } from "../../_context/AdminGroupContext";
 export default function GroupNavigation() {
   const router = useRouter();
   const params = useParams<{ group: string }>();
-  // Only the page the admin came from can say what "next" is, so the arrows stay
-  // hidden when this page is opened directly.
   const { lastListedGroupIds } = useAdminGroupContext();
 
   const currentIndex = lastListedGroupIds.indexOf(params.group);
@@ -18,7 +16,7 @@ export default function GroupNavigation() {
   const hasNext = hasContext && currentIndex < lastListedGroupIds.length - 1;
 
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div className="sticky top-0 z-30 -mx-6 bg-surface-bg px-6 pt-8 pb-3 flex items-center justify-between gap-2">
       <Button
         leftIcon={<ArrowLeft className="size-4" />}
         size="sm"

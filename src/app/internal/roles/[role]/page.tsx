@@ -47,14 +47,13 @@ export default function RolePage() {
   return (
     <div className="pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
       <RoleNavigation />
-      <div className="mt-4">
-        <AppHeader
-          title={wordFormatter(role?.name)}
-          subtitle={role?.description ?? ""}
-          count={role?.permissions.length}
-          countLabel="Roles"
-        />
-      </div>
+      <AppHeader
+        title={wordFormatter(role?.name)}
+        subtitle={role?.description ?? ""}
+        count={role?.permissions.length}
+        countLabel="Roles"
+        stickyTop="top-21"
+      />
       {isLoading ? (
         <RoleWorkspaceSkeleton />
       ) : (

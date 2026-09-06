@@ -56,7 +56,7 @@ export function ReportGroupModal({ groupUuid, groupName, trigger }: ReportGroupM
         category: reason,
         description: remark || undefined,
       });
-      toast.success("Thanks — our moderators will take a look at this group.");
+      toast.success("Thanks - our moderators will take a look at this group.");
       handleOpenChange(false);
     } catch {
       // The axios error interceptor already surfaces a toast for this.

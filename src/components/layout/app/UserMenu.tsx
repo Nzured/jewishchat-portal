@@ -13,6 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/Popover";
 import { Separator } from "@/components/ui/Separator";
+import { EXTERNAL_PROFILE_PATH } from "@/configs/const";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUser } from "@/contexts/UserContext";
 import { UserType } from "@/types/User";
@@ -25,9 +26,10 @@ export function UserMenu() {
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "";
 
   const handleMyProfile = () => {
-    if (user?.userType === UserType.INTERNAL) {
-      router.push(`/internal/users/${user.uuid}`);
-    }
+    if (!user) return;
+    router.push(
+      user.userType === UserType.INTERNAL ? `/internal/users/${user.uuid}` : EXTERNAL_PROFILE_PATH,
+    );
   };
 
   return (

@@ -1,15 +1,13 @@
 import { Header } from "@/app/(external)/home/_components/Header";
 import { NoData } from "@/components/ui/NoData";
 import { CANONICAL_SITE_URL, EXTERNAL_CATEGORIES_PATH } from "@/configs/const";
-import { GroupService } from "@/services/group/group.service";
+import { getCachedCategories } from "@/services/group/categories";
 import { CategoryListCard } from "./_components/CategoryListCard";
 import type { Metadata } from "next";
 
 const TITLE = "All Categories | ChatList";
 const DESCRIPTION = "Browse every active category of Jewish community WhatsApp groups on ChatList.";
 
-// FR-SEO-IL-05. Static per page-load config; the live category list below is
-// what actually varies.
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
@@ -30,8 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CategoriesPage() {
-  const res = await GroupService.getCategories().catch(() => ({ data: [] }));
-  const categories = res.data ?? [];
+  const categories = await getCachedCategories();
 
   return (
     <div className="flex flex-col gap-8">
@@ -56,7 +53,6 @@ export default async function CategoriesPage() {
               slug={category.slug}
               icon={category.icon}
               description={category.description}
-              count={category.groupsCount}
               color={category.color}
             />
           ))}

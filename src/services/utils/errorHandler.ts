@@ -7,6 +7,14 @@ interface ApiErrorData {
 
 export const createErrorHandler = () => {
   return (error: AxiosError) => {
+    if (typeof window === "undefined") {
+      return Promise.reject(error);
+    }
+
+    if (error.config?.silentError) {
+      return Promise.reject(error);
+    }
+
     const statusCode = error.response?.status;
     const statusMessage = (error.response?.data as ApiErrorData | undefined)?.message;
 

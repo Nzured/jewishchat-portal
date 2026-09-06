@@ -1,33 +1,36 @@
-import { ArrowRight } from "lucide-react";
-import NextLink from "next/link";
-import { Button } from "@/components/ui/Button";
-import { CANONICAL_SITE_URL, EXTERNAL_GROUPS_NEW_PATH, EXTERNAL_HOME_PATH } from "@/configs/const";
+import { GradientBackdrop } from "@/components/ui/Aurora";
+import {
+  CANONICAL_SITE_URL,
+  EXTERNAL_HOME_PATH,
+  HOME_PAGE_DESCRIPTION,
+  HOME_PAGE_TITLE,
+} from "@/configs/const";
 import { CategoriesSection } from "./home/_components/CategoriesSection";
+import { CountryStrip } from "./home/_components/CountryStrip";
+import { Faq } from "./home/_components/Faq";
 import { FeaturedGroupsSection } from "./home/_components/FeaturedGroupsSection";
-import { Header } from "./home/_components/Header";
 import { Hero } from "./home/_components/Hero";
+import { HowItWorks } from "./home/_components/HowItWorks";
+import { StatBand } from "./home/_components/StatBand";
+import { TrustSafety } from "./home/_components/TrustSafety";
 import { HomeProvider } from "./home/_context/HomeContext";
 import type { Metadata } from "next";
 
-const TITLE = "ChatList — Find Jewish Community WhatsApp Groups";
-const DESCRIPTION =
-  "Discover and join WhatsApp groups for Jewish businesses, organizations, and communities.";
-
 export const metadata: Metadata = {
-  title: TITLE,
-  description: DESCRIPTION,
+  title: HOME_PAGE_TITLE,
+  description: HOME_PAGE_DESCRIPTION,
   alternates: { canonical: EXTERNAL_HOME_PATH },
   openGraph: {
-    title: TITLE,
-    description: DESCRIPTION,
+    title: HOME_PAGE_TITLE,
+    description: HOME_PAGE_DESCRIPTION,
     url: EXTERNAL_HOME_PATH,
     type: "website",
     images: [{ url: `${CANONICAL_SITE_URL}/svgs/logo.svg` }],
   },
   twitter: {
     card: "summary",
-    title: TITLE,
-    description: DESCRIPTION,
+    title: HOME_PAGE_TITLE,
+    description: HOME_PAGE_DESCRIPTION,
     images: [`${CANONICAL_SITE_URL}/svgs/logo.svg`],
   },
 };
@@ -35,28 +38,27 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <HomeProvider>
-      <div className="flex flex-col gap-16 pb-16">
+      <GradientBackdrop />
+      <div className="space-y-16 pb-16">
         <div className="-mx-4 -mt-8 md:-mx-8">
           <Hero />
+        </div>
+
+        <div className="-mx-4 md:-mx-8">
+          <StatBand />
         </div>
 
         <FeaturedGroupsSection />
 
         <CategoriesSection />
 
-        <Header
-          tags={["FOR GROUP ADMINS"]}
-          title="Run a group?
-List it in seconds."
-          description={
-            "Free for community groups. AI-moderated, reviewed by a human, and live within 24 hours. No ads. No data resale. Just discovery."
-          }
-          action={
-            <Button rightIcon={<ArrowRight />} asChild>
-              <NextLink href={EXTERNAL_GROUPS_NEW_PATH}>Submit Group</NextLink>
-            </Button>
-          }
-        />
+        <CountryStrip />
+
+        <HowItWorks />
+
+        <TrustSafety />
+
+        <Faq />
       </div>
     </HomeProvider>
   );

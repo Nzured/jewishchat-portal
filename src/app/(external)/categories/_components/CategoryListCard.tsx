@@ -1,4 +1,3 @@
-import { ChevronRight } from "lucide-react";
 import NextLink from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { Typography } from "@/components/ui/Typography";
@@ -11,23 +10,10 @@ interface CategoryListCardProps {
   slug: string;
   icon?: string;
   description?: string;
-  count?: number;
   color?: CategoryColor;
 }
 
-function formatGroupCount(count?: number): string {
-  const value = count ?? 0;
-  return `${value.toLocaleString()} ${value === 1 ? "group" : "groups"}`;
-}
-
-export function CategoryListCard({
-  name,
-  slug,
-  icon,
-  description,
-  count,
-  color,
-}: CategoryListCardProps) {
+export function CategoryListCard({ name, slug, icon, description, color }: CategoryListCardProps) {
   return (
     <NextLink
       href={getCategoryPath(slug)}
@@ -45,9 +31,6 @@ export function CategoryListCard({
         <Typography as="span" variant="small" className="truncate font-semibold text-ink-1">
           {name}
         </Typography>
-        <Typography variant="xs" className="text-ink-4">
-          {formatGroupCount(count)}
-        </Typography>
         <Typography
           variant="xs"
           className={description ? "mt-1.5 text-ink-3" : "mt-1.5 text-ink-4"}
@@ -55,8 +38,6 @@ export function CategoryListCard({
           {description || "No description added"}
         </Typography>
       </div>
-
-      <ChevronRight className="size-4 shrink-0 text-ink-4" />
     </NextLink>
   );
 }

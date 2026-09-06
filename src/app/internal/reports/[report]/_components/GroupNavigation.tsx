@@ -31,7 +31,7 @@ export default function GroupNavigation() {
   };
 
   return (
-    <div className="flex flex-row justify-between">
+    <div className="sticky top-0 z-30 -mx-6 bg-surface-bg px-6 pt-8 pb-3 flex flex-row justify-between">
       <Button
         leftIcon={<ArrowLeft />}
         size={"sm"}

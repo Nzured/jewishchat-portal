@@ -1,87 +1,69 @@
-"use client";
-
-import * as React from "react";
-import { BadgeCheck } from "lucide-react";
+import { CircleUserRound } from "lucide-react";
+import NextLink from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
-import { Skeleton } from "@/components/ui/Skeleton";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { Typography } from "@/components/ui/Typography";
+import { EXTERNAL_PROFILE_PATH } from "@/configs/const";
+import { formatDate } from "@/lib/date";
 import { cn } from "@/lib/utils";
-import { UserService } from "@/services/user/user.service";
 import { Group } from "@/types/Group";
-import { User } from "@/types/User";
 
 interface GroupAdminCardProps {
   group: Group;
   className?: string;
 }
 
-const cardClasses =
-  "flex w-fit items-center gap-3 rounded-2xl border border-surface-line bg-surface-card p-3 pr-6";
-
 export function GroupAdminCard({ group, className }: GroupAdminCardProps) {
-  const ownerUuid = group.submittedByUuid;
-  const [owner, setOwner] = React.useState<User | null>(null);
-  const [isLoading, setIsLoading] = React.useState(Boolean(ownerUuid));
+  const owner = group.owner;
+  const ownerName = owner ? `${owner.firstName} ${owner.lastName}`.trim() : "";
+  const ownerUuid = owner?.uuid ?? group.submittedByUuid;
+  const ownerProfilePath = ownerUuid ? `${EXTERNAL_PROFILE_PATH}/${ownerUuid}` : null;
 
-  React.useEffect(() => {
-    if (!ownerUuid) return;
-
-    let ignore = false;
-
-    UserService.getUserById(ownerUuid)
-      .then((res) => {
-        if (!ignore) setOwner(res.data);
-      })
-      .catch(() => {
-        if (!ignore) setOwner(null);
-      })
-      .finally(() => {
-        if (!ignore) setIsLoading(false);
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [ownerUuid]);
-
-  if (isLoading) {
-    return (
-      <div className={cn(cardClasses, className)}>
-        <Skeleton className="size-6 rounded-xl" />
-        <div className="flex flex-col gap-1.5">
-          <Skeleton className="h-3 w-24 rounded-md" />
-          <Skeleton className="h-4 w-32 rounded-md" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!owner) return null;
-
-  const ownerName = `${owner.firstName ?? ""} ${owner.lastName ?? ""}`.trim();
+  if (!ownerName) return null;
 
   return (
-    <div className={cn(cardClasses, className)}>
-      <Avatar
-        variant="circle"
-        size="lg"
-        name={ownerName}
-        src={owner.profilePic ?? group.ownerProfileUrl}
-        alt={ownerName}
-      />
-      <div className="flex flex-col gap-0.5">
-        <div className="flex items-center gap-1 text-brand-green">
-          <Typography variant="xs" className="font-mono tracking-[1px] text-brand-green uppercase">
-            Group admin
-          </Typography>
-          <BadgeCheck className="size-3.5 shrink-0" />
-        </div>
-        {ownerName && (
-          <Typography variant="large" className="font-semibold text-ink-1">
+    <Card className={cn("gap-3", className)}>
+      <Typography
+        variant="xs"
+        className="px-(--card-spacing) font-mono tracking-[1.5px] text-ink-4 uppercase"
+      >
+        Listed by
+      </Typography>
+
+      <div className="flex items-center gap-3 px-(--card-spacing)">
+        <Avatar
+          variant="circle"
+          size="lg"
+          name={ownerName}
+          className="bg-brand-soft text-brand-deep"
+        />
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <Typography variant="small" className="truncate font-semibold text-ink-1">
             {ownerName}
           </Typography>
-        )}
+          {owner?.joinedOn && (
+            <Typography variant="xs" className="text-ink-3">
+              Member since {formatDate(owner.joinedOn, "MMM YYYY")}
+            </Typography>
+          )}
+        </div>
       </div>
-    </div>
+
+      {ownerProfilePath && (
+        <div className="px-(--card-spacing)">
+          <Button
+            variant="secondary"
+            color="primary"
+            size="sm"
+            rightIcon={<CircleUserRound />}
+            className="w-full"
+            asChild
+          >
+            <NextLink href={ownerProfilePath}>View profile</NextLink>
+          </Button>
+        </div>
+      )}
+    </Card>
   );
 }

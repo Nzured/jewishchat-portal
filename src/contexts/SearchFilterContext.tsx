@@ -17,7 +17,6 @@ interface SearchFilterContextType {
   updateFilterOptions: (key: string, options: FilterOption[]) => void;
   updateSearchValue: (key: string, searchValue: string) => void;
   applyFilters: () => void;
-  /** Sets and applies a single filter's value in one shot — for chips that stage their own draft locally. */
   applyFilterValue: (key: string, value: string | string[] | null) => void;
   clearFilter: (key: string) => void;
   clearAllFilters: () => void;

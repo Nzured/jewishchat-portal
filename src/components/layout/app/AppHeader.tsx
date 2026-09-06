@@ -9,6 +9,7 @@ import { SearchFilterChip } from "@/components/ui/SearchFilterChip";
 import { Typography } from "@/components/ui/Typography";
 import { singularize } from "@/configs/functions/WordFormatter";
 import { useSearchFilter } from "@/contexts/SearchFilterContext";
+import { cn } from "@/lib/utils";
 import { FilterItem } from "@/types/Search";
 
 interface AppHeaderProps {
@@ -20,6 +21,8 @@ interface AppHeaderProps {
   filters?: FilterItem[];
   onButtonPress?: () => void;
   buttonLabel?: string;
+  buttonIcon?: ReactNode;
+  stickyTop?: string;
 }
 
 export default function AppHeader({
@@ -30,11 +33,19 @@ export default function AppHeader({
   filters,
   onButtonPress,
   buttonLabel = "Add New",
+  buttonIcon,
+  stickyTop = "top-0",
 }: AppHeaderProps) {
   const { appliedFilters, applyFilterValue, clearFilter } = useSearchFilter();
 
   return (
-    <>
+    <div
+      className={cn(
+        "static z-20 -mx-6 bg-surface-bg px-6 pb-4 md:sticky",
+        stickyTop === "top-0" ? "pt-8" : "pt-4",
+        stickyTop,
+      )}
+    >
       <div className="flex justify-between gap-6 items-center">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-6">
@@ -62,13 +73,13 @@ export default function AppHeader({
             <Button
               variant="default"
               onClick={onButtonPress}
-              leftIcon={<PlusCircle className="size-4" />}
+              leftIcon={buttonIcon ?? <PlusCircle className="size-4" />}
               className="hidden justify-center md:inline-flex"
             >
               {buttonLabel}
             </Button>
             <Fab
-              icon={<PlusCircle className="size-6" />}
+              icon={buttonIcon ?? <PlusCircle className="size-6" />}
               onClick={onButtonPress}
               aria-label={buttonLabel}
             />
@@ -87,6 +98,6 @@ export default function AppHeader({
           />
         ))}
       </div>
-    </>
+    </div>
   );
 }

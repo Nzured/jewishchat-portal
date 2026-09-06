@@ -10,17 +10,13 @@ interface SwitchBannerProps extends Omit<
   React.ComponentProps<"div">,
   "title" | "onChange" | "defaultChecked"
 > {
-  /** Small caption rendered above the banner. Omit when rendering inside a `Field` with its own label. */
   label?: React.ReactNode;
-  /** Bold headline inside the banner — doubles as the switch label. */
   title: React.ReactNode;
-  /** Supporting copy under the title. */
   description?: React.ReactNode;
   checked?: boolean;
   defaultChecked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   disabled?: boolean;
-  /** Forwarded to the underlying switch, e.g. for uncontrolled form submission. */
   name?: string;
   value?: string;
 }

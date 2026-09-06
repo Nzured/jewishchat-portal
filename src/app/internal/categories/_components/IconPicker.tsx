@@ -74,7 +74,7 @@ export function IconPicker({ value, onChange, className }: IconPickerProps) {
       </div>
       {hiddenCount > 0 && (
         <p className="text-xs text-ink-4">
-          Showing {visibleIcons.length} of {matches.length} matches — refine your search to see
+          Showing {visibleIcons.length} of {matches.length} matches - refine your search to see
           more.
         </p>
       )}
