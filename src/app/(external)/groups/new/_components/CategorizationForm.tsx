@@ -26,7 +26,6 @@ interface CategorizationFormProps {
   setValue: UseFormSetValue<CreateGroupFormValues>;
 }
 
-/** Categories carry `displayOrder` only once an admin has ordered them; the rest fall to the end. */
 function byDisplayOrder(a: Category, b: Category) {
   const orderA = a.displayOrder ?? Number.MAX_SAFE_INTEGER;
   const orderB = b.displayOrder ?? Number.MAX_SAFE_INTEGER;
@@ -86,7 +85,6 @@ function ChipSkeletons() {
   );
 }
 
-/** A search box over a scrollable, bordered container — every category lives inside it, no cap. */
 function CategoryPicker({
   categories,
   isLoading,
@@ -197,7 +195,6 @@ export default function CategorizationForm({
     fetchIpLocation()
       .then((location) => {
         if (cancelled || !location) return;
-        // Never clobber a value the user (or a resumed draft) already has.
         const current = locationRef.current;
         if (current.country || current.state || current.city) return;
 

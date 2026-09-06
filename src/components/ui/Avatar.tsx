@@ -18,6 +18,7 @@ const avatarVariants = cva(
         md: "size-9 text-xs",
         lg: "size-11 text-sm",
         xl: "size-15 text-xl",
+        "2xl": "size-25 text-2xl",
       },
     },
     defaultVariants: {
@@ -77,9 +78,6 @@ function Avatar({
   const seed = name || alt || "";
   const { bg, text } = colorPalette[hashString(seed) % colorPalette.length];
   const showImage = Boolean(src) && !imageFailed;
-  // The initials fallback still needs a real accessible name (FR-SEO-META-05
-  // — "including the default two-letter placeholder avatar"). It moves to
-  // the wrapping span so it applies whether or not an image ever loads.
   const accessibleName = alt || name;
 
   return (

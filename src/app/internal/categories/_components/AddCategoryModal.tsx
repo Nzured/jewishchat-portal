@@ -134,9 +134,6 @@ export function AddCategoryModal({ open, setOpen, category }: AddCategoryModalPr
                 leftIcon={<Link />}
                 {...register("slug", {
                   required: "Slug is required",
-                  // FR-SEO-URL-06 — a category slug becomes the first path
-                  // segment of every group in it, so it must never collide
-                  // with a real (or planned) top-level route.
                   validate: (value) =>
                     !RESERVED_ROUTE_SLUGS.includes(value) ||
                     "This slug is reserved for a site page and can't be used for a category",

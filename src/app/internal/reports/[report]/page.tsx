@@ -147,9 +147,7 @@ function ReportPageContent({ reportId }: { reportId: string }) {
       );
       setSuspension(null);
       toast.success("Group re-listed.");
-    } catch {
-      // The axios error interceptor already surfaces a toast for this.
-    }
+    } catch {}
   };
 
   const handleMarkReviewed = async (report: ReportDetail) => {
@@ -168,9 +166,7 @@ function ReportPageContent({ reportId }: { reportId: string }) {
         };
       });
       toast.success("Report marked as reviewed.");
-    } catch {
-      // The axios error interceptor already surfaces a toast for this.
-    }
+    } catch {}
   };
 
   const handleResolveAll = () => {

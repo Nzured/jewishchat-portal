@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/Skeleton";
 import StepperCard, { type StepperCardStep } from "@/components/ui/StepperCard";
 import { EXTERNAL_GROUPS_PATH } from "@/configs/const";
 import { useUser } from "@/contexts/UserContext";
@@ -12,7 +13,12 @@ import {
   loadPendingGroupDraft,
   savePendingGroupDraft,
 } from "@/lib/pendingGroupDraft";
-import type { CreateGroupFormValues } from "@/types/Group";
+import { GroupService } from "@/services/group/group.service";
+import type {
+  CreateGroupFormValues,
+  GroupDraftStep1Payload,
+  GroupDraftStep2Payload,
+} from "@/types/Group";
 import { useGroups } from "../_context/GroupsContext";
 import AuthRequiredModal from "./_components/AuthRequiredModal";
 import CategorizationForm from "./_components/CategorizationForm";
@@ -50,15 +56,26 @@ const DEFAULT_FORM_VALUES = {
   image: null,
 };
 
-// The "Review" step's backend support is still under construction — flip this once it's ready.
 const IS_REVIEW_STEP_ENABLED = false;
 
-export default function CreateGroupPage() {
+function parseStepData<T>(data?: string): Partial<T> {
+  if (!data) return {};
+  try {
+    return JSON.parse(data) as Partial<T>;
+  } catch {
+    return {};
+  }
+}
+
+function CreateGroupFlow() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [submittedGroup, setSubmittedGroup] = useState<GroupSubmissionSummary | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const resumeDraftId = searchParams.get("draftId");
+  const [isResumingDraft, setIsResumingDraft] = useState(Boolean(resumeDraftId));
   const {
     draftId,
     restoreDraftId,
@@ -104,7 +121,14 @@ export default function CreateGroupPage() {
         title: "Group Details",
         cardTitle: "Your group",
         description: "Start with the invite link, then tell people what the group is.",
-        children: <GroupDetailsForm register={register} control={control} errors={errors} />,
+        children: (
+          <GroupDetailsForm
+            register={register}
+            control={control}
+            errors={errors}
+            trigger={trigger}
+          />
+        ),
       },
       {
         title: "Categorization",
@@ -141,16 +165,12 @@ export default function CreateGroupPage() {
     ] satisfies Omit<StepperCardStep, "id">[]
   ).map((step, index) => ({ ...step, id: index + 1 }));
 
-  // A signed-out user is bounced to signup/login and back (see
-  // PendingGroupDraftRedirect) with their progress parked in sessionStorage
-  // under this same, already-authenticated `user` — so if it's there at
-  // mount, land straight back on the last step instead of step 1.
+  const stepsLength = steps.length;
+
   const [currentStep, setCurrentStep] = useState(() =>
     user && loadPendingGroupDraft() ? steps.length : 1,
   );
 
-  // Rehydrates the draft id and form values that were parked before the
-  // signup/login detour — see requestAuthToContinue.
   useEffect(() => {
     if (!user) return;
     const pending = loadPendingGroupDraft();
@@ -160,6 +180,33 @@ export default function CreateGroupPage() {
     reset({ ...pending.values, image: null });
     clearPendingGroupDraft();
   }, [user, restoreDraftId, reset]);
+
+  useEffect(() => {
+    if (!resumeDraftId) return;
+    let ignore = false;
+
+    GroupService.getDraft(resumeDraftId)
+      .then((res) => {
+        if (ignore || !res?.data) return;
+        const draft = res.data;
+        const step1 = parseStepData<GroupDraftStep1Payload>(draft.step1Data);
+        const step2 = parseStepData<GroupDraftStep2Payload>(draft.step2Data);
+
+        restoreDraftId(draft.draftId ?? resumeDraftId);
+        reset({ ...DEFAULT_FORM_VALUES, ...step1, ...step2, image: null });
+        setCurrentStep(draft.step2Data ? stepsLength : draft.step1Data ? 2 : 1);
+      })
+      .catch(() => {
+        if (!ignore) toast.error("That draft could not be opened.");
+      })
+      .finally(() => {
+        if (!ignore) setIsResumingDraft(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [resumeDraftId, restoreDraftId, reset, stepsLength]);
 
   const goToNextStep = () => setCurrentStep((step) => Math.min(steps.length, step + 1));
 
@@ -180,9 +227,6 @@ export default function CreateGroupPage() {
     }
   };
 
-  // A signed-out user can fill out the whole form, but needs an account before
-  // it's actually submitted. Their progress is already saved server-side under
-  // draftId — this just parks it client-side so it can be resumed after auth.
   const requestAuthToContinue = async () => {
     if (!(await trigger(["image"]))) return;
 
@@ -247,7 +291,9 @@ export default function CreateGroupPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl pb-6">
-      {submittedGroup ? (
+      {isResumingDraft ? (
+        <Skeleton className="h-[560px] w-full rounded-2xl" />
+      ) : submittedGroup ? (
         <GroupSubmissionSuccess
           group={submittedGroup}
           onAddAnotherGroup={handleAddAnotherGroup}
@@ -271,5 +317,13 @@ export default function CreateGroupPage() {
         onLogIn={() => router.push("/login")}
       />
     </div>
+  );
+}
+
+export default function CreateGroupPage() {
+  return (
+    <Suspense fallback={<Skeleton className="mx-auto h-[560px] w-full max-w-3xl rounded-2xl" />}>
+      <CreateGroupFlow />
+    </Suspense>
   );
 }

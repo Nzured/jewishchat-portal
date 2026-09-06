@@ -1,6 +1,3 @@
-// FR-SEO-SD-01/02 — renders one connected @graph as server-side JSON-LD.
-// Escaping "<" stops a value containing "</script>" (a group name, a short
-// description, ...) from breaking out of the tag.
 export function JsonLd({ data }: { data: object }) {
   return (
     <script

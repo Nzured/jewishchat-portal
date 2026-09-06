@@ -5,19 +5,13 @@ import { Typography } from "@/components/ui/Typography";
 import { NAME_PART_ONE, NAME_PART_TWO } from "@/configs/const";
 import { FooterLinkGroup, FOOTER_LINK_GROUPS } from "@/configs/footerNav";
 import { getCategoryPath } from "@/lib/publicPaths";
-import { GroupService } from "@/services/group/group.service";
+import { getCachedCategories } from "@/services/group/categories";
 
 const TOP_CATEGORIES_COUNT = 6;
 
-// FR-SEO-IL-05 — the footer links the top categories by live-group count on
-// every page, so every category hub is within two clicks of the homepage
-// regardless of how the main nav is designed.
 async function getTopCategoriesGroup(): Promise<FooterLinkGroup | null> {
-  const res = await GroupService.getCategories().catch(() => ({ data: [] }));
-  const categories = res.data ?? [];
+  const categories = await getCachedCategories();
 
-  // The API doesn't currently return `groupsCount`, so this can't actually
-  // rank by live-group count yet — falls back to the list's own order.
   const top = categories.slice(0, TOP_CATEGORIES_COUNT);
 
   if (top.length === 0) return null;

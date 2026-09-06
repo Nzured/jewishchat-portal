@@ -10,7 +10,6 @@ import { VisuallyHidden } from "radix-ui";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Link } from "@/components/ui/Link";
-import { Separator } from "@/components/ui/Separator";
 import {
   Sheet,
   SheetClose,
@@ -23,6 +22,7 @@ import { Typography } from "@/components/ui/Typography";
 import {
   EXTERNAL_GROUPS_PATH,
   EXTERNAL_HOME_PATH,
+  EXTERNAL_PROFILE_PATH,
   NAME_PART_ONE,
   NAME_PART_TWO,
 } from "@/configs/const";
@@ -69,6 +69,7 @@ export function ExternalNavbar() {
   }
 
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "";
+  const desktopNavLinks = [...EXTERNAL_NAV_LINKS, ...(user ? [MY_LISTINGS_LINK] : [])];
 
   return (
     <header
@@ -96,7 +97,7 @@ export function ExternalNavbar() {
       </Link>
 
       <nav className="hidden items-center gap-6 lg:flex">
-        {EXTERNAL_NAV_LINKS.map((link) => {
+        {desktopNavLinks.map((link) => {
           const isActive = pathname === link.href;
           return (
             <Link
@@ -196,7 +197,10 @@ export function ExternalNavbar() {
                 <div className="mt-auto border-t border-surface-line p-4">
                   {user ? (
                     <div className="flex flex-col gap-3">
-                      <div className="flex items-center gap-3">
+                      <NextLink
+                        href={EXTERNAL_PROFILE_PATH}
+                        className="flex items-center gap-3 rounded-lg transition-colors hover:bg-surface-bg"
+                      >
                         <Avatar variant="circle" name={fullName} src={user.profilePic} />
                         <div className="flex flex-col">
                           <Typography variant="small" className="font-semibold text-ink-1">
@@ -206,9 +210,11 @@ export function ExternalNavbar() {
                             {user.email}
                           </Typography>
                         </div>
-                      </div>
-                      <Separator />
-                      <Button variant="secondary" color="primary" onClick={() => void logout()}>
+                      </NextLink>
+                      <Button variant="secondary" color="primary" asChild>
+                        <NextLink href={EXTERNAL_PROFILE_PATH}>View Profile</NextLink>
+                      </Button>
+                      <Button variant="secondary" color="danger" onClick={() => void logout()}>
                         Log out
                       </Button>
                     </div>

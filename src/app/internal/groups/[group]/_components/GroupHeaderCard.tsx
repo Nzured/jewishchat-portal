@@ -8,13 +8,10 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
 import { NOT_APPLICABLE, PUBLIC_HOST } from "@/configs/const";
 import { formatDate } from "@/lib/date";
+import { formatLocation } from "@/lib/location";
 import { getGroupPath } from "@/lib/publicPaths";
 import { Group } from "@/types/Group";
 import { StatusPill } from "../../_components/StatusPill";
-
-function formatLocation(group: Group) {
-  return [group.locationCity, group.locationState].filter(Boolean).join(", ");
-}
 
 interface GroupHeaderCardProps {
   group: Group | null;
@@ -48,7 +45,7 @@ export default function GroupHeaderCard({ group, loading }: GroupHeaderCardProps
   }
 
   const publicUrl = `${PUBLIC_HOST}${getGroupPath(group)}`;
-  const location = formatLocation(group);
+  const location = formatLocation(group, ["city", "state"]);
 
   return (
     <Card className="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">

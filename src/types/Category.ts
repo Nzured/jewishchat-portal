@@ -19,6 +19,11 @@ export interface Category {
   groupsCount?: number;
 }
 
+export interface CategoryDetail extends Category {
+  liveGroupsCount?: number;
+  countriesCount?: number;
+}
+
 export interface CategoryPayload {
   name: string;
   slug: string;

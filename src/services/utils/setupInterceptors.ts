@@ -39,12 +39,14 @@ const refreshAccessToken = async (): Promise<string | null> => {
 
 interface RetriableConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
+  _startedAt?: number;
 }
 
-const TRACKED_METHODS = ["get", "post", "put", "patch", "delete"] as const;
+const isServer = typeof window === "undefined";
+const requestLabel = (config: AxiosRequestConfig) =>
+  `${(config.method ?? "get").toUpperCase()} ${config.url}`;
 
-// Index of the AxiosRequestConfig argument for each convenience method's
-// (url, config) or (url, data, config) signature.
+const TRACKED_METHODS = ["get", "post", "put", "patch", "delete"] as const;
 const CONFIG_ARG_INDEX: Record<(typeof TRACKED_METHODS)[number], number> = {
   get: 1,
   delete: 1,
@@ -57,12 +59,6 @@ export const setupInterceptors = (
   instance: AxiosInstance,
   errorHandler: (error: AxiosError) => Promise<never>,
 ) => {
-  // axios.create() binds get/post/put/patch/delete to its own internal
-  // Axios instance, not to `instance` itself, so they never go through
-  // `instance.request` — wrapping that alone silently tracks nothing.
-  // Each convenience method has to be wrapped directly instead. Only
-  // requests that opt in via `{ globalLoader: true }` feed the tracker
-  // that drives the full-screen GlobalLoader overlay.
   type MethodFn = (...args: unknown[]) => Promise<unknown>;
   const untypedInstance = instance as unknown as Record<string, MethodFn>;
   TRACKED_METHODS.forEach((method) => {
@@ -79,21 +75,28 @@ export const setupInterceptors = (
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    (config as RetriableConfig)._startedAt = Date.now();
+    console.log(`[api] → ${requestLabel(config)} (${isServer ? "server" : "browser"})`);
     return config;
   });
 
   instance.interceptors.response.use(
-    (response) => response.data,
+    (response) => {
+      const config = response.config as RetriableConfig;
+      const ms = config._startedAt ? Date.now() - config._startedAt : "?";
+      console.log(`[api] ← ${response.status} ${requestLabel(config)} (${ms}ms)`);
+      return response.data;
+    },
     async (error: AxiosError) => {
       const config = error.config as RetriableConfig | undefined;
+      if (config) {
+        const ms = config._startedAt ? Date.now() - config._startedAt : "?";
+        console.log(
+          `[api] ✗ ${error.response?.status ?? "network error"} ${requestLabel(config)} (${ms}ms)`,
+        );
+      }
 
       if (error.response?.status === 401) {
-        // Requests that are unauthenticated by design (login, signup, invite
-        // validation, ...) are marked with skipAuthRefresh — a 401 from them
-        // means "bad credentials/token", not "session expired", so they
-        // should never trigger a refresh or force-redirect. Fall back to the
-        // same check by access-token presence for anything unmarked, since a
-        // 401 with no token on file couldn't be an expired session either.
         if (config?.skipAuthRefresh || !getAccessToken()) {
           return errorHandler(error);
         }
@@ -101,7 +104,6 @@ export const setupInterceptors = (
         if (config && !config._retry) {
           config._retry = true;
 
-          // Dedup concurrent 401s so only one refresh request is in flight.
           refreshPromise ??= refreshAccessToken().finally(() => {
             refreshPromise = null;
           });

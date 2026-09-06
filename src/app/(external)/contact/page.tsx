@@ -1,7 +1,6 @@
 import { UnderConstruction } from "@/components/ui/UnderConstruction";
 import type { Metadata } from "next";
 
-// FR-SEO-CAN-03 — noindex until there's real content here (Priority 11).
 export const metadata: Metadata = {
   title: "Contact | ChatList",
   alternates: { canonical: "/contact" },

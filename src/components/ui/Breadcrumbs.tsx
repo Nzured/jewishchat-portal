@@ -4,12 +4,9 @@ import { cn } from "@/lib/utils";
 
 export interface BreadcrumbItem {
   label: string;
-  /** Omitted on the current (last) page — it renders as plain text, not a link. */
   href?: string;
 }
 
-// FR-SEO-IL-02 — every indexable page's BreadcrumbList JSON-LD needs a
-// matching visible trail; schema with no on-page equivalent doesn't count.
 export function Breadcrumbs({ items, className }: { items: BreadcrumbItem[]; className?: string }) {
   return (
     <nav aria-label="Breadcrumb" className={cn("flex flex-wrap items-center gap-1.5", className)}>

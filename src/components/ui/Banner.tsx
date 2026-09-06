@@ -20,7 +20,7 @@ const bannerVariants = cva(
   },
 );
 
-const bannerIconVariants = cva("mt-0.5 shrink-0 [&_svg]:size-5", {
+const bannerIconVariants = cva("mt-0.5 shrink-0 [&_svg]:size-4 mt-1", {
   variants: {
     variant: {
       success: "text-state-success",
@@ -55,22 +55,24 @@ function Banner({
   return (
     <div data-slot="banner" className={cn(bannerVariants({ variant }), className)} {...props}>
       {icon && <span className={cn(bannerIconVariants({ variant }))}>{icon}</span>}
-      <div className="flex flex-1 flex-col gap-0.5">
-        {title && (
-          <Typography
-            as="p"
-            variant="small"
-            data-slot="banner-title"
-            className="font-semibold text-ink-1"
-          >
-            {title}
-          </Typography>
-        )}
-        {description && (
-          <Typography as="p" variant="xs" data-slot="banner-description" className="text-ink-3">
-            {description}
-          </Typography>
-        )}
+      <div className="flex flex-1 flex-row gap-2">
+        <div className="flex flex-1 flex-col gap-0.5">
+          {title && (
+            <Typography
+              as="p"
+              variant="small"
+              data-slot="banner-title"
+              className="font-semibold text-ink-1"
+            >
+              {title}
+            </Typography>
+          )}
+          {description && (
+            <Typography as="p" variant="xs" data-slot="banner-description" className="text-ink-3">
+              {description}
+            </Typography>
+          )}
+        </div>
         {children}
       </div>
     </div>

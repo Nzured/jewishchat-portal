@@ -101,10 +101,6 @@ export async function proxy(request: NextRequest) {
 
   const isAuthPath = matchesPath(pathname, AUTH_PATHS);
   const isInternalPath = matchesPath(pathname, [INTERNAL_PATH]);
-  // Everything else — the homepage, the groups directory, and the root-level
-  // category/group detail pages (FR-SEO-URL-01/02) — is public, external
-  // content. Category and group slugs are arbitrary, so this can't be a
-  // fixed allowlist; it's whatever isn't an auth screen or the admin area.
   const isPublicPath = !isAuthPath && !isInternalPath;
 
   if (!isAuthenticated) {

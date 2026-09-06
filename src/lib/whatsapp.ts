@@ -1,6 +1,5 @@
 const INVITE_HOST = "chat.whatsapp.com";
 
-/** WhatsApp invite codes are 22 chars today, but older/shorter ones exist — stay lenient on length. */
 const INVITE_CODE_REGEX = /^[A-Za-z0-9_-]{6,}$/;
 
 function getHostname(value: string): string | null {
@@ -10,7 +9,6 @@ function getHostname(value: string): string | null {
   }
 
   try {
-    // Users often paste without a scheme ("chat.whatsapp.com/AbC123").
     const url = new URL(/^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`);
     return url.hostname.toLowerCase().replace(/^www\./, "");
   } catch {
@@ -18,11 +16,6 @@ function getHostname(value: string): string | null {
   }
 }
 
-/**
- * Returns the canonical `https://chat.whatsapp.com/<code>` form of a WhatsApp group invite link,
- * or `null` when the value isn't one. Tolerates a missing scheme, `www.`, the legacy `/invite/`
- * path, tracking query params and trailing slashes.
- */
 export function normalizeWhatsappGroupLink(value: string): string | null {
   const trimmed = value.trim();
   if (!trimmed) {
@@ -55,7 +48,6 @@ export function normalizeWhatsappGroupLink(value: string): string | null {
   return `https://${INVITE_HOST}/${code}`;
 }
 
-/** react-hook-form `validate` rule: `true` when valid, otherwise the message to show. */
 export function validateWhatsappGroupLink(value: string): true | string {
   if (normalizeWhatsappGroupLink(value)) {
     return true;
@@ -68,7 +60,7 @@ export function validateWhatsappGroupLink(value: string): true | string {
   }
 
   if (hostname === INVITE_HOST) {
-    return "That link is missing its invite code — it should look like https://chat.whatsapp.com/AbC123";
+    return "That link is missing its invite code - it should look like https://chat.whatsapp.com/AbC123";
   }
 
   return "Enter a WhatsApp group invite link, e.g. https://chat.whatsapp.com/AbC123";

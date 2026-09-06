@@ -4,14 +4,9 @@ import { Link2, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
+import { formatLocation } from "@/lib/location";
 import { Group } from "@/types/Group";
 import { SectionLabel } from "./SectionLabel";
-
-function formatLocation(group: Group) {
-  return [group.locationCity, group.locationState, group.locationCountry]
-    .filter(Boolean)
-    .join(", ");
-}
 
 interface GroupOverviewCardProps {
   group: Group | null;

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { Typography } from "@/components/ui/Typography";
 import { useUser } from "@/contexts/UserContext";
+import { formatLocation } from "@/lib/location";
 import { cn } from "@/lib/utils";
 import { Category } from "@/types/Category";
 import { Group } from "@/types/Group";
@@ -17,13 +18,6 @@ interface GroupSummaryProps {
   className?: string;
 }
 
-function formatLocation(group: Group) {
-  return [group.locationCity, group.locationState, group.locationCountry]
-    .filter(Boolean)
-    .join(", ");
-}
-
-/** Main category first, then the rest, with duplicates dropped. */
 function collectCategories(group: Group): Category[] {
   const all = [group.mainCategory, ...(group.categories ?? [])].filter(Boolean);
   const seen = new Set<number>();
@@ -42,11 +36,8 @@ export function GroupSummary({ group, className }: GroupSummaryProps) {
   const location = formatLocation(group);
   const categories = collectCategories(group);
   const isOwner = Boolean(user) && user?.uuid === group.submittedByUuid;
-  // The owner can hide the invite link from logged-out visitors.
   const linkLocked = group.linkVisibilityLoggedInOnly && !user;
   const canJoin = Boolean(group.whatsappLink) && !linkLocked;
-  // Nothing to click if there's no link to open (or the link is locked, in
-  // which case the button prompts login instead) — hide rather than disable.
   const showJoinButton = !isOwner && (canJoin || linkLocked);
 
   const handleJoin = () => {

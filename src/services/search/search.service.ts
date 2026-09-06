@@ -43,10 +43,6 @@ export const SearchService = {
     pageSize: number = DEFAULT_PAGE_SIZE,
   ) =>
     api.get<ApiResponse<GroupSearchResults>>(`${SEARCH_SERVICE}/search`, {
-      // Axios sends "" as a real (empty) param rather than omitting it, and
-      // the backend appears to treat a present-but-empty category/city/country
-      // as "match nothing" rather than "no filter" — so blank values are left
-      // out of the request entirely instead of being sent as "".
       params: {
         q: search || undefined,
         category: category || undefined,

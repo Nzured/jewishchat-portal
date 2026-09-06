@@ -103,8 +103,8 @@ export function EditMobileModal({ user, open, setOpen, onSave }: EditMobileModal
                 <Phone className="mt-0.5 size-4 shrink-0 text-state-warn" />
                 <Typography variant="small" className="text-state-warn">
                   Changing the mobile number to{" "}
-                  <span className="font-semibold">{mobile || "—"}</span> clears its WhatsApp
-                  verification — the user must re-verify before they can add groups.
+                  <span className="font-semibold">{mobile || "-"}</span> clears its WhatsApp
+                  verification - the user must re-verify before they can add groups.
                 </Typography>
               </div>
             )}

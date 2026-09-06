@@ -10,7 +10,6 @@ export interface TypographyProps
   extends React.HTMLAttributes<HTMLElement>, VariantProps<typeof typographyVariants> {
   asChild?: boolean;
   as?: React.ElementType;
-  /** Truncates content to this many lines and shows a toggle to expand/collapse once it overflows. */
   clampLines?: number;
   showMoreLabel?: string;
   showLessLabel?: string;
@@ -41,11 +40,7 @@ const Typography = React.forwardRef<HTMLElement, TypographyProps>(
     },
     ref,
   ) => {
-    // If asChild is true, use Slot.Root.
-    // If `as` is provided, use that element.
-    // Otherwise use the default element for the chosen variant.
     const Comp = asChild ? Slot.Root : as || variantElementMap[variant ?? "p"];
-
     const [expanded, setExpanded] = React.useState(false);
     const [isTruncated, setIsTruncated] = React.useState(false);
     const clampRef = React.useRef<HTMLElement>(null);

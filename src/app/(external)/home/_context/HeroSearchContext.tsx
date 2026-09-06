@@ -38,9 +38,6 @@ export function HeroSearchProvider({ children }: { children: React.ReactNode }) 
 
   const requestSeq = React.useRef(0);
 
-  // Waits for a pause in typing before anything downstream reacts — without
-  // this, every keystroke both fires a request and (via ChatWindow reading
-  // `query`) posts a new chat message.
   React.useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedQuery(query), HERO_SEARCH_DEBOUNCE_MS);
     return () => window.clearTimeout(timer);
@@ -87,8 +84,6 @@ export function HeroSearchProvider({ children }: { children: React.ReactNode }) 
   }, [trimmed, isSearchable]);
 
   const value = React.useMemo<HeroSearchContextValue>(
-    // ChatWindow reacts to `query` per commit, so it's the debounced value —
-    // the raw, per-keystroke value is only ever used to seed the debounce.
     () => ({ query: debouncedQuery, setQuery, results, totalResults, isSearching }),
     [debouncedQuery, results, totalResults, isSearching],
   );

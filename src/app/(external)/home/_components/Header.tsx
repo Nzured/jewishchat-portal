@@ -5,8 +5,6 @@ import { cn } from "@/lib/utils";
 interface HeaderProps {
   tags?: string[];
   title: React.ReactNode;
-  /** Element the title renders as — defaults to the variant's own (h2). Pass
-   *  "h1" when this Header is a page's main heading, not a subsection. */
   titleAs?: React.ElementType;
   description?: React.ReactNode;
   action?: React.ReactNode;

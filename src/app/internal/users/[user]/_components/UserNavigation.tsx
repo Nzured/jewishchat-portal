@@ -16,7 +16,7 @@ export default function UserNavigation() {
   const hasNext = hasContext && currentIndex < lastListedUserIds.length - 1;
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="sticky top-0 z-30 -mx-6 bg-surface-bg px-6 pt-8 pb-3 flex items-center justify-between">
       <Button
         leftIcon={<ArrowLeft className="size-4" />}
         size="sm"

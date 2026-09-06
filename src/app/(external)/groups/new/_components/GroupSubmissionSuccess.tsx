@@ -3,14 +3,10 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Separator } from "@/components/ui/Separator";
 import { Typography } from "@/components/ui/Typography";
+import { formatLocation } from "@/lib/location";
 import { cn } from "@/lib/utils";
 import { GroupStatus } from "@/types/Group";
 
-/**
- * Just what this summary screen renders. Built client-side from the form's
- * own values right after submit — the submit-draft response only carries
- * `status`, not a full `Group` (no slug/uuid yet, since moderation hasn't run).
- */
 export interface GroupSubmissionSummary {
   whatsappLink?: string;
   name: string;
@@ -35,12 +31,6 @@ interface GroupSubmissionSuccessProps {
 interface SummaryRow {
   label: string;
   value: React.ReactNode;
-}
-
-function formatLocation(group: GroupSubmissionSummary) {
-  return [group.locationCity, group.locationState, group.locationCountry]
-    .filter(Boolean)
-    .join(", ");
 }
 
 function buildSummaryRows(group: GroupSubmissionSummary): SummaryRow[] {

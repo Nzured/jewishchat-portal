@@ -6,7 +6,6 @@ export interface SeoRedirectLookup {
   found: boolean;
   canonicalPath: string | null;
 }
-
 export interface SeoIndexableCheck {
   categorySlug: string;
   indexable: boolean;
@@ -23,9 +22,6 @@ export const SeoService = {
     ),
 };
 
-/** Resolves a 404'd request path to its canonical replacement, if the
- *  backend has one on record — null if there's no redirect or the lookup
- *  itself fails (never blocks rendering the real 404). */
 export async function resolveSeoRedirect(path: string): Promise<string | null> {
   try {
     const res = await SeoService.lookupRedirect(path);
@@ -36,9 +32,6 @@ export async function resolveSeoRedirect(path: string): Promise<string | null> {
   }
 }
 
-/** Whether a category page currently has enough live groups to be worth
- *  indexing. Defaults to false (noindex) if the check itself fails — the
- *  safer default for a page that might be thin. */
 export async function isCategoryIndexable(categorySlug: string): Promise<boolean> {
   try {
     const res = await SeoService.checkCategoryIndexable(categorySlug);
