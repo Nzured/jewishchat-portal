@@ -1,3 +1,5 @@
+import { hasAnalyticsConsent } from "@/lib/cookieConsent";
+
 const FINGERPRINT_STORAGE_KEY = "visitorFingerprint";
 
 function createFingerprint(): string {
@@ -8,7 +10,7 @@ function createFingerprint(): string {
 }
 
 export function getVisitorFingerprint(): string | undefined {
-  if (typeof window === "undefined") return undefined;
+  if (typeof window === "undefined" || !hasAnalyticsConsent()) return undefined;
 
   try {
     const stored = localStorage.getItem(FINGERPRINT_STORAGE_KEY);

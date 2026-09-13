@@ -56,6 +56,8 @@ export const USER_TYPE_COOKIE = "userType";
 export const REFRESH_TOKEN_ENDPOINT = "auth-service/api/v1/auth/refresh-token";
 
 export const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+export const COOKIE_CONSENT_COOKIE = "cookieConsent";
+export const COOKIE_CONSENT_MAX_AGE = 60 * 60 * 24 * 180;
 
 export const DEFAULT_PAGE = 0;
 export const FIRST_PAGE = 1;

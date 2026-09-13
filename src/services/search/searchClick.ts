@@ -1,5 +1,6 @@
 import { SEARCH_ATTRIBUTION_TTL_MS } from "@/configs/const";
 import { postBeacon } from "@/lib/beacon";
+import { hasAnalyticsConsent } from "@/lib/cookieConsent";
 import { getVisitorFingerprint } from "@/lib/visitor";
 import { SEARCH_SERVICE } from "./search.service";
 
@@ -28,7 +29,7 @@ function rememberAttribution(attribution: StoredAttribution): void {
 }
 
 export function trackSearchClick({ searchId, groupUuid, query, position }: SearchClick): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !hasAnalyticsConsent()) return;
 
   const term = query.trim();
   if (!term) return;
