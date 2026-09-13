@@ -1,4 +1,5 @@
 import { GROUP_VIEW_DEDUPE_MS } from "@/configs/const";
+import { hasAnalyticsConsent } from "@/lib/cookieConsent";
 import { getVisitorFingerprint } from "@/lib/visitor";
 import { takeSearchAttribution } from "@/services/search/searchClick";
 import { GroupService } from "./group.service";
@@ -46,7 +47,7 @@ function claimView(uuid: string): boolean {
 }
 
 export function recordGroupView(uuid: string): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !hasAnalyticsConsent()) return;
   if (!claimView(uuid)) return;
 
   GroupService.recordGroupView(uuid, {

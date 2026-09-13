@@ -6,6 +6,7 @@ import { NAME_PART_ONE, NAME_PART_TWO } from "@/configs/const";
 import { FooterLinkGroup, FOOTER_LINK_GROUPS } from "@/configs/footerNav";
 import { getCategoryPath } from "@/lib/publicPaths";
 import { getCachedCategories } from "@/services/group/categories";
+import { CookieSettingsLink } from "./CookieSettingsLink";
 
 const TOP_CATEGORIES_COUNT = 6;
 
@@ -48,6 +49,7 @@ export async function ExternalFooter() {
             A directory of WhatsApp groups for the Jewish community, made with care. Browse by
             topic, search by city, or just see what your neighbors have joined.
           </Typography>
+          <CookieSettingsLink />
         </div>
 
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
