@@ -8,12 +8,13 @@ import { cn } from "@/lib/utils";
 import { GroupStatus } from "@/types/Group";
 
 export interface GroupSubmissionSummary {
+  slug?: string;
   whatsappLink?: string;
   name: string;
   shortDesc?: string;
   about?: string;
   linkVisibilityLoggedInOnly?: boolean;
-  mainCategory?: { name: string };
+  mainCategory?: { name: string; slug?: string };
   categories?: { name: string }[];
   locationCity?: string;
   locationState?: string;

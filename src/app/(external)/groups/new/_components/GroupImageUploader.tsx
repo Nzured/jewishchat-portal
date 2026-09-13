@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ImageIcon, X } from "lucide-react";
 import { Controller } from "react-hook-form";
 import {
@@ -13,6 +13,7 @@ import {
   AttachmentTitle,
   AttachmentTrigger,
 } from "@/components/ui/Attachment";
+import { ChangePhotoModal } from "@/components/ui/ChangePhotoModal";
 import { Field, FieldError } from "@/components/ui/Field";
 import { Progress } from "@/components/ui/Progress";
 import { IMAGE_ACCEPTED_TYPES, IMAGE_MAX_FILE_SIZE } from "@/configs/const";
@@ -78,27 +79,24 @@ function ImagePicker({
   error?: FieldErrorType;
   uploadProgress: number | null;
 }) {
-  const inputId = useId();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const previewUrl = useObjectUrl(file);
   const isUploading = uploadProgress !== null;
 
-  const openFilePicker = () => inputRef.current?.click();
+  const openFilePicker = () => setIsPickerOpen(true);
 
-  const removeFile = () => {
-    onFileChange(null);
-    if (inputRef.current) inputRef.current.value = "";
-  };
+  const removeFile = () => onFileChange(null);
 
   return (
     <Field data-invalid={!!error}>
-      <input
-        ref={inputRef}
-        id={inputId}
-        type="file"
-        className="sr-only"
-        accept={IMAGE_ACCEPTED_TYPES.join(",")}
-        onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
+      <ChangePhotoModal
+        open={isPickerOpen}
+        onOpenChange={setIsPickerOpen}
+        title={file ? "Replace group photo" : "Add group photo"}
+        hint="JPG, PNG or WebP. You can crop it to a square before saving."
+        crop
+        saveLabel="Use photo"
+        onSave={(picked) => onFileChange(picked)}
       />
 
       {file ? (
@@ -150,7 +148,7 @@ function ImagePicker({
           <AttachmentContent className="flex-none">
             <AttachmentTitle className="text-base">Choose an image</AttachmentTitle>
             <AttachmentDescription className="text-ink-4">
-              JPG, PNG or WebP. Square works best, anything else is cropped to 1:1.
+              JPG, PNG or WebP. You can crop it to a square before saving.
             </AttachmentDescription>
           </AttachmentContent>
           <AttachmentTrigger aria-label="Choose an image" onClick={openFilePicker} />

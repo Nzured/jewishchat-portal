@@ -3,6 +3,7 @@
 import * as React from "react";
 import { ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { ImageCropper, type CropRect } from "@/components/ui/ImageCropper";
 import {
   Modal,
   ModalClose,
@@ -15,10 +16,8 @@ import { Typography } from "@/components/ui/Typography";
 import { IMAGE_ACCEPTED_TYPES, IMAGE_MAX_FILE_SIZE } from "@/configs/const";
 import { cn } from "@/lib/utils";
 
-const CROP_VIEWPORT_HEIGHT = 260;
+const PREVIEW_HEIGHT = 260;
 const MAX_OUTPUT_SIZE = 1024;
-const MIN_ZOOM = 1;
-const MAX_ZOOM = 3;
 
 interface ChangePhotoModalProps {
   open: boolean;
@@ -38,8 +37,13 @@ function validateImage(file: File): string | null {
   return null;
 }
 
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
+function loadImage(url: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = url;
+  });
 }
 
 export function ChangePhotoModal({
@@ -54,22 +58,13 @@ export function ChangePhotoModal({
   onSave,
 }: ChangePhotoModalProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const imageRef = React.useRef<HTMLImageElement>(null);
-  const viewportRef = React.useRef<HTMLDivElement>(null);
-  const dragOrigin = React.useRef<{
-    x: number;
-    y: number;
-    offsetX: number;
-    offsetY: number;
-  } | null>(null);
 
   const [file, setFile] = React.useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [isSaving, setIsSaving] = React.useState(false);
   const [isDraggingFile, setIsDraggingFile] = React.useState(false);
-  const [zoom, setZoom] = React.useState(MIN_ZOOM);
-  const [offset, setOffset] = React.useState({ x: 0, y: 0 });
+  const [cropRect, setCropRect] = React.useState<CropRect | null>(null);
 
   React.useEffect(() => {
     if (!previewUrl) return;
@@ -80,8 +75,7 @@ export function ChangePhotoModal({
     setFile(null);
     setPreviewUrl(null);
     setError(null);
-    setZoom(MIN_ZOOM);
-    setOffset({ x: 0, y: 0 });
+    setCropRect(null);
     if (inputRef.current) inputRef.current.value = "";
   }, []);
 
@@ -102,80 +96,14 @@ export function ChangePhotoModal({
     setError(null);
     setFile(picked);
     setPreviewUrl(URL.createObjectURL(picked));
-    setZoom(MIN_ZOOM);
-    setOffset({ x: 0, y: 0 });
+    setCropRect(null);
   };
 
-  const coverScale = () => {
-    const image = imageRef.current;
-    const viewport = viewportRef.current;
-    if (!image || !viewport) return 1;
+  const buildCroppedFile = async (source: File, url: string): Promise<File> => {
+    if (!cropRect) return source;
 
-    return Math.max(
-      viewport.clientWidth / image.naturalWidth,
-      viewport.clientHeight / image.naturalHeight,
-    );
-  };
-
-  const clampOffset = (next: { x: number; y: number }) => {
-    const image = imageRef.current;
-    const viewport = viewportRef.current;
-    if (!image || !viewport) return next;
-
-    const scale = coverScale() * zoom;
-    const overflowX = Math.max(0, (image.naturalWidth * scale - viewport.clientWidth) / 2);
-    const overflowY = Math.max(0, (image.naturalHeight * scale - viewport.clientHeight) / 2);
-
-    return {
-      x: clamp(next.x, -overflowX, overflowX),
-      y: clamp(next.y, -overflowY, overflowY),
-    };
-  };
-
-  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    event.currentTarget.setPointerCapture(event.pointerId);
-    dragOrigin.current = {
-      x: event.clientX,
-      y: event.clientY,
-      offsetX: offset.x,
-      offsetY: offset.y,
-    };
-  };
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const origin = dragOrigin.current;
-    if (!origin) return;
-
-    setOffset(
-      clampOffset({
-        x: origin.offsetX + (event.clientX - origin.x),
-        y: origin.offsetY + (event.clientY - origin.y),
-      }),
-    );
-  };
-
-  const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
-    dragOrigin.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-  };
-
-  const buildCroppedFile = async (source: File): Promise<File> => {
-    const image = imageRef.current;
-    const viewport = viewportRef.current;
-    if (!image || !viewport) return source;
-
-    const scale = coverScale() * zoom;
-    const scaledWidth = image.naturalWidth * scale;
-    const scaledHeight = image.naturalHeight * scale;
-
-    const sourceX = (scaledWidth / 2 - offset.x - viewport.clientWidth / 2) / scale;
-    const sourceY = (scaledHeight / 2 - offset.y - viewport.clientHeight / 2) / scale;
-    const sourceWidth = viewport.clientWidth / scale;
-    const sourceHeight = viewport.clientHeight / scale;
-
-    const outputWidth = Math.min(MAX_OUTPUT_SIZE, Math.round(sourceWidth));
+    const image = await loadImage(url);
+    const outputWidth = Math.min(MAX_OUTPUT_SIZE, Math.round(cropRect.width));
     const outputHeight = Math.round(outputWidth / aspect);
 
     const canvas = document.createElement("canvas");
@@ -186,10 +114,10 @@ export function ChangePhotoModal({
 
     context.drawImage(
       image,
-      sourceX,
-      sourceY,
-      sourceWidth,
-      sourceHeight,
+      cropRect.x,
+      cropRect.y,
+      cropRect.width,
+      cropRect.height,
       0,
       0,
       outputWidth,
@@ -205,11 +133,11 @@ export function ChangePhotoModal({
   };
 
   const handleSave = async () => {
-    if (!file) return;
+    if (!file || !previewUrl) return;
 
     setIsSaving(true);
     try {
-      await onSave(crop ? await buildCroppedFile(file) : file);
+      await onSave(crop ? await buildCroppedFile(file, previewUrl) : file);
       handleOpenChange(false);
     } catch {
       setError("That photo could not be saved.");
@@ -236,57 +164,33 @@ export function ChangePhotoModal({
 
           {previewUrl ? (
             <div className="flex flex-col gap-3">
-              <div
-                ref={viewportRef}
-                onPointerDown={crop ? handlePointerDown : undefined}
-                onPointerMove={crop ? handlePointerMove : undefined}
-                onPointerUp={crop ? endDrag : undefined}
-                onPointerCancel={crop ? endDrag : undefined}
-                style={{ height: CROP_VIEWPORT_HEIGHT }}
-                className={cn(
-                  "relative overflow-hidden bg-surface-bg",
-                  circular ? "mx-auto aspect-square rounded-full" : "w-full rounded-xl",
-                  crop && "cursor-grab touch-none active:cursor-grabbing",
-                )}
-              >
-                <img
-                  ref={imageRef}
-                  src={previewUrl}
-                  alt="Selected photo"
-                  draggable={false}
-                  onLoad={() => setOffset({ x: 0, y: 0 })}
-                  style={
-                    crop
-                      ? {
-                          transform: `translate(-50%, -50%) translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
-                        }
-                      : undefined
-                  }
-                  className={cn(
-                    "absolute top-1/2 left-1/2 max-w-none select-none",
-                    crop ? "h-auto w-auto min-h-full min-w-full origin-center" : "",
-                  )}
-                />
-              </div>
-
-              {crop && (
-                <label className="flex items-center gap-3">
-                  <Typography as="span" variant="xs" className="shrink-0 text-ink-4">
-                    Zoom
-                  </Typography>
-                  <input
-                    type="range"
-                    min={MIN_ZOOM}
-                    max={MAX_ZOOM}
-                    step={0.01}
-                    value={zoom}
-                    onChange={(event) => {
-                      setZoom(Number(event.target.value));
-                      setOffset((current) => clampOffset(current));
-                    }}
-                    className="h-1 w-full cursor-pointer accent-brand-green"
+              {crop ? (
+                <>
+                  <ImageCropper
+                    src={previewUrl}
+                    aspect={aspect}
+                    circular={circular}
+                    onChange={setCropRect}
                   />
-                </label>
+                  <Typography variant="xs" className="text-ink-4">
+                    Drag the box to reposition it, or pull a corner to resize the area that is kept.
+                  </Typography>
+                </>
+              ) : (
+                <div
+                  style={{ height: PREVIEW_HEIGHT }}
+                  className={cn(
+                    "relative overflow-hidden bg-surface-bg",
+                    circular ? "mx-auto aspect-square rounded-full" : "w-full rounded-xl",
+                  )}
+                >
+                  <img
+                    src={previewUrl}
+                    alt="Selected photo"
+                    draggable={false}
+                    className="size-full object-cover"
+                  />
+                </div>
               )}
 
               <div className="flex items-center justify-between gap-3">

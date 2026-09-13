@@ -554,6 +554,7 @@ export default function EditGroupPage() {
         open={isPhotoModalOpen}
         onOpenChange={setIsPhotoModalOpen}
         title="Change group photo"
+        crop
         onSave={handlePhotoSave}
       />
     </form>

@@ -82,6 +82,7 @@ export interface MyGroupsResponse {
 
 export interface GroupDraftRef {
   draftId: string;
+  slug?: string;
   status: GroupStatus;
   createdAt: string;
   lastUpdatedAt: string;
