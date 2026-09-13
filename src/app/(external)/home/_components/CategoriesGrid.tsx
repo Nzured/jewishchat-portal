@@ -15,7 +15,7 @@ function CategoriesRevealGrid({ categories }: { categories: CategoryType[] }) {
   return (
     <div
       ref={gridRef}
-      className="flex snap-x snap-mandatory gap-4 overflow-x-auto sm:grid sm:snap-none sm:overflow-visible sm:grid-cols-2 lg:grid-cols-4 lg:[&>*:nth-child(4n+2)]:top-8 lg:[&>*:nth-child(4n+4)]:top-8"
+      className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto sm:grid sm:snap-none sm:overflow-visible sm:grid-cols-2 lg:grid-cols-4 lg:[&>*:nth-child(4n+2)]:top-8 lg:[&>*:nth-child(4n+4)]:top-8"
     >
       {categories.map((category) => (
         <Category

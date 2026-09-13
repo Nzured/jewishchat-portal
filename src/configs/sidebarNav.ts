@@ -1,10 +1,13 @@
-import { Flag, LayoutGrid, MessageSquare, Tag, UserCog, Users } from "lucide-react";
+import { Flag, LayoutGrid, MessageSquare, Search, Tag, UserCog, Users } from "lucide-react";
 import type { SidebarNavSection } from "@/types/Navigation";
 import { UserType } from "@/types/User";
 
 const ADMIN_NAV_SECTIONS: SidebarNavSection[] = [
   {
-    items: [{ label: "Dashboard", href: "/internal", icon: LayoutGrid }],
+    items: [
+      { label: "Dashboard", href: "/internal", icon: LayoutGrid },
+      { label: "Search Insights", href: "/internal/search-insights", icon: Search },
+    ],
   },
   {
     label: "Users",

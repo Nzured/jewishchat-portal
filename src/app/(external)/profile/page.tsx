@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { toast } from "sonner";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { ChangePhotoModal } from "@/components/ui/ChangePhotoModal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EXTERNAL_HOME_PATH } from "@/configs/const";
 import { useUser } from "@/contexts/UserContext";
@@ -9,12 +11,15 @@ import { UserService } from "@/services/user/user.service";
 import { User } from "@/types/User";
 import ProfileHeader from "./_components/Header";
 import ProfileGroups from "./_components/ProfileGroups";
+import { VerifyWhatsappModal } from "./_components/VerifyWhatsappModal";
 import YourDetails, { type ProfileDetailsDraft } from "./_components/YourDetails";
 
 export default function ProfilePage() {
-  const { user: sessionUser } = useUser();
+  const { user: sessionUser, refetchUser } = useUser();
   const [user, setUser] = React.useState<User | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = React.useState(false);
+  const [isWhatsappModalOpen, setIsWhatsappModalOpen] = React.useState(false);
 
   React.useEffect(() => {
     const uuid = sessionUser?.uuid;
@@ -39,18 +44,37 @@ export default function ProfilePage() {
 
   const details = user ?? sessionUser;
 
-  const handleSave = (draft: ProfileDetailsDraft) => {
-    setUser((prev) =>
-      prev
-        ? {
-            ...prev,
-            email: draft.email,
-            firstName: draft.firstName,
-            lastName: draft.lastName,
-            mobile: draft.mobile,
-          }
-        : prev,
-    );
+  const startWhatsappVerification = async () => {
+    await UserService.requestWhatsappVerification();
+    setIsWhatsappModalOpen(true);
+  };
+
+  const refreshUser = async () => {
+    const uuid = sessionUser?.uuid;
+    if (uuid) {
+      const refreshed = await UserService.getUserById(uuid);
+      if (refreshed?.data) setUser(refreshed.data);
+    }
+    await refetchUser();
+  };
+
+  const handleSave = async (draft: ProfileDetailsDraft) => {
+    const { data } = await UserService.updateMyProfile(draft);
+    setUser((prev) => (prev ? { ...prev, ...draft, ...data } : prev));
+    await refetchUser();
+    toast.success("Your details have been updated.");
+
+    if (data && !data.whatsappVerified) await startWhatsappVerification();
+  };
+
+  const handleWhatsappVerified = () => refreshUser();
+
+  const handlePhotoSave = async (photo: File) => {
+    const { data } = await UserService.getProfilePictureUploadUrl();
+    await UserService.uploadProfilePicture(data.uploadUrl, photo);
+    await UserService.confirmProfilePicture(data.fileKey);
+    await refreshUser();
+    toast.success("Your profile photo has been updated.");
   };
 
   if (!details) {
@@ -74,6 +98,8 @@ export default function ProfilePage() {
         emailVerified={details.emailVerified}
         whatsappNumber={details.mobile}
         whatsappVerified={details.whatsappVerified}
+        onChangePhoto={() => setIsPhotoModalOpen(true)}
+        onVerifyWhatsapp={() => void startWhatsappVerification()}
       />
       {isLoading ? (
         <Skeleton className="h-80 w-full rounded-xl" />
@@ -89,6 +115,22 @@ export default function ProfilePage() {
         />
       )}
       <ProfileGroups userUuid={details.uuid} />
+      <ChangePhotoModal
+        open={isPhotoModalOpen}
+        onOpenChange={setIsPhotoModalOpen}
+        title="Change profile photo"
+        hint="JPG, PNG or WebP. Drag to reposition and zoom to crop."
+        crop
+        circular
+        aspect={1}
+        onSave={handlePhotoSave}
+      />
+      <VerifyWhatsappModal
+        open={isWhatsappModalOpen}
+        onOpenChange={setIsWhatsappModalOpen}
+        mobile={details.mobile}
+        onVerified={handleWhatsappVerified}
+      />
     </div>
   );
 }

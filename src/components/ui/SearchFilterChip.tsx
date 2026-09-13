@@ -4,7 +4,7 @@ import * as React from "react";
 import { PlusCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
-import { DatePicker } from "@/components/ui/DatePicker";
+import { DateRangeFields } from "@/components/ui/DateRangeFields";
 import { Input } from "@/components/ui/Input";
 import {
   Popover,
@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/Popover";
 import { SearchDropdown } from "@/components/ui/SearchDropdown";
 import { Typography } from "@/components/ui/Typography";
-import { formatDate, parseDateKey, toDateKey } from "@/lib/date";
+import { formatDate, parseDateKey } from "@/lib/date";
+import { cn } from "@/lib/utils";
 import type { FilterItem } from "@/types/Search";
 
 function formatRangeBound(value?: string) {
@@ -112,7 +113,12 @@ export function SearchFilterChip({
           />
         )}
       </PopoverTrigger>
-      <PopoverContent className="mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-96">
+      <PopoverContent
+        className={cn(
+          "mt-2 w-[calc(100vw-2rem)]",
+          filter.component === "DATE_RANGE" ? "max-w-lg sm:w-[32rem]" : "max-w-sm sm:w-96",
+        )}
+      >
         <PopoverHeader>
           <PopoverTitle>{`Filter by : ${filter.label}`}</PopoverTitle>
         </PopoverHeader>
@@ -167,25 +173,11 @@ export function SearchFilterChip({
                 />
               </div>
             ) : filter.component === "DATE_RANGE" ? (
-              <div className="flex w-full flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-                <DatePicker
-                  value={rangeStart ? parseDateKey(rangeStart) : undefined}
-                  onChange={(date) => setDraft([date ? toDateKey(date) : "", rangeEnd])}
-                  placeholder="From"
-                  align="start"
-                  className="w-full sm:w-auto"
-                />
-                <Typography variant="small" className="shrink-0 self-center text-ink-3">
-                  to
-                </Typography>
-                <DatePicker
-                  value={rangeEnd ? parseDateKey(rangeEnd) : undefined}
-                  onChange={(date) => setDraft([rangeStart, date ? toDateKey(date) : ""])}
-                  placeholder="To"
-                  align="end"
-                  className="w-full sm:w-auto"
-                />
-              </div>
+              <DateRangeFields
+                start={rangeStart}
+                end={rangeEnd}
+                onChange={(start, end) => setDraft([start, end])}
+              />
             ) : null}
           </div>
         </div>

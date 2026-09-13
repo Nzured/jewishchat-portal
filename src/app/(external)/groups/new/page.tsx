@@ -6,18 +6,20 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/Skeleton";
 import StepperCard, { type StepperCardStep } from "@/components/ui/StepperCard";
-import { EXTERNAL_GROUPS_PATH } from "@/configs/const";
+import { EXTERNAL_GROUPS_MINE_PATH } from "@/configs/const";
 import { useUser } from "@/contexts/UserContext";
 import {
   clearPendingGroupDraft,
   loadPendingGroupDraft,
   savePendingGroupDraft,
 } from "@/lib/pendingGroupDraft";
+import { getGroupPath } from "@/lib/publicPaths";
 import { GroupService } from "@/services/group/group.service";
-import type {
-  CreateGroupFormValues,
-  GroupDraftStep1Payload,
-  GroupDraftStep2Payload,
+import {
+  type CreateGroupFormValues,
+  type GroupDraftStep1Payload,
+  type GroupDraftStep2Payload,
+  GroupStatus,
 } from "@/types/Group";
 import { useGroups } from "../_context/GroupsContext";
 import AuthRequiredModal from "./_components/AuthRequiredModal";
@@ -264,6 +266,7 @@ function CreateGroupFlow() {
       const [draft, categories] = await Promise.all([submitDraft(), fetchCategories()]);
 
       setSubmittedGroup({
+        slug: draft.slug,
         whatsappLink: values.whatsappLink,
         name: values.name,
         shortDesc: values.shortDesc,
@@ -283,6 +286,17 @@ function CreateGroupFlow() {
     });
   };
 
+  const handleViewListing = () => {
+    const group = submittedGroup;
+    const categorySlug = group?.mainCategory?.slug;
+    const isLive = group?.status === GroupStatus.ACTIVE;
+    if (group?.slug && categorySlug && isLive) {
+      router.push(getGroupPath({ slug: group.slug, mainCategorySlug: categorySlug }));
+      return;
+    }
+    router.push(EXTERNAL_GROUPS_MINE_PATH);
+  };
+
   const handleAddAnotherGroup = () => {
     reset(DEFAULT_FORM_VALUES);
     setSubmittedGroup(null);
@@ -297,7 +311,7 @@ function CreateGroupFlow() {
         <GroupSubmissionSuccess
           group={submittedGroup}
           onAddAnotherGroup={handleAddAnotherGroup}
-          onViewListing={() => router.push(EXTERNAL_GROUPS_PATH)}
+          onViewListing={handleViewListing}
         />
       ) : (
         <StepperCard

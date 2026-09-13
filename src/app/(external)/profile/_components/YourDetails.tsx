@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { PhoneInput, isValidPhone } from "@/components/ui/PhoneInput";
 import { Separator } from "@/components/ui/Separator";
 import { Typography } from "@/components/ui/Typography";
-import { EMAIL_REGEX, NOT_APPLICABLE } from "@/configs/const";
+import { NOT_APPLICABLE } from "@/configs/const";
 import { cn } from "@/lib/utils";
 
 const editFieldClassName = "max-w-sm";
@@ -19,11 +19,9 @@ function EditField({ children }: { children: React.ReactNode }) {
 }
 
 export interface ProfileDetailsDraft {
-  email: string;
   firstName: string;
   lastName: string;
   mobile: string;
-  password?: string;
 }
 
 interface YourDetailsProps {
@@ -83,13 +81,11 @@ export default function YourDetails({
 }: YourDetailsProps) {
   const toDraft = React.useCallback(
     (): ProfileDetailsDraft => ({
-      email: email ?? "",
       firstName: firstName ?? "",
       lastName: lastName ?? "",
       mobile: mobile ?? "",
-      password: "",
     }),
-    [email, firstName, lastName, mobile],
+    [firstName, lastName, mobile],
   );
 
   const [isEditing, setIsEditing] = React.useState(false);
@@ -118,7 +114,6 @@ export default function YourDetails({
 
   const save = async () => {
     const nextErrors: Partial<Record<keyof ProfileDetailsDraft, string>> = {};
-    if (!EMAIL_REGEX.test(draft.email.trim())) nextErrors.email = "Enter a valid email address.";
     if (!draft.firstName.trim()) nextErrors.firstName = "First name is required.";
     if (!draft.lastName.trim()) nextErrors.lastName = "Last name is required.";
     if (draft.mobile && !isValidPhone(draft.mobile)) {
@@ -129,11 +124,9 @@ export default function YourDetails({
     if (Object.values(nextErrors).some(Boolean)) return;
 
     const payload: ProfileDetailsDraft = {
-      email: draft.email.trim(),
       firstName: draft.firstName.trim(),
       lastName: draft.lastName.trim(),
       mobile: draft.mobile,
-      ...(draft.password ? { password: draft.password } : {}),
     };
 
     try {
@@ -160,8 +153,7 @@ export default function YourDetails({
               Your details
             </Typography>
             <Typography variant="muted" className="max-w-md">
-              The information tied to your login. Changing your email or number re-triggers its
-              verification.
+              The information tied to your login. Changing your number re-triggers its verification.
             </Typography>
           </div>
 
@@ -195,27 +187,13 @@ export default function YourDetails({
           icon={<Mail />}
           label="Email address"
           action={
-            !isEditing && (
-              <Chip
-                label={emailVerified ? "Verified" : "Not verified"}
-                type={emailVerified ? "success" : "warning"}
-              />
-            )
+            <Chip
+              label={emailVerified ? "Verified" : "Not verified"}
+              type={emailVerified ? "success" : "warning"}
+            />
           }
         >
-          {isEditing ? (
-            <EditField>
-              <Input
-                type="email"
-                aria-label="Email address"
-                value={draft.email}
-                error={errors.email}
-                onChange={(event) => setField("email", event.target.value)}
-              />
-            </EditField>
-          ) : (
-            <ReadValue>{email || NOT_APPLICABLE}</ReadValue>
-          )}
+          <ReadValue>{email || NOT_APPLICABLE}</ReadValue>
         </DetailRow>
 
         <Separator />
@@ -255,20 +233,7 @@ export default function YourDetails({
         <Separator />
 
         <DetailRow icon={<Lock />} label="Password">
-          {isEditing ? (
-            <EditField>
-              <Input
-                type="password"
-                aria-label="New password"
-                placeholder="Leave blank to keep current password"
-                value={draft.password ?? ""}
-                error={errors.password}
-                onChange={(event) => setField("password", event.target.value)}
-              />
-            </EditField>
-          ) : (
-            <ReadValue>&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</ReadValue>
-          )}
+          <ReadValue>&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</ReadValue>
         </DetailRow>
 
         <Separator />

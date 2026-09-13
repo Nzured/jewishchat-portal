@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, ArrowRight, BadgeCheck, CalendarDays, CircleAlert } from "lucide-react";
+import { AlertTriangle, BadgeCheck, CalendarDays, Camera, CircleAlert } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
@@ -21,6 +21,7 @@ interface ProfileHeaderProps {
   whatsappVerified?: boolean;
   memberSince?: ConfigType;
   onVerifyWhatsapp?: () => void;
+  onChangePhoto?: () => void;
   className?: string;
 }
 
@@ -33,6 +34,7 @@ export default function ProfileHeader({
   whatsappVerified = false,
   memberSince,
   onVerifyWhatsapp,
+  onChangePhoto,
   className,
 }: ProfileHeaderProps) {
   const memberSinceLabel = isValidDate(memberSince)
@@ -44,7 +46,24 @@ export default function ProfileHeader({
       <div className="relative overflow-hidden rounded-lg">
         <div className="relative flex flex-col gap-3 p-4 sm:p-6">
           <div className="flex items-center gap-4">
-            <Avatar src={avatarUrl} name={name} size="xl" />
+            {onChangePhoto ? (
+              <button
+                type="button"
+                onClick={onChangePhoto}
+                aria-label="Change profile photo"
+                className="group relative shrink-0 cursor-pointer rounded-full focus-visible:ring-2 focus-visible:ring-brand-green focus-visible:ring-offset-2 focus-visible:outline-none"
+              >
+                <Avatar src={avatarUrl} name={name} size="xl" variant="circle" />
+                <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                  <Camera className="size-5" />
+                </span>
+                <span className="absolute -right-0.5 -bottom-0.5 flex size-6 items-center justify-center rounded-full border-2 border-surface-card bg-brand-green text-white">
+                  <Camera className="size-3" />
+                </span>
+              </button>
+            ) : (
+              <Avatar src={avatarUrl} name={name} size="xl" variant="circle" />
+            )}
             <div className="flex min-w-0 flex-col gap-0.5">
               <Typography variant="h1" className="truncate font-display font-bold">
                 {name}
@@ -99,13 +118,8 @@ export default function ProfileHeader({
           description={`${whatsappNumber ? `${whatsappNumber} hasn't` : "Your number hasn't"} been confirmed yet. Until it's verified your account isn't fully verified, and group submission stays locked.`}
         >
           {onVerifyWhatsapp && (
-            <Button
-              size="sm"
-              className="self-center"
-              leftIcon={<ArrowRight />}
-              onClick={onVerifyWhatsapp}
-            >
-              Verify WhatsApp number
+            <Button size="sm" variant="outline" className="self-center" onClick={onVerifyWhatsapp}>
+              Verify
             </Button>
           )}
         </Banner>

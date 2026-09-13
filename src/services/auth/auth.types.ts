@@ -38,10 +38,8 @@ export interface RefreshTokenPayload {
   refreshToken: string;
 }
 
-// Refresh returns the same shape as login (rotated accessToken + refreshToken).
 export type RefreshTokenResponse = LoginResponse;
 
-// Verifying the OTP logs the user in, so the response carries fresh tokens too.
 export type VerifyEmailResponse = LoginResponse;
 
 export interface UserTypeData {

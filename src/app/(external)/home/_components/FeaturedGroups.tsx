@@ -16,7 +16,7 @@ function FeaturedGroupsGrid({ groups }: { groups: Group[] }) {
   return (
     <div
       ref={gridRef}
-      className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-3"
+      className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 sm:grid sm:snap-none sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-3"
     >
       {groups?.map((group, index) => (
         <GroupCard

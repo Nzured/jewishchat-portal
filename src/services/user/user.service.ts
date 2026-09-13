@@ -1,9 +1,17 @@
+import axios from "axios";
+import { GROUP_PHOTO_UPLOAD_CONTENT_TYPE } from "@/configs/const";
 import { ApiResponse } from "@/types/Common";
-import { Group } from "@/types/Group";
+import { GetPhotoUrlResponse, Group } from "@/types/Group";
 import { AdminUsersPage, User, UserReportTypes, UserType } from "@/types/User";
 import { api } from "../axiosConfig";
 
 const USER_SERVICE = "/user-service/api/v1";
+
+export interface UpdateMyProfilePayload {
+  firstName: string;
+  lastName: string;
+  mobile: string;
+}
 
 export interface AdminUserSearchParams {
   search?: string;
@@ -15,6 +23,8 @@ export interface AdminUserSearchParams {
 
 export const UserService = {
   myProfile: () => api.get<ApiResponse<User>>(`${USER_SERVICE}/users/me`),
+  updateMyProfile: (payload: UpdateMyProfilePayload) =>
+    api.patch<ApiResponse<User>>(`${USER_SERVICE}/users/me`, payload, { globalLoader: true }),
   fetchUsers: (params: AdminUserSearchParams) =>
     api.get<ApiResponse<AdminUsersPage>>(`${USER_SERVICE}/admin/users`, { params }),
   getUser: (userId: string) => api.get<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}`),
@@ -60,4 +70,18 @@ export const UserService = {
     ),
   getUserById: (userId: string) =>
     api.get<ApiResponse<User>>(`${USER_SERVICE}/users/getById/${userId}`),
+  getProfilePictureUploadUrl: () =>
+    api.post<ApiResponse<GetPhotoUrlResponse>>(`${USER_SERVICE}/users/me/profile-picture`, {}),
+  uploadProfilePicture: (uploadUrl: string, file: File) =>
+    axios.put(uploadUrl, file, {
+      headers: { "Content-Type": GROUP_PHOTO_UPLOAD_CONTENT_TYPE },
+    }),
+  requestWhatsappVerification: () =>
+    api.post<ApiResponse<void>>(`${USER_SERVICE}/users/verify-whatsapp/request`, {}),
+  confirmWhatsappVerification: (otp: string) =>
+    api.post<ApiResponse<User>>(`${USER_SERVICE}/users/verify-whatsapp/confirm`, { otp }),
+  confirmProfilePicture: (fileKey: string) =>
+    api.patch<ApiResponse<User>>(`${USER_SERVICE}/users/me/profile-picture/confirm`, undefined, {
+      params: { fileKey },
+    }),
 };
