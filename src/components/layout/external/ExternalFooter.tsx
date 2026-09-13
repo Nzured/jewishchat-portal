@@ -30,7 +30,7 @@ export async function ExternalFooter() {
     : FOOTER_LINK_GROUPS;
 
   return (
-    <footer className="border-t border-surface-line bg-surface-card px-4 py-10 md:px-8">
+    <footer className="hidden border-t border-surface-line bg-surface-card px-4 py-10 md:block md:px-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-10 lg:flex-row lg:justify-between">
         <div className="flex max-w-xs flex-col gap-3">
           <div className="flex items-center gap-2">

@@ -117,34 +117,36 @@ function DraftCard({
   return (
     <div
       className={cn(
-        "flex items-center gap-4 rounded-2xl border border-surface-line bg-state-bg-success/40 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
+        "flex flex-col gap-3 rounded-2xl border border-surface-line bg-state-bg-success/40 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-center sm:gap-4",
         className,
       )}
     >
-      <Avatar variant="tile" name={draftName} />
+      <div className="flex min-w-0 flex-1 items-center gap-4">
+        <Avatar variant="tile" name={draftName} />
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <Typography variant="small" className="truncate font-semibold text-ink-1">
-          {draftName}
-        </Typography>
-        <Typography variant="tiny" className="text-ink-3">
-          Step {currentStep} of {TOTAL_DRAFT_STEPS} · last edited {timeAgo(draft.lastUpdatedAt)}
-          {expiry && (
-            <>
-              {" · "}
-              <span
-                title={expiry.exactLabel}
-                className={cn(expiry.urgent && "font-medium text-state-danger")}
-              >
-                {expiry.label}
-              </span>
-            </>
-          )}
-        </Typography>
-        <Progress value={completedSteps} max={TOTAL_DRAFT_STEPS} className="h-1" />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <Typography variant="small" className="truncate font-semibold text-ink-1">
+            {draftName}
+          </Typography>
+          <Typography variant="tiny" className="text-ink-3">
+            Step {currentStep} of {TOTAL_DRAFT_STEPS} · last edited {timeAgo(draft.lastUpdatedAt)}
+            {expiry && (
+              <>
+                {" · "}
+                <span
+                  title={expiry.exactLabel}
+                  className={cn(expiry.urgent && "font-medium text-state-danger")}
+                >
+                  {expiry.label}
+                </span>
+              </>
+            )}
+          </Typography>
+          <Progress value={completedSteps} max={TOTAL_DRAFT_STEPS} className="h-1" />
+        </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex shrink-0 items-center justify-end gap-2">
         <Button
           variant="default"
           color="primary"
@@ -247,54 +249,56 @@ function GroupItemCard({
         className,
       )}
     >
-      <div className="flex items-center gap-4">
-        <Avatar variant="tile" src={group.thumbnailUrl ?? undefined} name={group.name} />
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
+        <div className="flex min-w-0 flex-1 items-start gap-4">
+          <Avatar variant="tile" src={group.thumbnailUrl ?? undefined} name={group.name} />
 
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <Typography variant="large" className="truncate font-semibold text-ink-1">
-            {group.name ?? NOT_APPLICABLE}
-          </Typography>
-          <Typography variant="small" className="text-ink-3">
-            {group.shortDesc ?? NOT_APPLICABLE}
-          </Typography>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {group.mainCategory?.name && (
-              <Chip
-                variant="filter"
-                shape="pill"
-                type="success"
-                label={group.mainCategory.name}
-                className="text-brand-deep"
-              />
-            )}
-            {group.categories
-              ?.filter((category) => category.id !== group.mainCategory?.id)
-              .map((category) => (
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <Typography variant="large" className="truncate font-semibold text-ink-1">
+              {group.name ?? NOT_APPLICABLE}
+            </Typography>
+            <Typography variant="small" className="line-clamp-2 text-ink-3">
+              {group.shortDesc ?? NOT_APPLICABLE}
+            </Typography>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {group.mainCategory?.name && (
                 <Chip
-                  key={category.id}
                   variant="filter"
                   shape="pill"
-                  type="neutral"
-                  label={category.name}
+                  type="success"
+                  label={group.mainCategory.name}
+                  className="text-brand-deep"
                 />
-              ))}
-          </div>
-          <div className="mt-2 flex items-center gap-2">
-            {location && (
-              <Typography variant="tiny" className="text-ink-4">
-                {location}
-              </Typography>
-            )}
-            {group.memberCount > 0 && (
-              <Typography variant="tiny" className="text-ink-4">
-                | {`${group.memberCount.toLocaleString()} members`}
-              </Typography>
-            )}
+              )}
+              {group.categories
+                ?.filter((category) => category.id !== group.mainCategory?.id)
+                .map((category) => (
+                  <Chip
+                    key={category.id}
+                    variant="filter"
+                    shape="pill"
+                    type="neutral"
+                    label={category.name}
+                  />
+                ))}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {location && (
+                <Typography variant="tiny" className="text-ink-4">
+                  {location}
+                </Typography>
+              )}
+              {group.memberCount > 0 && (
+                <Typography variant="tiny" className="text-ink-4">
+                  | {`${group.memberCount.toLocaleString()} members`}
+                </Typography>
+              )}
+            </div>
           </div>
         </div>
 
         <div
-          className="flex shrink-0 items-center gap-3"
+          className="flex flex-wrap items-center gap-3 lg:shrink-0"
           onClick={(event) => event.stopPropagation()}
           onKeyDown={(event) => event.stopPropagation()}
         >
@@ -318,60 +322,62 @@ function GroupItemCard({
             </Typography>
           </div>
 
-          {isSuspended ? (
-            <Button
-              variant="default"
-              color="primary"
-              size="sm"
-              leftIcon={<RotateCcw />}
-              onClick={() => {
-                handleEdit();
-                onResubmit?.(group);
-              }}
-            >
-              Edit & Resubmit
-            </Button>
-          ) : (
-            <Button variant="outline" size="sm" leftIcon={<Pencil />} onClick={handleEdit}>
-              Edit
-            </Button>
-          )}
-
-          <Popover open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <PopoverTrigger asChild>
+          <div className="ml-auto flex items-center gap-2 lg:ml-0">
+            {isSuspended ? (
               <Button
-                variant="outline"
-                size="icon-sm"
-                aria-label={`More actions for ${group.name}`}
-                disabled={isDeleting}
-              >
-                <Menu className="size-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-48 gap-1 p-2">
-              <Button
-                variant="icon"
+                variant="default"
+                color="primary"
                 size="sm"
-                className="w-full justify-start gap-2 px-2"
-                onClick={() => void handleCopyLink()}
-              >
-                <Copy className="size-4" />
-                Copy link
-              </Button>
-              <Button
-                variant="icon"
-                size="sm"
-                className="w-full justify-start gap-2 px-2 text-state-danger hover:bg-state-bg-error hover:text-state-danger [&_svg]:text-state-danger"
+                leftIcon={<RotateCcw />}
                 onClick={() => {
-                  setIsMenuOpen(false);
-                  setIsDeleteOpen(true);
+                  handleEdit();
+                  onResubmit?.(group);
                 }}
               >
-                <Trash2 className="size-4" />
-                Delete listing
+                Edit & Resubmit
               </Button>
-            </PopoverContent>
-          </Popover>
+            ) : (
+              <Button variant="outline" size="sm" leftIcon={<Pencil />} onClick={handleEdit}>
+                Edit
+              </Button>
+            )}
+
+            <Popover open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label={`More actions for ${group.name}`}
+                  disabled={isDeleting}
+                >
+                  <Menu className="size-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-48 gap-1 p-2">
+                <Button
+                  variant="icon"
+                  size="sm"
+                  className="w-full justify-start gap-2 px-2"
+                  onClick={() => void handleCopyLink()}
+                >
+                  <Copy className="size-4" />
+                  Copy link
+                </Button>
+                <Button
+                  variant="icon"
+                  size="sm"
+                  className="w-full justify-start gap-2 px-2 text-state-danger hover:bg-state-bg-error hover:text-state-danger [&_svg]:text-state-danger"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setIsDeleteOpen(true);
+                  }}
+                >
+                  <Trash2 className="size-4" />
+                  Delete listing
+                </Button>
+              </PopoverContent>
+            </Popover>
+          </div>
 
           <DeleteModal
             open={isDeleteOpen}
