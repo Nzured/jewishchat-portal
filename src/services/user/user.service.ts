@@ -21,13 +21,37 @@ export interface AdminUserSearchParams {
   sort?: string;
 }
 
+type ApiUser = User & { profilePictureUrl?: string | null };
+
+const normalizeUser = (user: ApiUser): User => ({
+  ...user,
+  profilePic: user.profilePic ?? user.profilePictureUrl ?? undefined,
+});
+
+const withUser = async (request: Promise<ApiResponse<ApiUser>>): Promise<ApiResponse<User>> => {
+  const res = await request;
+  return res?.data ? { ...res, data: normalizeUser(res.data) } : res;
+};
+
+const withUsersPage = async (
+  request: Promise<ApiResponse<AdminUsersPage>>,
+): Promise<ApiResponse<AdminUsersPage>> => {
+  const res = await request;
+  return res?.data?.users
+    ? { ...res, data: { ...res.data, users: res.data.users.map(normalizeUser) } }
+    : res;
+};
+
 export const UserService = {
-  myProfile: () => api.get<ApiResponse<User>>(`${USER_SERVICE}/users/me`),
+  myProfile: () => withUser(api.get<ApiResponse<User>>(`${USER_SERVICE}/users/me`)),
   updateMyProfile: (payload: UpdateMyProfilePayload) =>
-    api.patch<ApiResponse<User>>(`${USER_SERVICE}/users/me`, payload, { globalLoader: true }),
+    withUser(
+      api.patch<ApiResponse<User>>(`${USER_SERVICE}/users/me`, payload, { globalLoader: true }),
+    ),
   fetchUsers: (params: AdminUserSearchParams) =>
-    api.get<ApiResponse<AdminUsersPage>>(`${USER_SERVICE}/admin/users`, { params }),
-  getUser: (userId: string) => api.get<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}`),
+    withUsersPage(api.get<ApiResponse<AdminUsersPage>>(`${USER_SERVICE}/admin/users`, { params })),
+  getUser: (userId: string) =>
+    withUser(api.get<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}`)),
   getGroupsByUser: (userId: string) =>
     api.get<ApiResponse<Group[]>>(`${USER_SERVICE}/admin/users/${userId}/groups`),
   deleteUser: (userId: string) =>
@@ -37,39 +61,43 @@ export const UserService = {
   getSuspendType: () =>
     api.get<ApiResponse<UserReportTypes[]>>(`${USER_SERVICE}/admin/users/suspend-types`),
   suspendUser: (userId: string, payload: { suspendTypeId: number; reason: string }) =>
-    api.patch<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}/suspend`, payload, {
-      globalLoader: true,
-    }),
-  reactivateUser: (userId: string) =>
-    api.patch<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}/reactivate`, undefined, {
-      globalLoader: true,
-    }),
-  changeEmail: (userId: string, email: string) =>
-    api.patch<ApiResponse<User>>(
-      `${USER_SERVICE}/admin/users/${userId}/email`,
-      { newEmail: email },
-      {
+    withUser(
+      api.patch<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}/suspend`, payload, {
         globalLoader: true,
-      },
+      }),
+    ),
+  reactivateUser: (userId: string) =>
+    withUser(
+      api.patch<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}/reactivate`, undefined, {
+        globalLoader: true,
+      }),
+    ),
+  changeEmail: (userId: string, email: string) =>
+    withUser(
+      api.patch<ApiResponse<User>>(
+        `${USER_SERVICE}/admin/users/${userId}/email`,
+        { newEmail: email },
+        { globalLoader: true },
+      ),
     ),
   changeMobile: (userId: string, mobile: string) =>
-    api.patch<ApiResponse<User>>(
-      `${USER_SERVICE}/admin/users/${userId}/mobile`,
-      { newMobile: mobile },
-      {
-        globalLoader: true,
-      },
+    withUser(
+      api.patch<ApiResponse<User>>(
+        `${USER_SERVICE}/admin/users/${userId}/mobile`,
+        { newMobile: mobile },
+        { globalLoader: true },
+      ),
     ),
   changeUserRole: (userId: string, roles: number[]) =>
-    api.patch<ApiResponse<User>>(
-      `${USER_SERVICE}/admin/users/${userId}/role`,
-      { roles: roles },
-      {
-        globalLoader: true,
-      },
+    withUser(
+      api.patch<ApiResponse<User>>(
+        `${USER_SERVICE}/admin/users/${userId}/role`,
+        { roles: roles },
+        { globalLoader: true },
+      ),
     ),
   getUserById: (userId: string) =>
-    api.get<ApiResponse<User>>(`${USER_SERVICE}/users/getById/${userId}`),
+    withUser(api.get<ApiResponse<User>>(`${USER_SERVICE}/users/getById/${userId}`)),
   getProfilePictureUploadUrl: () =>
     api.post<ApiResponse<GetPhotoUrlResponse>>(`${USER_SERVICE}/users/me/profile-picture`, {}),
   uploadProfilePicture: (uploadUrl: string, file: File) =>
@@ -79,9 +107,11 @@ export const UserService = {
   requestWhatsappVerification: () =>
     api.post<ApiResponse<void>>(`${USER_SERVICE}/users/verify-whatsapp/request`, {}),
   confirmWhatsappVerification: (otp: string) =>
-    api.post<ApiResponse<User>>(`${USER_SERVICE}/users/verify-whatsapp/confirm`, { otp }),
+    withUser(api.post<ApiResponse<User>>(`${USER_SERVICE}/users/verify-whatsapp/confirm`, { otp })),
   confirmProfilePicture: (fileKey: string) =>
-    api.patch<ApiResponse<User>>(`${USER_SERVICE}/users/me/profile-picture/confirm`, undefined, {
-      params: { fileKey },
-    }),
+    withUser(
+      api.patch<ApiResponse<User>>(`${USER_SERVICE}/users/me/profile-picture/confirm`, undefined, {
+        params: { fileKey },
+      }),
+    ),
 };

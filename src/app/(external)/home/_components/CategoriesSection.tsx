@@ -7,9 +7,9 @@ import { Header } from "./Header";
 import { useHome } from "../_context/HomeContext";
 
 export function CategoriesSection() {
-  const { categories, isLoading } = useHome();
+  const { categories } = useHome();
 
-  if (!isLoading && categories.length === 0) {
+  if (categories.length === 0) {
     return null;
   }
 

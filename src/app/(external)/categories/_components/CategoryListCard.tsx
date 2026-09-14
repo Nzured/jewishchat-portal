@@ -17,6 +17,7 @@ export function CategoryListCard({ name, slug, icon, description, color }: Categ
   return (
     <NextLink
       href={getCategoryPath(slug)}
+      prefetch
       className="flex items-center gap-4 rounded-2xl border border-surface-line bg-surface-card p-5 transition-colors hover:border-brand-green/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-green/40"
     >
       {icon && (

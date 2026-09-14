@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import Image from "next/image";
+import { IMAGE_CDN_HOSTNAME } from "@/configs/const";
 import { cn } from "@/lib/utils";
 import { Typography } from "./Typography";
 
@@ -48,6 +50,22 @@ function hashString(value: string) {
   return Math.abs(hash);
 }
 
+const sizePx: Record<NonNullable<VariantProps<typeof avatarVariants>["size"]>, number> = {
+  sm: 24,
+  md: 36,
+  lg: 44,
+  xl: 60,
+  "2xl": 100,
+};
+
+function isOptimizableSrc(src: string) {
+  try {
+    return new URL(src).hostname === IMAGE_CDN_HOSTNAME;
+  } catch {
+    return false;
+  }
+}
+
 function getInitials(name: string) {
   const words = name.trim().split(/\s+/).filter(Boolean);
   if (words.length === 0) return "";
@@ -73,7 +91,8 @@ function Avatar({
   className,
   ...props
 }: AvatarProps) {
-  const [imageFailed, setImageFailed] = React.useState(false);
+  const [failedSrc, setFailedSrc] = React.useState<string | null>(null);
+  const imageFailed = failedSrc === src;
   const resolvedInitials = getInitials(name);
   const seed = name || alt || "";
   const { bg, text } = colorPalette[hashString(seed) % colorPalette.length];
@@ -95,11 +114,14 @@ function Avatar({
       {...props}
     >
       {showImage ? (
-        <img
-          src={src}
+        <Image
+          src={src as string}
           alt=""
-          className="size-full object-cover"
-          onError={() => setImageFailed(true)}
+          fill
+          sizes={`${sizePx[size ?? "md"]}px`}
+          unoptimized={!isOptimizableSrc(src as string)}
+          className="object-cover"
+          onError={() => setFailedSrc(src ?? null)}
         />
       ) : (
         <Typography as="span" aria-hidden="true" className="text-inherit leading-none">

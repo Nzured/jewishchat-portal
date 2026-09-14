@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Lottie from "lottie-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import verifiedAnimation from "@/assets/animations/Verified.json";
+import { createLazyLottie } from "@/components/ui/LazyLottie";
 import { Progress } from "@/components/ui/Progress";
 import { Typography } from "@/components/ui/Typography";
 import { getHomePathForUserType } from "@/lib/auth";
 import { UserType } from "@/types/User";
+
+const VerifiedAnimation = createLazyLottie(() => import("@/assets/animations/Verified.json"));
 
 interface OtpVerificationSuccessProps {
   userType: UserType;
@@ -47,8 +48,7 @@ export default function OtpVerificationSuccess({ userType }: OtpVerificationSucc
   return (
     <div className="flex flex-col items-center justify-center text-center w-full max-w-[320px] mx-auto py-8">
       <div className="w-24 h-24 mb-6">
-        <Lottie
-          animationData={verifiedAnimation}
+        <VerifiedAnimation
           loop={false}
           className="w-full h-full"
           onComplete={() => setIsAnimationDone(true)}

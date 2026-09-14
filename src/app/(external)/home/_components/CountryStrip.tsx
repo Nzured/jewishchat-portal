@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
 import { gsap, registerGsap, useIsomorphicLayoutEffect } from "@/lib/motion/gsap";
 import { useHome } from "../_context/HomeContext";
@@ -69,22 +68,9 @@ function CountryTicker({ countries }: { countries: string[] }) {
 }
 
 export function CountryStrip() {
-  const { countries, isLoading } = useHome();
+  const { countries } = useHome();
 
   const visible = React.useMemo(() => dedupe(countries), [countries]);
-
-  if (isLoading) {
-    return (
-      <section className="flex flex-col gap-6">
-        <Skeleton className="h-3 w-20" />
-        <div className="flex gap-3 overflow-hidden">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <Skeleton key={index} className="h-12 w-36 shrink-0 rounded-full" />
-          ))}
-        </div>
-      </section>
-    );
-  }
 
   if (visible.length === 0) return null;
 

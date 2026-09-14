@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { NoData } from "@/components/ui/NoData";
 import { Progress } from "@/components/ui/Progress";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, EXTERNAL_GROUPS_NEW_PATH } from "@/configs/const";
 import { useUser } from "@/contexts/UserContext";
@@ -18,6 +17,7 @@ import { getGroupPath } from "@/lib/publicPaths";
 import { cn } from "@/lib/utils";
 import { GroupService } from "@/services/group/group.service";
 import { Group, GroupDraft, GroupDraftStep1Payload, GroupStatus } from "@/types/Group";
+import { ProfileGroupCardSkeleton } from "./ProfileSkeletons";
 
 type ProfileGroupsTab = "published" | "drafts";
 
@@ -127,7 +127,9 @@ function GroupCard({
           </Button>
         )}
         <Button variant="link" size="sm" rightIcon={<ExternalLink />} asChild>
-          <NextLink href={groupPath}>View public page</NextLink>
+          <NextLink href={groupPath} prefetch>
+            View public page
+          </NextLink>
         </Button>
       </div>
     </div>
@@ -264,7 +266,7 @@ export default function ProfileGroups({ userUuid, onEditGroup, className }: Prof
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
-            <Skeleton key={index} className="h-56 rounded-2xl" />
+            <ProfileGroupCardSkeleton key={index} />
           ))}
         </div>
       ) : showDrafts ? (

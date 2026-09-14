@@ -15,6 +15,47 @@ interface UserContextType {
 
 const UserContext = React.createContext<UserContextType | undefined>(undefined);
 
+const PROFILE_CACHE_KEY = "profile";
+const PROFILE_CACHE_TTL_MS = 60 * 1000;
+
+interface CachedProfile {
+  token: string;
+  user: User;
+  savedAt: number;
+}
+
+function readCachedProfile(token: string): User | null {
+  try {
+    const raw = sessionStorage.getItem(PROFILE_CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw) as CachedProfile;
+    if (cached.token !== token || Date.now() - cached.savedAt > PROFILE_CACHE_TTL_MS) {
+      sessionStorage.removeItem(PROFILE_CACHE_KEY);
+      return null;
+    }
+    return cached.user;
+  } catch {
+    return null;
+  }
+}
+
+function safeStorage(action: () => void) {
+  try {
+    action();
+  } catch {
+    return;
+  }
+}
+
+function writeCachedProfile(token: string, user: User) {
+  const entry: CachedProfile = { token, user, savedAt: Date.now() };
+  safeStorage(() => sessionStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(entry)));
+}
+
+function clearCachedProfile() {
+  safeStorage(() => sessionStorage.removeItem(PROFILE_CACHE_KEY));
+}
+
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -23,15 +64,27 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     let ignore = false;
 
     async function fetchUser() {
-      if (!getAccessToken()) {
+      const token = getAccessToken();
+      if (!token) {
         if (!ignore) setIsLoading(false);
+        return;
+      }
+
+      const cached = readCachedProfile(token);
+      if (cached) {
+        if (!ignore) {
+          setUser(cached);
+          setIsLoading(false);
+        }
         return;
       }
 
       try {
         const res = await UserService.myProfile();
+        writeCachedProfile(token, res.data);
         if (!ignore) setUser(res.data);
       } catch {
+        clearCachedProfile();
         if (!ignore) setUser(null);
       } finally {
         if (!ignore) setIsLoading(false);
@@ -46,7 +99,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const refetchUser = React.useCallback(async () => {
-    if (!getAccessToken()) {
+    const token = getAccessToken();
+    if (!token) {
+      clearCachedProfile();
       setUser(null);
       return;
     }
@@ -54,8 +109,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       const res = await UserService.myProfile();
+      writeCachedProfile(token, res.data);
       setUser(res.data);
     } catch {
+      clearCachedProfile();
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -67,7 +124,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     [user],
   );
 
-  const clearUser = React.useCallback(() => setUser(null), []);
+  const clearUser = React.useCallback(() => {
+    clearCachedProfile();
+    setUser(null);
+  }, []);
 
   return (
     <UserContext.Provider value={{ user, isLoading, hasPermission, refetchUser, clearUser }}>

@@ -77,6 +77,7 @@ export const Category = ({
 
       <NextLink
         href={getCategoryPath(slug)}
+        prefetch
         aria-label={name}
         className="absolute inset-0 z-10 rounded-[22px] outline-none focus-visible:ring-2 focus-visible:ring-brand-green"
       />

@@ -4,13 +4,14 @@ import * as React from "react";
 import { toast } from "sonner";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { ChangePhotoModal } from "@/components/ui/ChangePhotoModal";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { EXTERNAL_HOME_PATH } from "@/configs/const";
 import { useUser } from "@/contexts/UserContext";
+import { getWhatsappOtpCooldownSeconds, markWhatsappOtpRequested } from "@/lib/whatsappOtp";
 import { UserService } from "@/services/user/user.service";
 import { User } from "@/types/User";
 import ProfileHeader from "./_components/Header";
 import ProfileGroups from "./_components/ProfileGroups";
+import { ProfileDetailsSkeleton, ProfileHeaderSkeleton } from "./_components/ProfileSkeletons";
 import { VerifyWhatsappModal } from "./_components/VerifyWhatsappModal";
 import YourDetails, { type ProfileDetailsDraft } from "./_components/YourDetails";
 
@@ -44,8 +45,11 @@ export default function ProfilePage() {
 
   const details = user ?? sessionUser;
 
-  const startWhatsappVerification = async () => {
-    await UserService.requestWhatsappVerification();
+  const startWhatsappVerification = async (mobile = details?.mobile ?? "") => {
+    if (getWhatsappOtpCooldownSeconds(mobile) === 0) {
+      await UserService.requestWhatsappVerification();
+      markWhatsappOtpRequested(mobile);
+    }
     setIsWhatsappModalOpen(true);
   };
 
@@ -64,7 +68,8 @@ export default function ProfilePage() {
     await refetchUser();
     toast.success("Your details have been updated.");
 
-    if (data && !data.whatsappVerified) await startWhatsappVerification();
+    if (data && !data.whatsappVerified)
+      await startWhatsappVerification(data.mobile ?? draft.mobile);
   };
 
   const handleWhatsappVerified = () => refreshUser();
@@ -79,12 +84,13 @@ export default function ProfilePage() {
 
   if (!details) {
     return (
-      <>
+      <div className="flex w-full flex-col gap-8">
         <Breadcrumbs
           items={[{ label: "Home", href: EXTERNAL_HOME_PATH }, { label: "My Profile" }]}
         />
-        <Skeleton className="h-40 w-full rounded-lg" />
-      </>
+        <ProfileHeaderSkeleton />
+        <ProfileDetailsSkeleton />
+      </div>
     );
   }
 
@@ -102,7 +108,7 @@ export default function ProfilePage() {
         onVerifyWhatsapp={() => void startWhatsappVerification()}
       />
       {isLoading ? (
-        <Skeleton className="h-80 w-full rounded-xl" />
+        <ProfileDetailsSkeleton />
       ) : (
         <YourDetails
           email={details.email}

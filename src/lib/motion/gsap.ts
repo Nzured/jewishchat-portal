@@ -3,13 +3,12 @@
 import { useEffect, useLayoutEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { SplitText } from "gsap/dist/SplitText";
 
 let registered = false;
 
 export function registerGsap(): void {
   if (registered || typeof window === "undefined") return;
-  gsap.registerPlugin(ScrollTrigger, SplitText);
+  gsap.registerPlugin(ScrollTrigger);
   gsap.defaults({ ease: "power3.out", duration: 0.9 });
   registered = true;
 }
@@ -17,4 +16,4 @@ export function registerGsap(): void {
 export const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-export { gsap, ScrollTrigger, SplitText };
+export { gsap, ScrollTrigger };

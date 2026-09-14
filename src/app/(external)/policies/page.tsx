@@ -1,4 +1,4 @@
-import { UnderConstruction } from "@/components/ui/UnderConstruction";
+import { ComingSoon } from "@/components/ui/ComingSoon";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PoliciesPage() {
   return (
-    <UnderConstruction
+    <ComingSoon
       title="Our listing policy is being written up"
       description="What's allowed, how moderation and link verification work, and how to report a listing - coming soon."
     />

@@ -1,11 +1,12 @@
 "use client";
 
-import Lottie from "lottie-react";
 import { X } from "lucide-react";
-import noDataAnimation from "@/assets/animations/NoData.json";
 import { Button } from "@/components/ui/Button";
+import { createLazyLottie } from "@/components/ui/LazyLottie";
 import { Typography } from "@/components/ui/Typography";
 import { cn } from "@/lib/utils";
+
+const NoDataAnimation = createLazyLottie(() => import("@/assets/animations/NoData.json"));
 
 interface NoDataProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   title?: React.ReactNode;
@@ -28,7 +29,7 @@ function NoData({
       {...props}
     >
       <div className="size-50">
-        <Lottie animationData={noDataAnimation} loop className="h-full w-full" />
+        <NoDataAnimation loop className="h-full w-full" />
       </div>
       <Typography variant="h4" className="font-semibold text-ink-1">
         {title}

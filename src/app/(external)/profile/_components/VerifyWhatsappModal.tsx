@@ -15,6 +15,7 @@ import {
 import { OtpInput } from "@/components/ui/OtpInput";
 import { Typography } from "@/components/ui/Typography";
 import { EXTERNAL_GROUPS_NEW_PATH, RESEND_OTP_COOLDOWN_SECONDS } from "@/configs/const";
+import { getWhatsappOtpCooldownSeconds, markWhatsappOtpRequested } from "@/lib/whatsappOtp";
 import { UserService } from "@/services/user/user.service";
 
 const OTP_LENGTH = 6;
@@ -61,7 +62,9 @@ function VerifyWhatsappModalBody({
   const [otp, setOtp] = React.useState("");
   const [isVerifying, setIsVerifying] = React.useState(false);
   const [hasError, setHasError] = React.useState(false);
-  const [resendCooldown, setResendCooldown] = React.useState(RESEND_OTP_COOLDOWN_SECONDS);
+  const [resendCooldown, setResendCooldown] = React.useState(
+    () => getWhatsappOtpCooldownSeconds(mobile ?? "") || RESEND_OTP_COOLDOWN_SECONDS,
+  );
 
   React.useEffect(() => {
     if (step !== "code" || resendCooldown <= 0) return;
@@ -92,6 +95,7 @@ function VerifyWhatsappModalBody({
     setResendCooldown(RESEND_OTP_COOLDOWN_SECONDS);
     setOtp("");
     setHasError(false);
+    markWhatsappOtpRequested(mobile ?? "");
     void UserService.requestWhatsappVerification();
   };
 

@@ -8,7 +8,6 @@ import { Typography } from "@/components/ui/Typography";
 import { EXTERNAL_GROUPS_NEW_PATH } from "@/configs/const";
 import { gsap, registerGsap, ScrollTrigger, useIsomorphicLayoutEffect } from "@/lib/motion/gsap";
 import { Header } from "./Header";
-import { useHome } from "../_context/HomeContext";
 import type { LucideIcon } from "lucide-react";
 
 type Step = { icon: LucideIcon; title: string; body: string };
@@ -60,13 +59,10 @@ function StepCard({ step, index }: { step: Step; index: number }) {
 export function HowItWorks() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const { isLoading } = useHome();
-
   useEffect(() => {
-    if (isLoading) return;
     const id = requestAnimationFrame(() => ScrollTrigger.refresh());
     return () => cancelAnimationFrame(id);
-  }, [isLoading]);
+  }, []);
 
   useIsomorphicLayoutEffect(() => {
     registerGsap();

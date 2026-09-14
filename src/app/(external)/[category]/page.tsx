@@ -10,7 +10,8 @@ import {
   RESERVED_ROUTE_SLUGS,
 } from "@/configs/const";
 import { getCategoryPath } from "@/lib/publicPaths";
-import { GroupService } from "@/services/group/group.service";
+import { getCachedCategories } from "@/services/group/categories";
+import { GroupServer } from "@/services/group/group.server";
 import { isCategoryIndexable, resolveSeoRedirect } from "@/services/seo/seo.service";
 import { BrowseOtherCategories } from "./_components/BrowseOtherCategories";
 import { CategoryGroups } from "./_components/CategoryGroups";
@@ -21,12 +22,19 @@ import {
 } from "./_components/groupsListing";
 import type { Metadata } from "next";
 
+export const revalidate = 300;
+
+export async function generateStaticParams() {
+  const categories = await getCachedCategories();
+  return categories.map((category) => ({ category: category.slug }));
+}
+
 interface CategoryPageProps {
   params: Promise<{ category: string }>;
 }
 
 const findCategory = cache(async (slug: string) => {
-  const res = await GroupService.getCategoryBySlug(slug);
+  const res = await GroupServer.getCategoryBySlug(slug);
   return res.data ?? null;
 });
 
@@ -34,14 +42,12 @@ const checkIndexable = cache((slug: string) => isCategoryIndexable(slug));
 
 const loadGroups = cache(async (slug: string) => {
   try {
-    const res = await GroupService.getAllGroups(
-      undefined,
-      undefined,
-      slug,
-      DEFAULT_PAGE,
-      CATEGORY_GROUPS_PAGE_SIZE,
-      CATEGORY_GROUPS_DEFAULT_SORT,
-    );
+    const res = await GroupServer.getGroups({
+      category: slug,
+      page: DEFAULT_PAGE,
+      size: CATEGORY_GROUPS_PAGE_SIZE,
+      sort: CATEGORY_GROUPS_DEFAULT_SORT,
+    });
     return { groups: res.data?.groups ?? [], total: res.data?.totalElements ?? 0 };
   } catch {
     return { groups: [], total: 0 };

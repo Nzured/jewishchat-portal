@@ -36,7 +36,7 @@ jobs:
       - name: Run SEO check against production
         run: |
           node scripts/seo-check/seo-check.js \
-            --base-url "https://chatlist.link" \
+            --base-url "https://www.chatlist.link" \
             --mode production \
             --api-base-url "https://api.chatlist.link/group-service"
 

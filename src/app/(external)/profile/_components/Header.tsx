@@ -44,7 +44,7 @@ export default function ProfileHeader({
   return (
     <div className={cn("flex flex-col gap-4 bw-1", className)}>
       <div className="relative overflow-hidden rounded-lg">
-        <div className="relative flex flex-col gap-3 p-4 sm:p-6">
+        <div className="relative flex flex-col gap-3">
           <div className="flex items-center gap-4">
             {onChangePhoto ? (
               <button

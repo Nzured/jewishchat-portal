@@ -16,9 +16,9 @@ if (!BASE_URL) {
 const STATIC_SAMPLES = [
   { path: "/", type: "homepage", expectIndexable: true },
   { path: "/categories", type: "category-index", expectIndexable: true },
-  { path: "/search?q=test", type: "search", expectIndexable: false },
+  { path: "/groups?q=test", type: "search", expectIndexable: false },
   { path: "/login", type: "login-external", expectIndexable: false },
-  { path: "/add-group", type: "add-group", expectIndexable: false },
+  { path: "/groups/new", type: "add-group", expectIndexable: false },
 ];
 
 async function fetchHtml(url) {

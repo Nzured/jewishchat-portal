@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { useReveal } from "@/lib/motion/useReveal";
 import { Category as CategoryType } from "@/types/Category";
 import { Category } from "./Category";
@@ -34,7 +33,7 @@ function CategoriesRevealGrid({ categories }: { categories: CategoryType[] }) {
 }
 
 export function CategoriesGrid() {
-  const { categories, isLoading } = useHome();
+  const { categories } = useHome();
 
   const visibleCategories = React.useMemo(() => {
     const described = (category: CategoryType) => (category.description?.trim() ? 0 : 1);
@@ -42,19 +41,6 @@ export function CategoriesGrid() {
       .sort((a, b) => described(a) - described(b))
       .slice(0, MAX_VISIBLE_CATEGORIES);
   }, [categories]);
-
-  if (isLoading) {
-    return (
-      <div className="flex gap-4 overflow-hidden sm:grid sm:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: MAX_VISIBLE_CATEGORIES }).map((_, index) => (
-          <Skeleton
-            key={index}
-            className="h-[212px] w-[76vw] max-w-[300px] shrink-0 rounded-[22px] sm:w-auto sm:max-w-none"
-          />
-        ))}
-      </div>
-    );
-  }
 
   return <CategoriesRevealGrid categories={visibleCategories} />;
 }

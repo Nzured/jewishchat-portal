@@ -72,7 +72,7 @@ const STATUS_COPY: Partial<Record<GroupStatus, { label: string; dot: string; not
 
 function toFormValues(group: Group): CreateGroupFormValues {
   return {
-    whatsappLink: group.joinUrl ?? "",
+    whatsappLink: group.whatsappLink ?? "",
     name: group.name ?? "",
     shortDesc: group.shortDesc ?? "",
     about: group.about ?? "",

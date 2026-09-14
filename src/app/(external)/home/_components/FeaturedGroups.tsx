@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { GroupCard } from "@/app/(external)/groups/_components/GroupCard";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { useReveal } from "@/lib/motion/useReveal";
 import { cn } from "@/lib/utils";
 import { Group } from "@/types/Group";
@@ -33,21 +32,8 @@ function FeaturedGroupsGrid({ groups }: { groups: Group[] }) {
 }
 
 export function FeaturedGroups() {
-  const { groups, isLoading } = useHome();
+  const { groups } = useHome();
   const visibleGroups = groups.slice(0, MAX_VISIBLE_GROUPS);
-
-  if (isLoading) {
-    return (
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: MAX_VISIBLE_GROUPS }).map((_, index) => (
-          <Skeleton
-            key={index}
-            className={cn("h-[132px] rounded-2xl", index === 0 && "sm:col-span-2 xl:col-span-2")}
-          />
-        ))}
-      </div>
-    );
-  }
 
   return <FeaturedGroupsGrid groups={visibleGroups} />;
 }

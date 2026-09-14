@@ -30,7 +30,32 @@ const STATIC_TOP_LEVEL_SEGMENTS = new Set([
 ]);
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
-const GONE_CHECK_TIMEOUT_MS = 5000;
+const GONE_CHECK_TIMEOUT_MS = 1500;
+const GONE_CACHE_TTL_MS = 5 * 60 * 1000;
+const GONE_CACHE_MAX_ENTRIES = 5000;
+
+const goneCache = new Map<string, { gone: boolean; expiresAt: number }>();
+
+function readGoneCache(key: string): boolean | null {
+  const entry = goneCache.get(key);
+  if (!entry) return null;
+  if (entry.expiresAt <= Date.now()) {
+    goneCache.delete(key);
+    return null;
+  }
+  return entry.gone;
+}
+
+function writeGoneCache(key: string, gone: boolean) {
+  if (goneCache.size >= GONE_CACHE_MAX_ENTRIES) {
+    const oldest = goneCache.keys().next().value;
+    if (oldest !== undefined) goneCache.delete(oldest);
+  }
+  goneCache.set(key, {
+    gone,
+    expiresAt: gone ? Number.POSITIVE_INFINITY : Date.now() + GONE_CACHE_TTL_MS,
+  });
+}
 
 const GONE_HTML = `<!doctype html>
 <html lang="en">
@@ -58,12 +83,18 @@ const GONE_HTML = `<!doctype html>
 async function checkGroupGone(category: string, groupSlug: string): Promise<boolean> {
   if (!API_BASE) return false;
 
+  const key = `${category}/${groupSlug}`;
+  const cached = readGoneCache(key);
+  if (cached !== null) return cached;
+
   try {
     const res = await fetch(
       `${API_BASE}${GROUP_SERVICE}groups/${encodeURIComponent(category)}/${encodeURIComponent(groupSlug)}`,
       { signal: AbortSignal.timeout(GONE_CHECK_TIMEOUT_MS) },
     );
-    return res.status === 410;
+    const gone = res.status === 410;
+    if (res.ok || gone || res.status === 404) writeGoneCache(key, gone);
+    return gone;
   } catch {
     return false;
   }

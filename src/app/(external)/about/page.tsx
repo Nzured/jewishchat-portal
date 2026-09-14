@@ -1,4 +1,4 @@
-import { UnderConstruction } from "@/components/ui/UnderConstruction";
+import { ComingSoon } from "@/components/ui/ComingSoon";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <UnderConstruction
+    <ComingSoon
       title="Our story is on its way"
       description="We're still writing up who runs ChatList and why. Check back soon."
     />

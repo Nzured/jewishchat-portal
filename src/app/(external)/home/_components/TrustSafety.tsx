@@ -34,7 +34,7 @@ export function TrustSafety() {
   const gridRef = useReveal<HTMLDivElement>({ stagger: 0.08, y: 32 });
 
   return (
-    <section className="relative -mx-4 overflow-hidden bg-ink-1 py-20 text-white md:-mx-8 lg:py-28">
+    <section className="relative -mx-4 overflow-hidden bg-ink-1 py-20 text-white [contain-intrinsic-size:auto_640px] [content-visibility:auto] md:-mx-8 lg:py-28">
       <LatticeBackdrop className="text-brand-green/60 opacity-40" />
 
       <div className="relative mx-auto max-w-[1400px] px-4 md:px-8">
