@@ -28,6 +28,7 @@ export async function BrowseOtherCategories({ currentSlug }: { currentSlug: stri
           <NextLink
             key={category.id}
             href={getCategoryPath(category.slug)}
+            prefetch
             className="flex shrink-0 snap-start items-center gap-2.5 rounded-xl border border-surface-line bg-surface-card px-3 py-2.5 transition-colors hover:border-brand-green/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-green/40"
           >
             <span

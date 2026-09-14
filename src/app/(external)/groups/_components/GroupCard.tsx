@@ -53,9 +53,10 @@ function GroupCard({ group, className, search }: GroupCardProps) {
   return (
     <NextLink
       href={getGroupPath(group)}
+      prefetch
       onClick={handleClick}
       className={cn(
-        "flex cursor-pointer flex-col gap-4 rounded-2xl border border-surface-line bg-surface-card p-5 text-left transition-shadow hover:shadow-md active:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-green/40",
+        "flex cursor-pointer flex-col gap-4 rounded-2xl border border-surface-line bg-surface-card p-5 text-left transition-shadow [contain-intrinsic-size:auto_132px] [content-visibility:auto] hover:shadow-md active:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-green/40",
         className,
       )}
     >

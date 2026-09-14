@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { gsap, registerGsap, useIsomorphicLayoutEffect } from "@/lib/motion/gsap";
 import { PlatformStats } from "@/types/Stats";
 import { useHome } from "../_context/HomeContext";
@@ -102,22 +101,7 @@ function StatBandContent({ items }: { items: StatItem[] }) {
 }
 
 export function StatBand() {
-  const { stats, isLoading } = useHome();
-
-  if (isLoading) {
-    return (
-      <div className="border-y border-surface-line bg-surface-card/60 backdrop-blur-sm">
-        <div className="mx-auto grid max-w-[1400px] grid-cols-2 px-5 md:px-8 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="py-8 pr-6 lg:py-10">
-              <Skeleton className="h-9 w-24" />
-              <Skeleton className="mt-3 h-4 w-28" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const { stats } = useHome();
 
   if (!stats) return null;
 

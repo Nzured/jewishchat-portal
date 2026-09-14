@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef } from "react";
+import { SplitText } from "gsap/dist/SplitText";
 import { ArrowDown, ShieldCheck } from "lucide-react";
 import { Link } from "@/components/ui/Link";
 import { Typography } from "@/components/ui/Typography";
-import { gsap, SplitText, registerGsap, useIsomorphicLayoutEffect } from "@/lib/motion/gsap";
+import { gsap, registerGsap, useIsomorphicLayoutEffect } from "@/lib/motion/gsap";
 import { ChatWindow } from "./ChatWindow";
 import { Constellation } from "./Constellation";
 import { HomeSearchBar } from "./HomeSearchBar";
@@ -25,6 +26,7 @@ function HeroSection() {
 
   useIsomorphicLayoutEffect(() => {
     registerGsap();
+    gsap.registerPlugin(SplitText);
     const root = ref.current;
     if (!root) return;
 

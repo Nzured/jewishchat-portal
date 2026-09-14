@@ -43,6 +43,7 @@ interface RetriableConfig extends InternalAxiosRequestConfig {
 }
 
 const isServer = typeof window === "undefined";
+const logApi = process.env.NODE_ENV !== "production";
 const requestLabel = (config: AxiosRequestConfig) =>
   `${(config.method ?? "get").toUpperCase()} ${config.url}`;
 
@@ -76,20 +77,24 @@ export const setupInterceptors = (
       config.headers.Authorization = `Bearer ${token}`;
     }
     (config as RetriableConfig)._startedAt = Date.now();
-    console.log(`[api] → ${requestLabel(config)} (${isServer ? "server" : "browser"})`);
+    if (logApi) {
+      console.log(`[api] → ${requestLabel(config)} (${isServer ? "server" : "browser"})`);
+    }
     return config;
   });
 
   instance.interceptors.response.use(
     (response) => {
       const config = response.config as RetriableConfig;
-      const ms = config._startedAt ? Date.now() - config._startedAt : "?";
-      console.log(`[api] ← ${response.status} ${requestLabel(config)} (${ms}ms)`);
+      if (logApi) {
+        const ms = config._startedAt ? Date.now() - config._startedAt : "?";
+        console.log(`[api] ← ${response.status} ${requestLabel(config)} (${ms}ms)`);
+      }
       return response.data;
     },
     async (error: AxiosError) => {
       const config = error.config as RetriableConfig | undefined;
-      if (config) {
+      if (logApi && config) {
         const ms = config._startedAt ? Date.now() - config._startedAt : "?";
         console.log(
           `[api] ✗ ${error.response?.status ?? "network error"} ${requestLabel(config)} (${ms}ms)`,

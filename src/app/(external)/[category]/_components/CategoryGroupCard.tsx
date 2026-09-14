@@ -12,6 +12,7 @@ export function CategoryGroupCard({ group }: { group: Group }) {
   return (
     <NextLink
       href={getGroupPath(group)}
+      prefetch
       className="flex flex-col gap-3 rounded-2xl border border-surface-line bg-surface-card p-5 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-green/40"
     >
       <div className="flex items-start gap-3">

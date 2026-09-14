@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { LatticeBackdrop } from "@/components/ui/LatticeBackdrop";
 import { gsap, registerGsap, useIsomorphicLayoutEffect } from "@/lib/motion/gsap";
-import { createConstellation, type ConstellationHandle } from "./ConstellationField";
+import type { ConstellationHandle } from "./ConstellationField";
 
 export function Constellation() {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -13,6 +13,7 @@ export function Constellation() {
   const [visible, setVisible] = useState(true);
   const [reduced, setReduced] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useIsomorphicLayoutEffect(() => {
     registerGsap();
@@ -51,26 +52,37 @@ export function Constellation() {
     const canvas = canvasRef.current;
     if (!enabled || failed || !host || !canvas) return;
 
-    const handle = createConstellation(canvas, host);
-    if (!handle) {
-      setFailed(true);
-      return;
-    }
-    handleRef.current = handle;
+    let cancelled = false;
+    let handle: ConstellationHandle | null = null;
+    let ro: ResizeObserver | null = null;
 
-    const ro = new ResizeObserver(() => handle.resize());
-    ro.observe(host);
+    void import("./ConstellationField").then(({ createConstellation }) => {
+      if (cancelled) return;
+
+      handle = createConstellation(canvas, host);
+      if (!handle) {
+        setFailed(true);
+        return;
+      }
+      handleRef.current = handle;
+      setReady(true);
+
+      ro = new ResizeObserver(() => handle?.resize());
+      ro.observe(host);
+    });
 
     return () => {
-      ro.disconnect();
-      handle.dispose();
+      cancelled = true;
+      ro?.disconnect();
+      handle?.dispose();
       handleRef.current = null;
+      setReady(false);
     };
   }, [enabled, failed]);
 
   useEffect(() => {
     const handle = handleRef.current;
-    if (!handle) return;
+    if (!ready || !handle) return;
 
     if (reduced) {
       handle.stop();
@@ -80,7 +92,7 @@ export function Constellation() {
 
     if (visible) handle.start();
     else handle.stop();
-  }, [enabled, failed, reduced, visible]);
+  }, [ready, reduced, visible]);
 
   const showCanvas = enabled && !failed;
 

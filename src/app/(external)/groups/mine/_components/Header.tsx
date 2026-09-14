@@ -24,7 +24,7 @@ export default function Header({
 }: HeaderProps) {
   return (
     <div className="relative overflow-hidden items-center">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <Typography variant="h1" className="text-ink-1 font-display font-bold">
           My Groups
         </Typography>

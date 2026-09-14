@@ -1,79 +1,57 @@
-"use client";
-
-import * as React from "react";
-import { useParams, useRouter } from "next/navigation";
+import { cache } from "react";
+import { notFound } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
-import { NoData } from "@/components/ui/NoData";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
-import { EXTERNAL_HOME_PATH, EXTERNAL_PROFILE_PATH } from "@/configs/const";
-import { useUser } from "@/contexts/UserContext";
-import { UserService } from "@/services/user/user.service";
-import { User } from "@/types/User";
-import ProfileGroups from "../_components/ProfileGroups";
+import { EXTERNAL_HOME_PATH } from "@/configs/const";
+import { UserServer } from "@/services/user/user.server";
+import { MemberProfileClient } from "./_components/MemberProfileClient";
+import type { Metadata } from "next";
 
-export default function MemberProfilePage() {
-  const params = useParams<{ user: string }>();
-  const uuid = params.user;
-  const router = useRouter();
-  const { user: sessionUser } = useUser();
-  const [member, setMember] = React.useState<User | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
+export const revalidate = 300;
 
-  const isSelf = Boolean(sessionUser) && sessionUser?.uuid === uuid;
+interface MemberProfilePageProps {
+  params: Promise<{ user: string }>;
+}
 
-  React.useEffect(() => {
-    if (isSelf) router.replace(EXTERNAL_PROFILE_PATH);
-  }, [isSelf, router]);
+const findMember = cache((uuid: string) => UserServer.getUserById(uuid));
 
-  React.useEffect(() => {
-    if (!uuid) return;
-    let ignore = false;
+const fullName = (member: { firstName: string; lastName: string }) =>
+  `${member.firstName} ${member.lastName}`.trim();
 
-    UserService.getUserById(uuid)
-      .then((res) => {
-        if (!ignore) setMember(res?.data ?? null);
-      })
-      .catch(() => {
-        if (!ignore) setMember(null);
-      })
-      .finally(() => {
-        if (!ignore) setIsLoading(false);
-      });
+export async function generateMetadata({ params }: MemberProfilePageProps): Promise<Metadata> {
+  const { user: uuid } = await params;
+  const member = await findMember(uuid);
+  if (!member) return { title: "Member not found" };
 
-    return () => {
-      ignore = true;
-    };
-  }, [uuid]);
+  return {
+    title: `${fullName(member)} | ChatList`,
+    description: `Groups listed on ChatList by ${fullName(member)}.`,
+  };
+}
 
-  const name = member ? `${member.firstName} ${member.lastName}`.trim() : "";
+export default async function MemberProfilePage({ params }: MemberProfilePageProps) {
+  const { user: uuid } = await params;
+  const member = await findMember(uuid);
+  if (!member) notFound();
+
+  const name = fullName(member);
 
   return (
     <div className="flex w-full flex-col gap-8">
-      <Breadcrumbs
-        items={[{ label: "Home", href: EXTERNAL_HOME_PATH }, { label: name || "Member" }]}
-      />
+      <Breadcrumbs items={[{ label: "Home", href: EXTERNAL_HOME_PATH }, { label: name }]} />
 
-      {isLoading ? (
-        <Skeleton className="h-24 w-full rounded-lg" />
-      ) : !member ? (
-        <NoData title="Member not found" description="This profile is no longer available." />
-      ) : (
-        <>
-          <div className="flex items-center gap-4">
-            <Avatar src={member.profilePic} name={name} size="xl" />
-            <div className="flex min-w-0 flex-col gap-0.5">
-              <Typography variant="h1" className="truncate font-display font-bold">
-                {name}
-              </Typography>
-              <Typography variant="muted">Community member</Typography>
-            </div>
-          </div>
+      <div className="flex items-center gap-4">
+        <Avatar src={member.profilePic} name={name} size="xl" />
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <Typography variant="h1" className="truncate font-display font-bold">
+            {name}
+          </Typography>
+          <Typography variant="muted">Community member</Typography>
+        </div>
+      </div>
 
-          {sessionUser && <ProfileGroups userUuid={member.uuid} />}
-        </>
-      )}
+      <MemberProfileClient memberUuid={member.uuid} />
     </div>
   );
 }

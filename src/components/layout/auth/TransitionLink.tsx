@@ -9,12 +9,7 @@ interface TransitionLinkProps extends Omit<LinkProps, "href"> {
   direction?: "login-to-signup" | "signup-to-login";
 }
 
-export function TransitionLink({
-  href,
-  direction,
-  children,
-  ...props
-}: TransitionLinkProps) {
+export function TransitionLink({ href, direction, children, ...props }: TransitionLinkProps) {
   const router = useRouter();
 
   const handleNavigate = (e: React.MouseEvent<HTMLAnchorElement>) => {

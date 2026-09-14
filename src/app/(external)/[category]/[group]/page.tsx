@@ -1,10 +1,11 @@
-import { cache } from "react";
+import { cache, Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import { notFound, permanentRedirect } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Link } from "@/components/ui/Link";
 import { NoData } from "@/components/ui/NoData";
+import { Skeleton } from "@/components/ui/Skeleton";
 import {
   CANONICAL_SITE_URL,
   EXTERNAL_GROUPS_PATH,
@@ -13,9 +14,9 @@ import {
 } from "@/configs/const";
 import { formatLocation } from "@/lib/location";
 import { getCategoryPath, getGroupPath } from "@/lib/publicPaths";
-import { GroupService } from "@/services/group/group.service";
+import { GroupServer } from "@/services/group/group.server";
 import { resolveSeoRedirect } from "@/services/seo/seo.service";
-import { GroupStatus } from "@/types/Group";
+import { Group, GroupStatus } from "@/types/Group";
 import { GroupAbout } from "./_components/GroupAbout";
 import { GroupAdminCard } from "./_components/GroupAdminCard";
 import { GroupHeader } from "./_components/GroupHeader";
@@ -24,13 +25,15 @@ import { GroupViewTracker } from "./_components/GroupViewTracker";
 import { RelatedGroups } from "./_components/RelatedGroups";
 import type { Metadata } from "next";
 
+export const revalidate = 300;
+
 interface GroupPageProps {
   params: Promise<{ category: string; group: string }>;
 }
 
 const findGroup = cache(async (category: string, slug: string) => {
   try {
-    const res = await GroupService.getGroupByCategoryAndSlug(category, slug);
+    const res = await GroupServer.getGroupByCategoryAndSlug(category, slug);
     return res.data;
   } catch {
     return null;
@@ -39,12 +42,17 @@ const findGroup = cache(async (category: string, slug: string) => {
 
 const findRelated = cache(async (uuid: string) => {
   try {
-    const res = await GroupService.getRelatedGroups(uuid);
+    const res = await GroupServer.getRelatedGroups(uuid);
     return res.data ?? [];
   } catch {
     return [];
   }
 });
+
+async function RelatedGroupsSection({ group }: { group: Group }) {
+  const related = await findRelated(group.uuid);
+  return <RelatedGroups group={group} related={related} />;
+}
 
 export async function generateMetadata({ params }: GroupPageProps): Promise<Metadata> {
   const { category, group: slug } = await params;
@@ -103,7 +111,6 @@ export default async function GroupPage({ params }: GroupPageProps) {
     permanentRedirect(getGroupPath(group));
   }
   const isActive = group.status === GroupStatus.ACTIVE;
-  const related = isActive ? await findRelated(group.uuid) : [];
   const categoryName = group.mainCategory?.name ?? "";
   const categoryPath = canonicalCategory ? getCategoryPath(canonicalCategory) : null;
   const groupPath = getGroupPath(group);
@@ -175,7 +182,11 @@ export default async function GroupPage({ params }: GroupPageProps) {
         <aside className="flex w-full flex-col gap-4 lg:w-[320px] lg:shrink-0">
           <GroupAdminCard group={group} />
           <GroupStatsCard group={group} />
-          <RelatedGroups group={group} related={related} />
+          {isActive && (
+            <Suspense fallback={<Skeleton className="h-56 rounded-2xl" />}>
+              <RelatedGroupsSection group={group} />
+            </Suspense>
+          )}
         </aside>
       </div>
     </div>

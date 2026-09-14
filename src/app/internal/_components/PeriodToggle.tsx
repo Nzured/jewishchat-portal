@@ -15,39 +15,15 @@ import {
 import { Typography } from "@/components/ui/Typography";
 import { formatDate, parseDateKey } from "@/lib/date";
 import { cn } from "@/lib/utils";
-import { DashboardPeriod } from "@/types/Dashboard";
+import { PERIOD_OPTIONS, type PeriodSelection } from "./dashboardPeriod";
 
-export const PERIOD_OPTIONS = [
-  { value: "today", label: "Today" },
-  { value: "7d", label: "7 days" },
-  { value: "30d", label: "30 days" },
-  { value: "90d", label: "90 days" },
-  { value: "custom", label: "Custom" },
-] as const;
-
-export type Period = (typeof PERIOD_OPTIONS)[number]["value"];
-
-export const PERIOD_TO_API: Record<Period, DashboardPeriod> = {
-  today: "TODAY",
-  "7d": "LAST_7_DAYS",
-  "30d": "LAST_30_DAYS",
-  "90d": "LAST_90_DAYS",
-  custom: "CUSTOM",
-};
-
-export const PERIOD_HINT_LABEL: Record<Period, string> = {
-  today: "today",
-  "7d": "this week",
-  "30d": "last 30 days",
-  "90d": "last 90 days",
-  custom: "in range",
-};
-
-export interface PeriodSelection {
-  period: Period;
-  startDate?: string;
-  endDate?: string;
-}
+export {
+  PERIOD_HINT_LABEL,
+  PERIOD_OPTIONS,
+  PERIOD_TO_API,
+  type Period,
+  type PeriodSelection,
+} from "./dashboardPeriod";
 
 interface PeriodToggleProps {
   value: PeriodSelection;

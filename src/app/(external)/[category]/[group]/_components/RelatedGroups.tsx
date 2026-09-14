@@ -32,6 +32,7 @@ export function RelatedGroups({ group, related, className }: RelatedGroupsProps)
           <NextLink
             key={item.uuid}
             href={getGroupPath(item)}
+            prefetch
             className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-brand-softer focus-visible:ring-2 focus-visible:ring-brand-green/40 focus-visible:outline-none"
           >
             <Avatar

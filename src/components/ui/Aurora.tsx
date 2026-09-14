@@ -1,6 +1,10 @@
 "use client";
 
-import { Grainient } from "@/components/ui/Grainient";
+import dynamic from "next/dynamic";
+
+const Grainient = dynamic(() => import("@/components/ui/Grainient").then((mod) => mod.Grainient), {
+  ssr: false,
+});
 
 export function GradientBackdrop() {
   return (

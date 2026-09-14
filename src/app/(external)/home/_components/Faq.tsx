@@ -11,7 +11,7 @@ export function Faq() {
   const [open, setOpen] = React.useState<string | null>(FAQS[0]?.id ?? null);
 
   return (
-    <section className="grid gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
+    <section className="grid gap-10 [contain-intrinsic-size:auto_720px] [content-visibility:auto] lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
       <Header
         className="self-start"
         tags={["Questions"]}

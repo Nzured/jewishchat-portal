@@ -6,7 +6,6 @@ import { ConversationalSearchBar } from "@/components/ui/ConversationalSearchBar
 import { EXTERNAL_GROUPS_PATH } from "@/configs/const";
 import { SEARCH_SUGGESTIONS } from "@/configs/searchSuggestions";
 import { useUser } from "@/contexts/UserContext";
-import { startGroupSearch } from "@/services/search/pendingGroupSearch";
 import { useHeroSearch } from "../_context/HeroSearchContext";
 
 const SUGGESTION_COUNT = 3;
@@ -48,7 +47,6 @@ export function HomeSearchBar() {
       onValueChange={handleValueChange}
       onSubmit={(query) => {
         handleValueChange(query);
-        startGroupSearch(query);
         router.push(`${EXTERNAL_GROUPS_PATH}?q=${encodeURIComponent(query)}`);
       }}
       suggestions={suggestions}

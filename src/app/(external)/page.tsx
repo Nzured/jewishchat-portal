@@ -5,6 +5,7 @@ import {
   HOME_PAGE_DESCRIPTION,
   HOME_PAGE_TITLE,
 } from "@/configs/const";
+import { getCachedHomeData } from "@/services/group/home";
 import { CategoriesSection } from "./home/_components/CategoriesSection";
 import { CountryStrip } from "./home/_components/CountryStrip";
 import { Faq } from "./home/_components/Faq";
@@ -35,9 +36,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
+export const revalidate = 600;
+
+export default async function HomePage() {
+  const data = await getCachedHomeData();
+
   return (
-    <HomeProvider>
+    <HomeProvider data={data}>
       <GradientBackdrop />
       <div className="space-y-16 pb-16">
         <div className="-mx-4 -mt-8 md:-mx-8">

@@ -48,6 +48,7 @@ export const HOME_PAGE_DESCRIPTION =
   "Discover and join WhatsApp groups for Jewish businesses, organizations, and communities.";
 
 export const CANONICAL_SITE_URL = "https://chatlist.link";
+export const IMAGE_CDN_HOSTNAME = "cdn.chatlist.link";
 export const SITE_NAME = "ChatList";
 
 export const ACCESS_TOKEN_COOKIE = "accessToken";

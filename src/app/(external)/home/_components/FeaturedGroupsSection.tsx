@@ -7,9 +7,9 @@ import { Header } from "./Header";
 import { useHome } from "../_context/HomeContext";
 
 export function FeaturedGroupsSection() {
-  const { groups, isLoading } = useHome();
+  const { groups } = useHome();
 
-  if (!isLoading && groups.length === 0) {
+  if (groups.length === 0) {
     return null;
   }
 
