@@ -161,32 +161,38 @@ export const GroupService = {
     api.patch<ApiResponse<Group>>(
       `${GROUP_SERVICE}admin/groups/${groupId}/moderation/approve`,
       {},
-      { globalLoader: true },
+      { globalLoader: true, showSuccessToast: true },
     ),
   rejectGroup: (groupId: string, rejectionReason: string) =>
     api.patch<ApiResponse<Group>>(
       `${GROUP_SERVICE}admin/groups/${groupId}/moderation/reject`,
       { reason: rejectionReason },
-      { globalLoader: true },
+      { globalLoader: true, showSuccessToast: true },
     ),
   reactivateGroup: (groupId: string) =>
     api.patch<ApiResponse<Group>>(
       `${GROUP_SERVICE}admin/groups/${groupId}/reactivate`,
       {},
-      { globalLoader: true },
+      { globalLoader: true, showSuccessToast: true },
     ),
   resetReportCount: (groupId: string) =>
     api.patch<ApiResponse<Group>>(
       `${GROUP_SERVICE}admin/groups/${groupId}/reset-report-count`,
       {},
-      { globalLoader: true },
+      { globalLoader: true, showSuccessToast: true },
     ),
   suspendGroup: (groupId: string, payload?: SuspendGroupPayload) =>
     api.patch<ApiResponse<Group>>(
       `${GROUP_SERVICE}admin/groups/${groupId}/suspend`,
       payload ?? {},
-      { globalLoader: true },
+      { globalLoader: true, showSuccessToast: true },
     ),
+  deleteGroupAdmin: (groupId: string, reason: string) =>
+    api.delete<ApiResponse<void>>(`${GROUP_SERVICE}admin/groups/${groupId}`, {
+      data: { reason },
+      globalLoader: true,
+      showSuccessToast: true,
+    }),
   reportGroup: (uuid: string, payload: ReportGroupPayload) =>
     api.post<ApiResponse<void>>(`${GROUP_SERVICE}groups/${uuid}/report`, payload, {
       globalLoader: true,
@@ -206,7 +212,7 @@ export const GroupService = {
     api.patch<ApiResponse<void>>(
       `${GROUP_SERVICE}admin/groups/reports/${reportId}/resolve`,
       {},
-      { params: { dismiss }, globalLoader: true },
+      { params: { dismiss }, globalLoader: true, showSuccessToast: true },
     ),
   getReportThresholds: () =>
     api.get<ApiResponse<ReportThresholdsResponse>>(
@@ -216,12 +222,12 @@ export const GroupService = {
     api.put<ApiResponse<ReportThresholdsResponse>>(
       `${GROUP_SERVICE}admin/groups/report-thresholds`,
       payload,
-      { globalLoader: true },
+      { globalLoader: true, showSuccessToast: true },
     ),
   resolveAllReports: (uuid: string, dismiss: boolean = false) =>
     api.patch<ApiResponse<void>>(
       `${GROUP_SERVICE}admin/groups/${uuid}/reports/resolve-all`,
       {},
-      { params: { dismiss }, globalLoader: true },
+      { params: { dismiss }, globalLoader: true, showSuccessToast: true },
     ),
 };

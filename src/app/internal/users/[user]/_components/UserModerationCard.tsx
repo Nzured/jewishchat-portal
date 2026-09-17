@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { KeyRound, Mail, PauseCircle, Phone, RefreshCw, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { DeleteModal } from "@/components/ui/DeleteModal";
 import { ModerationActionItem, ModerationActionsCard } from "@/components/ui/ModerationActionsCard";
@@ -76,6 +77,7 @@ export default function UserModerationCard({
     if (!user) return;
     try {
       await AuthService.forgotPassword({ email: user.email });
+      toast.success(`A password reset email has been sent to ${user.email}.`);
     } catch (error) {
       console.error(error);
     }

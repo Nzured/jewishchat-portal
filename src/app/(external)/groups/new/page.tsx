@@ -198,9 +198,7 @@ function CreateGroupFlow() {
         reset({ ...DEFAULT_FORM_VALUES, ...step1, ...step2, image: null });
         setCurrentStep(draft.step2Data ? stepsLength : draft.step1Data ? 2 : 1);
       })
-      .catch(() => {
-        if (!ignore) toast.error("That draft could not be opened.");
-      })
+      .catch(() => {})
       .finally(() => {
         if (!ignore) setIsResumingDraft(false);
       });

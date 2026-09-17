@@ -1,7 +1,7 @@
 import axios from "axios";
 import { GROUP_PHOTO_UPLOAD_CONTENT_TYPE } from "@/configs/const";
 import { ApiResponse } from "@/types/Common";
-import { GetPhotoUrlResponse, Group } from "@/types/Group";
+import { GetPhotoUrlResponse, GroupsPage } from "@/types/Group";
 import { AdminUsersPage, User, UserReportTypes, UserType } from "@/types/User";
 import { api } from "../axiosConfig";
 
@@ -53,10 +53,11 @@ export const UserService = {
   getUser: (userId: string) =>
     withUser(api.get<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}`)),
   getGroupsByUser: (userId: string) =>
-    api.get<ApiResponse<Group[]>>(`${USER_SERVICE}/admin/users/${userId}/groups`),
+    api.get<ApiResponse<GroupsPage>>(`${USER_SERVICE}/admin/users/${userId}/groups`),
   deleteUser: (userId: string) =>
     api.delete<ApiResponse<void>>(`${USER_SERVICE}/admin/users/${userId}`, {
       globalLoader: true,
+      showSuccessToast: true,
     }),
   getSuspendType: () =>
     api.get<ApiResponse<UserReportTypes[]>>(`${USER_SERVICE}/admin/users/suspend-types`),
@@ -64,12 +65,14 @@ export const UserService = {
     withUser(
       api.patch<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}/suspend`, payload, {
         globalLoader: true,
+        showSuccessToast: true,
       }),
     ),
   reactivateUser: (userId: string) =>
     withUser(
       api.patch<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}/reactivate`, undefined, {
         globalLoader: true,
+        showSuccessToast: true,
       }),
     ),
   changeEmail: (userId: string, email: string) =>
@@ -77,7 +80,7 @@ export const UserService = {
       api.patch<ApiResponse<User>>(
         `${USER_SERVICE}/admin/users/${userId}/email`,
         { newEmail: email },
-        { globalLoader: true },
+        { globalLoader: true, showSuccessToast: true },
       ),
     ),
   changeMobile: (userId: string, mobile: string) =>
@@ -85,15 +88,15 @@ export const UserService = {
       api.patch<ApiResponse<User>>(
         `${USER_SERVICE}/admin/users/${userId}/mobile`,
         { newMobile: mobile },
-        { globalLoader: true },
+        { globalLoader: true, showSuccessToast: true },
       ),
     ),
   changeUserRole: (userId: string, roles: number[]) =>
     withUser(
-      api.patch<ApiResponse<User>>(
-        `${USER_SERVICE}/admin/users/${userId}/role`,
-        { roles: roles },
-        { globalLoader: true },
+      api.post<ApiResponse<User>>(
+        `${USER_SERVICE}/admin/users/${userId}/roles`,
+        { roleIds: roles },
+        { globalLoader: true, showSuccessToast: true },
       ),
     ),
   getUserById: (userId: string) =>

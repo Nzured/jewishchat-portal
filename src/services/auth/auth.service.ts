@@ -69,6 +69,7 @@ export const AuthService = {
   inviteInternalUser: (payload: InviteInternalUserPayload) =>
     api.post<ApiResponse<User>>(`${AUTH_ADMIN_SERVICE}/invite`, payload, {
       globalLoader: true,
+      showSuccessToast: true,
     }),
   validateToken: (token: string) =>
     api.get<ApiResponse<InvitedUser>>(`${AUTH_ADMIN_SERVICE}/invite/validate`, {

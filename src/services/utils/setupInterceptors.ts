@@ -5,6 +5,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import { trackPromise } from "react-promise-tracker";
+import { toast } from "sonner";
 import { REFRESH_TOKEN_ENDPOINT } from "@/configs/const";
 import { clearAuthSession, getAccessToken, getRefreshToken, updateAccessToken } from "@/lib/auth";
 import type { LoginData } from "@/services/auth/auth.types";
@@ -90,6 +91,12 @@ export const setupInterceptors = (
         const ms = config._startedAt ? Date.now() - config._startedAt : "?";
         console.log(`[api] ← ${response.status} ${requestLabel(config)} (${ms}ms)`);
       }
+
+      if (typeof window !== "undefined" && config.showSuccessToast) {
+        const message = (response.data as { message?: string } | undefined)?.message;
+        if (message) toast.success(message);
+      }
+
       return response.data;
     },
     async (error: AxiosError) => {

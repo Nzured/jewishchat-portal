@@ -8,14 +8,17 @@ export const CategoryService = {
     api.post<ApiResponse<Category>>(`${GROUP_SERVICE_ADMIN}/categories`, undefined, {
       params: payload,
       globalLoader: true,
+      showSuccessToast: true,
     }),
   updateCategory: (id: number, payload: CategoryPayload) =>
     api.patch<ApiResponse<Category>>(`${GROUP_SERVICE_ADMIN}/categories/${id}`, payload, {
       globalLoader: true,
+      showSuccessToast: true,
     }),
   deleteCategory: (id: number) =>
     api.delete<ApiResponse<Category>>(`${GROUP_SERVICE_ADMIN}/categories/${id}`, {
       globalLoader: true,
+      showSuccessToast: true,
     }),
   getAllCategories: () => api.get<ApiResponse<Category[]>>(`${GROUP_SERVICE_ADMIN}/categories`),
 };
