@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { ShieldCheck } from "lucide-react";
-import { toast } from "sonner";
 import {
   Modal,
   ModalContent,
@@ -58,9 +57,7 @@ export function EmailVerificationGate() {
       const userType = await verifyEmail({ email, otp: code });
       if (!userType) {
         setHasError(true);
-        return;
       }
-      toast.success("Email verified.");
     } finally {
       setIsVerifying(false);
     }

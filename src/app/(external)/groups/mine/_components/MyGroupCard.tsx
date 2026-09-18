@@ -106,9 +106,6 @@ function DraftCard({
     try {
       await GroupService.deleteDraft(draft.draftId);
       onDraftDeleted?.(draft.draftId);
-      toast.success("Draft deleted.");
-    } catch {
-      toast.error("That draft could not be deleted.");
     } finally {
       setIsDeleting(false);
     }
@@ -225,9 +222,6 @@ function GroupItemCard({
     try {
       await GroupService.deleteGroup(group.uuid);
       onGroupDeleted?.(group.uuid);
-      toast.success("Listing deleted.");
-    } catch {
-      toast.error("That listing could not be deleted.");
     } finally {
       setIsDeleting(false);
     }

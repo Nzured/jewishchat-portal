@@ -5,6 +5,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 import { trackPromise } from "react-promise-tracker";
+import { toast } from "sonner";
 import { REFRESH_TOKEN_ENDPOINT } from "@/configs/const";
 import { clearAuthSession, getAccessToken, getRefreshToken, updateAccessToken } from "@/lib/auth";
 import type { LoginData } from "@/services/auth/auth.types";
@@ -48,6 +49,7 @@ const requestLabel = (config: AxiosRequestConfig) =>
   `${(config.method ?? "get").toUpperCase()} ${config.url}`;
 
 const TRACKED_METHODS = ["get", "post", "put", "patch", "delete"] as const;
+const MUTATING_METHODS = new Set(["post", "put", "patch", "delete"]);
 const CONFIG_ARG_INDEX: Record<(typeof TRACKED_METHODS)[number], number> = {
   get: 1,
   delete: 1,
@@ -90,6 +92,16 @@ export const setupInterceptors = (
         const ms = config._startedAt ? Date.now() - config._startedAt : "?";
         console.log(`[api] ← ${response.status} ${requestLabel(config)} (${ms}ms)`);
       }
+
+      if (
+        typeof window !== "undefined" &&
+        !config.silentSuccess &&
+        MUTATING_METHODS.has((config.method ?? "get").toLowerCase())
+      ) {
+        const message = (response.data as { message?: string } | undefined)?.message;
+        if (message) toast.success(message);
+      }
+
       return response.data;
     },
     async (error: AxiosError) => {

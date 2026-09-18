@@ -25,6 +25,7 @@ interface AdminGroupContextType {
   reactivateGroup: (groupId: string) => Promise<Group | undefined>;
   resetReportCount: (groupId: string) => Promise<Group | undefined>;
   suspendGroup: (groupId: string) => Promise<Group | undefined>;
+  deleteGroup: (groupId: string, reason: string) => Promise<void>;
   lastListedGroupIds: string[];
   setLastListedGroupIds: (ids: string[]) => void;
 }
@@ -102,6 +103,10 @@ export function AdminGroupProvider({ children }: { children: React.ReactNode }) 
     return res?.data;
   }, []);
 
+  const deleteGroup = React.useCallback(async (groupId: string, reason: string) => {
+    await GroupService.deleteGroupAdmin(groupId, reason);
+  }, []);
+
   return (
     <AdminGroupContext.Provider
       value={{
@@ -114,6 +119,7 @@ export function AdminGroupProvider({ children }: { children: React.ReactNode }) 
         reactivateGroup,
         resetReportCount,
         suspendGroup,
+        deleteGroup,
         lastListedGroupIds,
         setLastListedGroupIds,
       }}

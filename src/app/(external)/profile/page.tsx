@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { toast } from "sonner";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { ChangePhotoModal } from "@/components/ui/ChangePhotoModal";
 import { EXTERNAL_HOME_PATH } from "@/configs/const";
@@ -66,7 +65,6 @@ export default function ProfilePage() {
     const { data } = await UserService.updateMyProfile(draft);
     setUser((prev) => (prev ? { ...prev, ...draft, ...data } : prev));
     await refetchUser();
-    toast.success("Your details have been updated.");
 
     if (data && !data.whatsappVerified)
       await startWhatsappVerification(data.mobile ?? draft.mobile);
@@ -79,7 +77,6 @@ export default function ProfilePage() {
     await UserService.uploadProfilePicture(data.uploadUrl, photo);
     await UserService.confirmProfilePicture(data.fileKey);
     await refreshUser();
-    toast.success("Your profile photo has been updated.");
   };
 
   if (!details) {

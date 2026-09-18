@@ -3,7 +3,6 @@
 import * as React from "react";
 import { ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import {
   Modal,
   ModalContent,
@@ -66,7 +65,6 @@ function VerifyEmailModalBody({ email, onOpenChange }: VerifyEmailModalBodyProps
         return;
       }
 
-      toast.success("Email verified. You're now logged in.");
       onOpenChange(false);
       router.push(getHomePathForUserType(userType));
       router.refresh();

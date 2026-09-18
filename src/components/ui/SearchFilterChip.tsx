@@ -76,6 +76,12 @@ export function SearchFilterChip({
         : ["", ""]
       : ["", ""];
 
+  const numberRangeInvalid =
+    filter.component === "NUMBER_RANGE" &&
+    rangeStart !== "" &&
+    rangeEnd !== "" &&
+    Number(rangeStart) > Number(rangeEnd);
+
   return (
     <Popover
       onOpenChange={(open) => {
@@ -181,8 +187,18 @@ export function SearchFilterChip({
             ) : null}
           </div>
         </div>
+        {numberRangeInvalid && (
+          <Typography variant="xs" as="p" className="mt-2 text-state-danger">
+            Min must not be greater than max.
+          </Typography>
+        )}
         <PopoverClose asChild>
-          <Button className="mt-2" variant="default" onClick={() => onApply(draft)}>
+          <Button
+            className="mt-2"
+            variant="default"
+            disabled={numberRangeInvalid}
+            onClick={() => onApply(draft)}
+          >
             Apply Filter
           </Button>
         </PopoverClose>

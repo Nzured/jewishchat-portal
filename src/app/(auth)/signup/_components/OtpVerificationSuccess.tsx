@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { createLazyLottie } from "@/components/ui/LazyLottie";
 import { Progress } from "@/components/ui/Progress";
 import { Typography } from "@/components/ui/Typography";
@@ -37,7 +36,6 @@ export default function OtpVerificationSuccess({ userType }: OtpVerificationSucc
   useEffect(() => {
     if (progress >= 100 && isAnimationDone) {
       const timeout = setTimeout(() => {
-        toast.success("User has successfully signed up");
         router.push(getHomePathForUserType(userType));
         router.refresh();
       }, 200);

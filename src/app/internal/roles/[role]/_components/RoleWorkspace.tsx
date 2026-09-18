@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
 import { getRoleChanges, useRoles } from "@/app/internal/roles/_context/RoleContext";
 import { Permission } from "@/types/Permission";
 import { Role } from "@/types/Role";
@@ -38,16 +37,13 @@ export function RoleWorkspace({ role, permissions }: RoleWorkspaceProps) {
 
     try {
       await saveRoleChanges(role, { name, description, permissionIds: grantedIds });
-      toast.success(`Changes saved for ${role.name}`);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to save changes");
     }
   };
 
   const handleDelete = async () => {
     await deleteRole(role.id);
-    toast.success(`${role.name} deleted`);
   };
 
   return (

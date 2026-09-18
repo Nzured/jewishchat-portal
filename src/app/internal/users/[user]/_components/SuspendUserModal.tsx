@@ -79,7 +79,7 @@ export function SuspendUserModal({ user, open, setOpen, onSuspend }: SuspendUser
   }));
 
   const handleSuspend = async () => {
-    if (!reason) return;
+    if (!reason || !remark.trim()) return;
     const reasonLabel =
       reasonItems?.find((item) => Number(item.value) === reason)?.label ?? String(reason);
     await onSuspend({ reason, reasonLabel, remark });
@@ -112,11 +112,11 @@ export function SuspendUserModal({ user, open, setOpen, onSuspend }: SuspendUser
           </Field>
 
           <Field>
-            <FieldLabel>Remark</FieldLabel>
+            <FieldLabel required>Remark</FieldLabel>
             <Textarea
               value={remark}
               onChange={(event) => setRemark(event.target.value)}
-              placeholder="Add an optional remark..."
+              placeholder="Add a remark..."
             />
           </Field>
 
@@ -142,7 +142,7 @@ export function SuspendUserModal({ user, open, setOpen, onSuspend }: SuspendUser
           <Button
             leftIcon={<PauseCircle />}
             onClick={() => void handleSuspend()}
-            disabled={!reason}
+            disabled={!reason || !remark.trim()}
             variant="default"
             color="warning"
           >

@@ -39,6 +39,7 @@ export const AuthService = {
       headers: { Authorization: payload.refreshToken },
       globalLoader: true,
       skipAuthRefresh: true,
+      silentSuccess: true,
     }),
   getUserType: async (payload: { email: string }) =>
     api.get<UserTypeResponse>(`${AUTH_SERVICE}/user-type`, {

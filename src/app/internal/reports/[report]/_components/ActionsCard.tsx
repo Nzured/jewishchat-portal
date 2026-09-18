@@ -58,7 +58,7 @@ export default function ActionsCard({
   const handleDelete = async () => {
     if (!group?.uuid) return;
     try {
-      await GroupService.rejectGroup(group.uuid, "Permanently deleted by admin");
+      await GroupService.deleteGroupAdmin(group.uuid, "Permanently deleted by admin");
       onDelete?.();
     } catch {
       // The axios error interceptor already surfaces a toast for this.

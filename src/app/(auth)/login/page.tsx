@@ -78,16 +78,21 @@ export default function LoginPage() {
 
       await login(data);
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 403) {
-        setPendingVerifyEmail(data.email);
-        return;
-      }
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        const message =
-          (error.response?.data as { message?: string } | undefined)?.message ||
-          "Invalid email or password.";
-        setError("password", { type: "manual", message });
-        return;
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = (error.response?.data as { message?: string } | undefined)?.message;
+
+        if (status === 403 && message?.toLowerCase().includes("verify")) {
+          setPendingVerifyEmail(data.email);
+          return;
+        }
+        if (status === 401) {
+          setError("password", {
+            type: "manual",
+            message: message || "Invalid email or password.",
+          });
+          return;
+        }
       }
       console.error(error);
     }
