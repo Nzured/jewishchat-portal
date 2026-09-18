@@ -75,7 +75,13 @@ export default function UserModerationCard({
   const handleSendPasswordReset = async () => {
     if (!user) return;
     try {
-      await AuthService.forgotPassword({ email: user.email });
+      // Admin-triggered reset — hits the admin-only endpoint, gated by
+      // admin JWT auth (@PreAuthorize on the backend) rather than
+      // Turnstile. Turnstile belongs only on the PUBLIC, unauthenticated
+      // /forgot-password page (AuthService.forgotPassword) — it protects
+      // against anonymous bot email-bombing, a threat model that doesn't
+      // apply here since the caller is already an authenticated admin.
+      await AuthService.adminSendPasswordResetEmail(user.uuid);
     } catch (error) {
       console.error(error);
     }
