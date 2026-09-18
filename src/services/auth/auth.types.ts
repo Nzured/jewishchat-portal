@@ -7,6 +7,7 @@ export interface SignupRequest {
   lastName: string;
   mobile?: string;
   password: string;
+  turnstileToken: string;
 }
 
 export interface SignupResponse {

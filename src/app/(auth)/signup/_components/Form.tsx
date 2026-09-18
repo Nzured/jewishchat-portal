@@ -17,6 +17,7 @@ import {
 } from "@/configs/const";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useTurnstile } from "@/hooks/useTurnstile";
 import { AuthService } from "@/services/auth/auth.service";
 import type { SignupRequest } from "@/services/auth/auth.types";
 import {
@@ -60,6 +61,11 @@ export default function Form({ onSuccess }: FormProps) {
   const debouncedEmail = useDebouncedValue(emailValue, EMAIL_CHECK_DEBOUNCE_MS);
   const emailExistsCacheRef = useRef<{ email: string; exists: boolean } | null>(null);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+  const {
+    token: turnstileToken,
+    widget: turnstileWidget,
+    isReady: turnstileReady,
+  } = useTurnstile();
 
   const checkEmailExists = async (email: string): Promise<boolean> => {
     if (emailExistsCacheRef.current?.email === email) return emailExistsCacheRef.current.exists;
@@ -98,7 +104,7 @@ export default function Form({ onSuccess }: FormProps) {
         return;
       }
 
-      await signup(values);
+      await signup({ ...values, turnstileToken });
       onSuccess?.(values.email);
     } catch (error) {
       console.error(error);
@@ -208,11 +214,13 @@ export default function Form({ onSuccess }: FormProps) {
             </div>
           </Field>
 
+          {turnstileWidget}
+
           <Button
             type="submit"
             variant="default"
             className="w-full text-base mt-4"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !turnstileReady}
           >
             Continue <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
