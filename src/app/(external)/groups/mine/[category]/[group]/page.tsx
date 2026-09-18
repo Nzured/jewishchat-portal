@@ -227,7 +227,6 @@ export default function EditGroupPage() {
       setGroup(updated);
       reset(toFormValues(updated));
       setResubmissionMessage("");
-      toast.success("Your listing has been updated.");
     } finally {
       setIsSaving(false);
     }

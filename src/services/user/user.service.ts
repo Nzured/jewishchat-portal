@@ -57,7 +57,6 @@ export const UserService = {
   deleteUser: (userId: string) =>
     api.delete<ApiResponse<void>>(`${USER_SERVICE}/admin/users/${userId}`, {
       globalLoader: true,
-      showSuccessToast: true,
     }),
   getSuspendType: () =>
     api.get<ApiResponse<UserReportTypes[]>>(`${USER_SERVICE}/admin/users/suspend-types`),
@@ -65,14 +64,12 @@ export const UserService = {
     withUser(
       api.patch<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}/suspend`, payload, {
         globalLoader: true,
-        showSuccessToast: true,
       }),
     ),
   reactivateUser: (userId: string) =>
     withUser(
       api.patch<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}/reactivate`, undefined, {
         globalLoader: true,
-        showSuccessToast: true,
       }),
     ),
   changeEmail: (userId: string, email: string) =>
@@ -80,7 +77,7 @@ export const UserService = {
       api.patch<ApiResponse<User>>(
         `${USER_SERVICE}/admin/users/${userId}/email`,
         { newEmail: email },
-        { globalLoader: true, showSuccessToast: true },
+        { globalLoader: true },
       ),
     ),
   changeMobile: (userId: string, mobile: string) =>
@@ -88,7 +85,7 @@ export const UserService = {
       api.patch<ApiResponse<User>>(
         `${USER_SERVICE}/admin/users/${userId}/mobile`,
         { newMobile: mobile },
-        { globalLoader: true, showSuccessToast: true },
+        { globalLoader: true },
       ),
     ),
   changeUserRole: (userId: string, roles: number[]) =>
@@ -96,13 +93,17 @@ export const UserService = {
       api.post<ApiResponse<User>>(
         `${USER_SERVICE}/admin/users/${userId}/roles`,
         { roleIds: roles },
-        { globalLoader: true, showSuccessToast: true },
+        { globalLoader: true },
       ),
     ),
   getUserById: (userId: string) =>
     withUser(api.get<ApiResponse<User>>(`${USER_SERVICE}/users/getById/${userId}`)),
   getProfilePictureUploadUrl: () =>
-    api.post<ApiResponse<GetPhotoUrlResponse>>(`${USER_SERVICE}/users/me/profile-picture`, {}),
+    api.post<ApiResponse<GetPhotoUrlResponse>>(
+      `${USER_SERVICE}/users/me/profile-picture`,
+      {},
+      { silentSuccess: true },
+    ),
   uploadProfilePicture: (uploadUrl: string, file: File) =>
     axios.put(uploadUrl, file, {
       headers: { "Content-Type": GROUP_PHOTO_UPLOAD_CONTENT_TYPE },

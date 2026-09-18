@@ -49,6 +49,7 @@ const requestLabel = (config: AxiosRequestConfig) =>
   `${(config.method ?? "get").toUpperCase()} ${config.url}`;
 
 const TRACKED_METHODS = ["get", "post", "put", "patch", "delete"] as const;
+const MUTATING_METHODS = new Set(["post", "put", "patch", "delete"]);
 const CONFIG_ARG_INDEX: Record<(typeof TRACKED_METHODS)[number], number> = {
   get: 1,
   delete: 1,
@@ -92,7 +93,11 @@ export const setupInterceptors = (
         console.log(`[api] ← ${response.status} ${requestLabel(config)} (${ms}ms)`);
       }
 
-      if (typeof window !== "undefined" && config.showSuccessToast) {
+      if (
+        typeof window !== "undefined" &&
+        !config.silentSuccess &&
+        MUTATING_METHODS.has((config.method ?? "get").toLowerCase())
+      ) {
         const message = (response.data as { message?: string } | undefined)?.message;
         if (message) toast.success(message);
       }

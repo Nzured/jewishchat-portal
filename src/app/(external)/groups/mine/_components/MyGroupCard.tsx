@@ -106,7 +106,6 @@ function DraftCard({
     try {
       await GroupService.deleteDraft(draft.draftId);
       onDraftDeleted?.(draft.draftId);
-      toast.success("Draft deleted.");
     } finally {
       setIsDeleting(false);
     }
@@ -223,7 +222,6 @@ function GroupItemCard({
     try {
       await GroupService.deleteGroup(group.uuid);
       onGroupDeleted?.(group.uuid);
-      toast.success("Listing deleted.");
     } finally {
       setIsDeleting(false);
     }

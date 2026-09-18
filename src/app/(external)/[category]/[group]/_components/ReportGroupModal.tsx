@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { Flag, X } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/Field";
 import {
@@ -56,10 +55,7 @@ export function ReportGroupModal({ groupUuid, groupName, trigger }: ReportGroupM
         category: reason,
         description: remark || undefined,
       });
-      toast.success("Thanks - our moderators will take a look at this group.");
       handleOpenChange(false);
-    } catch {
-      // The axios error interceptor already surfaces a toast for this.
     } finally {
       setIsSubmitting(false);
     }

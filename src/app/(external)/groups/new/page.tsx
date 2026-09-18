@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/Skeleton";
 import StepperCard, { type StepperCardStep } from "@/components/ui/StepperCard";
 import { EXTERNAL_GROUPS_MINE_PATH } from "@/configs/const";
@@ -280,7 +279,6 @@ function CreateGroupFlow() {
         memberCount: values.memberCount,
         status: draft.status,
       });
-      toast.success("Your group has been submitted for review.");
     });
   };
 

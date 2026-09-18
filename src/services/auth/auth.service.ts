@@ -39,6 +39,7 @@ export const AuthService = {
       headers: { Authorization: payload.refreshToken },
       globalLoader: true,
       skipAuthRefresh: true,
+      silentSuccess: true,
     }),
   getUserType: async (payload: { email: string }) =>
     api.get<UserTypeResponse>(`${AUTH_SERVICE}/user-type`, {
@@ -69,7 +70,6 @@ export const AuthService = {
   inviteInternalUser: (payload: InviteInternalUserPayload) =>
     api.post<ApiResponse<User>>(`${AUTH_ADMIN_SERVICE}/invite`, payload, {
       globalLoader: true,
-      showSuccessToast: true,
     }),
   validateToken: (token: string) =>
     api.get<ApiResponse<InvitedUser>>(`${AUTH_ADMIN_SERVICE}/invite/validate`, {
