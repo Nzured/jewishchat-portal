@@ -14,7 +14,7 @@ interface GroupsContextType {
   saveDraftStep2: (values: CreateGroupFormValues) => Promise<void>;
   getImageUploadUrl: () => Promise<GetPhotoUrlResponse>;
   uploadGroupImage: (file: File, onProgress?: (percent: number) => void) => Promise<string>;
-  submitDraft: () => Promise<GroupDraft>;
+  submitDraft: (turnstileToken: string) => Promise<GroupDraft>;
 }
 
 const GroupsContext = React.createContext<GroupsContextType | undefined>(undefined);
@@ -103,12 +103,15 @@ export function GroupsProvider({ children }: { children: React.ReactNode }) {
     },
     [getImageUploadUrl],
   );
-  const submitDraft = React.useCallback(async () => {
-    if (!draftId) throw new Error("Draft ID is not set");
-    const res = await GroupService.submitDraft(draftId);
-    setStatus(res.data.status);
-    return res.data;
-  }, [draftId]);
+  const submitDraft = React.useCallback(
+    async (turnstileToken: string) => {
+      if (!draftId) throw new Error("Draft ID is not set");
+      const res = await GroupService.submitDraft(draftId, turnstileToken);
+      setStatus(res.data.status);
+      return res.data;
+    },
+    [draftId],
+  );
 
   return (
     <GroupsContext.Provider

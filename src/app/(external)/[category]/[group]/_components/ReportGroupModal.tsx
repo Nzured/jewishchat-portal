@@ -19,6 +19,7 @@ import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { Textarea } from "@/components/ui/Textarea";
 import { Typography } from "@/components/ui/Typography";
 import { NOT_APPLICABLE } from "@/configs/const";
+import { useTurnstile } from "@/hooks/useTurnstile";
 import { GroupService } from "@/services/group/group.service";
 import { ReportCategories } from "@/types/Report";
 
@@ -38,12 +39,19 @@ export function ReportGroupModal({ groupUuid, groupName, trigger }: ReportGroupM
   const [reason, setReason] = React.useState<ReportCategories | "">("");
   const [remark, setRemark] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const {
+    token: turnstileToken,
+    widget: turnstileWidget,
+    isReady: turnstileReady,
+    reset: resetTurnstile,
+  } = useTurnstile();
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
     if (!next) {
       setReason("");
       setRemark("");
+      resetTurnstile();
     }
   };
 
@@ -55,6 +63,7 @@ export function ReportGroupModal({ groupUuid, groupName, trigger }: ReportGroupM
       await GroupService.reportGroup(groupUuid, {
         category: reason,
         description: remark || undefined,
+        turnstileToken,
       });
       toast.success("Thanks - our moderators will take a look at this group.");
       handleOpenChange(false);
@@ -99,6 +108,8 @@ export function ReportGroupModal({ groupUuid, groupName, trigger }: ReportGroupM
               placeholder="Add an optional remark..."
             />
           </Field>
+
+          {turnstileWidget}
         </FieldGroup>
 
         <ModalFooter>
@@ -115,7 +126,7 @@ export function ReportGroupModal({ groupUuid, groupName, trigger }: ReportGroupM
           <Button
             leftIcon={<Flag />}
             onClick={() => void handleReport()}
-            disabled={!reason || isSubmitting}
+            disabled={!reason || isSubmitting || !turnstileReady}
             variant="default"
             color="danger"
           >

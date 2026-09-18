@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import StepperCard, { type StepperCardStep } from "@/components/ui/StepperCard";
 import { EXTERNAL_GROUPS_MINE_PATH } from "@/configs/const";
 import { useUser } from "@/contexts/UserContext";
+import { useTurnstile } from "@/hooks/useTurnstile";
 import {
   clearPendingGroupDraft,
   loadPendingGroupDraft,
@@ -102,6 +103,11 @@ function CreateGroupFlow() {
     defaultValues: DEFAULT_FORM_VALUES,
   });
   const { user } = useUser();
+  const {
+    token: turnstileToken,
+    widget: turnstileWidget,
+    isReady: turnstileReady,
+  } = useTurnstile();
 
   useEffect(
     () =>
@@ -161,7 +167,10 @@ function CreateGroupFlow() {
         description:
           "Listings with a photo get opened more often. You can skip this and add one later.",
         children: (
-          <GroupImageUploader control={control} errors={errors} uploadProgress={uploadProgress} />
+          <>
+            <GroupImageUploader control={control} errors={errors} uploadProgress={uploadProgress} />
+            {turnstileWidget}
+          </>
         ),
       },
     ] satisfies Omit<StepperCardStep, "id">[]
@@ -263,7 +272,7 @@ function CreateGroupFlow() {
         }
       }
 
-      const [draft, categories] = await Promise.all([submitDraft(), fetchCategories()]);
+      const [draft, categories] = await Promise.all([submitDraft(turnstileToken), fetchCategories()]);
 
       setSubmittedGroup({
         slug: draft.slug,
@@ -321,6 +330,7 @@ function CreateGroupFlow() {
           onContinue={handleContinue}
           isSubmitting={isSubmitting}
           submitLabel="Create group"
+          continueDisabled={currentStep === stepsLength && !turnstileReady}
         />
       )}
 

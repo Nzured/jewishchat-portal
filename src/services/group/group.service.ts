@@ -134,10 +134,10 @@ export const GroupService = {
   getCategories: () => api.get<ApiResponse<Category[]>>(`${GROUP_SERVICE}groups/categories`),
   getCategoryBySlug: (slug: string) =>
     api.get<ApiResponse<CategoryDetail>>(`${GROUP_SERVICE}groups/categories/${slug}`),
-  submitDraft: (draftId: string) =>
+  submitDraft: (draftId: string, turnstileToken: string) =>
     api.post<ApiResponse<GroupDraft>>(
       `${GROUP_SERVICE}groups/drafts/${draftId}/submit`,
-      {},
+      { turnstileToken },
       { globalLoader: true },
     ),
   getAdminGroups: (

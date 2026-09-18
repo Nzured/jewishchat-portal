@@ -31,6 +31,7 @@ export interface Report {
 export interface ReportGroupPayload {
   category: ReportCategories;
   description?: string;
+  turnstileToken: string;
 }
 
 export interface AdminGroupReport {
