@@ -56,7 +56,7 @@ export const AuthService = {
     }),
   logout: async () =>
     api.post<ApiResponse<void>>(`${AUTH_SERVICE}/logout`, undefined, { globalLoader: true }),
-  forgotPassword: async (payload: { email: string }) =>
+  forgotPassword: async (payload: { email: string; turnstileToken: string }) =>
     api.post<ApiResponse<void>>(`${AUTH_SERVICE}/forgot-password`, payload, {
       globalLoader: true,
       skipAuthRefresh: true,
