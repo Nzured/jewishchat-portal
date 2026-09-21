@@ -56,12 +56,13 @@ export const GroupService = {
   recordGroupView: (uuid: string, payload: GroupViewPayload) =>
     api.post<ApiResponse<void>>(`${GROUP_SERVICE}groups/${uuid}/view`, payload, {
       silentError: true,
+      silentSuccess: true,
     }),
   startGroupJoin: (slug: string) =>
     api.post<ApiResponse<JoinTokenResponse>>(
       `${GROUP_SERVICE}groups/${encodeURIComponent(slug)}/join`,
       {},
-      { silentError: true },
+      { silentError: true, silentSuccess: true },
     ),
   redeemJoinToken: (token: string) =>
     api.get<ApiResponse<JoinRedirectResponse>>(
@@ -91,7 +92,7 @@ export const GroupService = {
     api.post<ApiResponse<GroupDraftRef>>(
       `${GROUP_SERVICE}groups/drafts`,
       {},
-      { globalLoader: true },
+      { globalLoader: true, silentSuccess: true },
     ),
   checkWhatsappUrl: (url: string, excludeDraftId?: string) =>
     api.get<WhatsappUrlCheckResponse>(`${GROUP_SERVICE}groups/check-whatsapp-url`, {
@@ -105,15 +106,18 @@ export const GroupService = {
   saveDraftStep1: (payload: GroupDraftStep1Payload, draftId: string) =>
     api.patch<ApiResponse<GroupDraft>>(`${GROUP_SERVICE}groups/drafts/${draftId}/step1`, payload, {
       globalLoader: true,
+      silentSuccess: true,
     }),
   saveDraftStep2: (payload: GroupDraftStep2Payload, draftId: string) =>
     api.patch<ApiResponse<GroupDraft>>(`${GROUP_SERVICE}groups/drafts/${draftId}/step2`, payload, {
       globalLoader: true,
+      silentSuccess: true,
     }),
   saveDraftStep4: (draftId: string) =>
     api.post<ApiResponse<GetPhotoUrlResponse>>(
       `${GROUP_SERVICE}groups/drafts/${draftId}/step4/photo`,
       {},
+      { silentSuccess: true },
     ),
   uploadGroupPhoto: (uploadUrl: string, file: File, onProgress?: (percent: number) => void) =>
     axios.put(uploadUrl, file, {
@@ -122,7 +126,11 @@ export const GroupService = {
         onProgress?.(total ? Math.round((loaded / total) * 100) : 0),
     }),
   getGroupPhotoUploadUrl: (uuid: string) =>
-    api.post<ApiResponse<GetPhotoUrlResponse>>(`${GROUP_SERVICE}groups/${uuid}/photo`, {}),
+    api.post<ApiResponse<GetPhotoUrlResponse>>(
+      `${GROUP_SERVICE}groups/${uuid}/photo`,
+      {},
+      { silentSuccess: true },
+    ),
   updateGroup: (uuid: string, payload: UpdateGroupPayload) =>
     api.patch<ApiResponse<Group>>(`${GROUP_SERVICE}groups/${uuid}`, payload, {
       globalLoader: true,
@@ -187,6 +195,11 @@ export const GroupService = {
       payload ?? {},
       { globalLoader: true },
     ),
+  deleteGroupAdmin: (groupId: string, reason: string) =>
+    api.delete<ApiResponse<void>>(`${GROUP_SERVICE}admin/groups/${groupId}`, {
+      data: { reason },
+      globalLoader: true,
+    }),
   reportGroup: (uuid: string, payload: ReportGroupPayload) =>
     api.post<ApiResponse<void>>(`${GROUP_SERVICE}groups/${uuid}/report`, payload, {
       globalLoader: true,

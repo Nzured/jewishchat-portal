@@ -45,7 +45,7 @@ export function UserManagementProvider({ children }: { children: React.ReactNode
     if (userId === undefined || userId === null || userId === "") return;
     const res = await UserService.getGroupsByUser(userId);
     if (!res || !res.data) throw new Error("No data received");
-    return res.data;
+    return res.data.groups;
   }, []);
 
   const inviteInternalUser = React.useCallback(async (payload: InviteInternalUserPayload) => {

@@ -4,7 +4,6 @@ import { Suspense, useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import AuthIllustration from "@/components/layout/auth/AuthIllustration";
 import { Button } from "@/components/ui/Button";
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/Field";
@@ -88,10 +87,6 @@ function ForgotPasswordContent() {
       }
 
       const res = await AuthService.forgotPassword({ ...data, turnstileToken });
-
-      if (res && res.message) {
-        toast.success(`A reset link has been sent to ${data.email}`);
-      }
     } catch (error) {
       console.error(error);
     }

@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Save, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { DeleteModal } from "@/components/ui/DeleteModal";
 import { ModerationActionItem, ModerationActionsCard } from "@/components/ui/ModerationActionsCard";
@@ -34,7 +33,6 @@ export function RoleActionsCard({
         router.push("/internal/roles");
       } catch (error) {
         console.error(error);
-        toast.error("Failed to delete role");
       }
     })();
   };

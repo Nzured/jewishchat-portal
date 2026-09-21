@@ -7,6 +7,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
+import { DeleteModal } from "@/components/ui/DeleteModal";
 import { NoData } from "@/components/ui/NoData";
 import { Typography } from "@/components/ui/Typography";
 import { DEFAULT_PAGE_SIZE, DEFAULT_SORT, FIRST_PAGE, NOT_APPLICABLE } from "@/configs/const";
@@ -29,7 +30,13 @@ function countExtraCategories(group: Group) {
   return group.categories?.filter((category) => category.id !== group.mainCategory?.id).length ?? 0;
 }
 
-function getColumns({ onEdit }: { onEdit: (group: Group) => void }): DataTableColumn<Group>[] {
+function getColumns({
+  onEdit,
+  onDelete,
+}: {
+  onEdit: (group: Group) => void;
+  onDelete: (group: Group) => void;
+}): DataTableColumn<Group>[] {
   return [
     {
       id: "name",
@@ -120,6 +127,7 @@ function getColumns({ onEdit }: { onEdit: (group: Group) => void }): DataTableCo
             size="icon-sm"
             aria-label={`Delete ${group.name}`}
             className="hover:bg-state-danger/10 hover:text-state-danger"
+            onClick={() => onDelete(group)}
           >
             <Trash2 className="text-ink-3 transition-colors group-hover/button:text-state-danger text-ink-4" />
           </Button>
@@ -147,13 +155,14 @@ function matchesFilter(group: Group, key: string, value: string | string[] | nul
 export function GroupsTable({ onCountChange }: { onCountChange?: (total: number) => void }) {
   const router = useRouter();
   const { appliedFilters, hasActiveFilters, clearAllFilters } = useSearchFilter();
-  const { fetchGroups, setLastListedGroupIds } = useAdminGroupContext();
+  const { fetchGroups, deleteGroup, setLastListedGroupIds } = useAdminGroupContext();
   const [groups, setGroups] = React.useState<Group[]>([]);
   const [mobileGroups, setMobileGroups] = React.useState<Group[]>([]);
   const [totalGroups, setTotalGroups] = React.useState(0);
   const [loading, setLoading] = React.useState(true);
   const [page, setPage] = React.useState(FIRST_PAGE);
   const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_SIZE);
+  const [groupToDelete, setGroupToDelete] = React.useState<Group | null>(null);
 
   const filterValue = (key: string) =>
     (appliedFilters.find((filter) => filter.key === key)?.value as string) || undefined;
@@ -225,42 +234,77 @@ export function GroupsTable({ onCountChange }: { onCountChange?: (total: number)
     (group: Group) => router.push(`/internal/groups/${group.uuid}`),
     [router],
   );
-  const columns = React.useMemo(() => getColumns({ onEdit: handleEdit }), [handleEdit]);
+  const columns = React.useMemo(
+    () => getColumns({ onEdit: handleEdit, onDelete: setGroupToDelete }),
+    [handleEdit],
+  );
+
+  const handleDelete = async () => {
+    if (!groupToDelete) return;
+    await deleteGroup(groupToDelete.uuid, "Permanently deleted by admin");
+    setGroups((prev) => prev.filter((group) => group.uuid !== groupToDelete.uuid));
+    setMobileGroups((prev) => prev.filter((group) => group.uuid !== groupToDelete.uuid));
+    setTotalGroups((prev) => {
+      const next = Math.max(0, prev - 1);
+      onCountChange?.(next);
+      return next;
+    });
+  };
 
   return (
-    <DataTable
-      columns={columns}
-      data={filteredGroups}
-      cardData={filteredMobileGroups}
-      renderCard={(group) => <GroupCard group={group} onEdit={handleEdit} />}
-      getRowId={(group) => group.uuid}
-      loading={loading && page === FIRST_PAGE}
-      emptyState={
-        <NoData
-          title={hasActiveFilters ? "No groups match these filters" : "No groups yet"}
-          description={
-            hasActiveFilters
-              ? "Try adjusting or clearing your filters to see more groups."
-              : "Groups submitted to the directory will show up here."
-          }
-          onClearFilters={hasActiveFilters ? clearAllFilters : undefined}
-        />
-      }
-      pagination={{
-        page,
-        pageSize,
-        total: totalGroups,
-        onPageChange: setPage,
-        onPageSizeChange: (size) => {
-          setPageSize(size);
-          setPage(FIRST_PAGE);
-        },
-      }}
-      infiniteScroll={{
-        hasMore: mobileGroups.length < totalGroups,
-        onLoadMore: () => setPage((current) => current + 1),
-      }}
-    />
+    <>
+      <DataTable
+        columns={columns}
+        data={filteredGroups}
+        cardData={filteredMobileGroups}
+        renderCard={(group) => <GroupCard group={group} onEdit={handleEdit} />}
+        getRowId={(group) => group.uuid}
+        loading={loading && page === FIRST_PAGE}
+        emptyState={
+          <NoData
+            title={hasActiveFilters ? "No groups match these filters" : "No groups yet"}
+            description={
+              hasActiveFilters
+                ? "Try adjusting or clearing your filters to see more groups."
+                : "Groups submitted to the directory will show up here."
+            }
+            onClearFilters={hasActiveFilters ? clearAllFilters : undefined}
+          />
+        }
+        pagination={{
+          page,
+          pageSize,
+          total: totalGroups,
+          onPageChange: setPage,
+          onPageSizeChange: (size) => {
+            setPageSize(size);
+            setPage(FIRST_PAGE);
+          },
+        }}
+        infiniteScroll={{
+          hasMore: mobileGroups.length < totalGroups,
+          onLoadMore: () => setPage((current) => current + 1),
+        }}
+      />
+      <DeleteModal
+        open={groupToDelete != null}
+        onOpenChange={(open) => !open && setGroupToDelete(null)}
+        title="Permanently delete this group?"
+        description={
+          <>
+            <Typography as="span" variant="small" className="font-semibold text-ink-2">
+              This cannot be undone.
+            </Typography>{" "}
+            It removes{" "}
+            <Typography as="span" variant="small" className="font-semibold text-ink-2">
+              {groupToDelete?.name}
+            </Typography>{" "}
+            along with all of its reports, metrics and submission history.
+          </>
+        }
+        onConfirm={() => void handleDelete()}
+      />
+    </>
   );
 }
 

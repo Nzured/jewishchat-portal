@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { useUser } from "@/contexts/UserContext";
 import { clearAuthSession, getHomePathForUserType, setAuthSession } from "@/lib/auth";
 import { AuthService } from "@/services/auth/auth.service";
@@ -74,7 +73,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error("Login failed");
 
       await establishSession(res.data);
-      toast.success("User has successfully logged in");
       router.push(getHomePathForUserType(res.data.user.userType));
       router.refresh();
     },
@@ -111,7 +109,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resendOtp = React.useCallback(async (email: string) => {
     await AuthService.resendOtp({ email });
-    toast.success("Verification code resent!");
   }, []);
 
   const logout = React.useCallback(async () => {

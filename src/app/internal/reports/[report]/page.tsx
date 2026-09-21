@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import { AlertTriangle } from "lucide-react";
-import { useParams } from "next/navigation";
-import { toast } from "sonner";
+import { useParams, useRouter } from "next/navigation";
 import { Banner } from "@/components/ui/Banner";
 import { Card, CardContent } from "@/components/ui/Card";
 import { NoData } from "@/components/ui/NoData";
@@ -65,6 +64,7 @@ function ReportListSkeleton() {
 }
 
 function ReportPageContent({ reportId }: { reportId: string }) {
+  const router = useRouter();
   const { fetchReport } = useReportContext();
   const { user } = useUser();
   const [data, setData] = React.useState<ReportDetailResponse>();
@@ -132,41 +132,35 @@ function ReportPageContent({ reportId }: { reportId: string }) {
   const handleRelist = async () => {
     if (!group?.uuid) return;
 
-    try {
-      await GroupService.reactivateGroup(group.uuid);
-      setData((prev) =>
-        prev
-          ? {
-              ...prev,
-              report: {
-                ...prev.report,
-                group: { ...prev.report.group, status: GroupStatus.ACTIVE },
-              },
-            }
-          : prev,
-      );
-      setSuspension(null);
-      toast.success("Group re-listed.");
-    } catch {}
+    await GroupService.reactivateGroup(group.uuid);
+    setData((prev) =>
+      prev
+        ? {
+            ...prev,
+            report: {
+              ...prev.report,
+              group: { ...prev.report.group, status: GroupStatus.ACTIVE },
+            },
+          }
+        : prev,
+    );
+    setSuspension(null);
   };
 
   const handleMarkReviewed = async (report: ReportDetail) => {
     if (typeof report?.id !== "number") return;
 
-    try {
-      await GroupService.resolveReport(report.id);
-      setData((prev) => {
-        if (!prev) return prev;
-        const markResolved = (item: ReportDetail) =>
-          item.id === report.id ? { ...item, resolved: true } : item;
-        return {
-          ...prev,
-          report: markResolved(prev.report),
-          allGroupReports: prev.allGroupReports.map(markResolved),
-        };
-      });
-      toast.success("Report marked as reviewed.");
-    } catch {}
+    await GroupService.resolveReport(report.id);
+    setData((prev) => {
+      if (!prev) return prev;
+      const markResolved = (item: ReportDetail) =>
+        item.id === report.id ? { ...item, resolved: true } : item;
+      return {
+        ...prev,
+        report: markResolved(prev.report),
+        allGroupReports: prev.allGroupReports.map(markResolved),
+      };
+    });
   };
 
   const handleResolveAll = () => {
@@ -179,7 +173,10 @@ function ReportPageContent({ reportId }: { reportId: string }) {
         allGroupReports: prev.allGroupReports.map(markResolved),
       };
     });
-    toast.success("All reports for this group marked as reviewed.");
+  };
+
+  const handleDelete = () => {
+    router.push("/internal/groups");
   };
 
   const summaryCard = isLoading ? (
@@ -252,6 +249,7 @@ function ReportPageContent({ reportId }: { reportId: string }) {
               onSuspend={handleSuspend}
               onRelist={() => void handleRelist()}
               onResolveAll={handleResolveAll}
+              onDelete={handleDelete}
             />
           )}
         </div>

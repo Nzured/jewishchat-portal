@@ -227,9 +227,6 @@ export default function EditGroupPage() {
       setGroup(updated);
       reset(toFormValues(updated));
       setResubmissionMessage("");
-      toast.success("Your listing has been updated.");
-    } catch {
-      toast.error("Those changes could not be saved.");
     } finally {
       setIsSaving(false);
     }

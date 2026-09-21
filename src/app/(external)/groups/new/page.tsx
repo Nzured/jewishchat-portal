@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/Skeleton";
 import StepperCard, { type StepperCardStep } from "@/components/ui/StepperCard";
 import { EXTERNAL_GROUPS_MINE_PATH } from "@/configs/const";
@@ -207,9 +206,7 @@ function CreateGroupFlow() {
         reset({ ...DEFAULT_FORM_VALUES, ...step1, ...step2, image: null });
         setCurrentStep(draft.step2Data ? stepsLength : draft.step1Data ? 2 : 1);
       })
-      .catch(() => {
-        if (!ignore) toast.error("That draft could not be opened.");
-      })
+      .catch(() => {})
       .finally(() => {
         if (!ignore) setIsResumingDraft(false);
       });
@@ -291,7 +288,6 @@ function CreateGroupFlow() {
         memberCount: values.memberCount,
         status: draft.status,
       });
-      toast.success("Your group has been submitted for review.");
     });
   };
 

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { GROUP_PHOTO_UPLOAD_CONTENT_TYPE } from "@/configs/const";
 import { ApiResponse } from "@/types/Common";
-import { GetPhotoUrlResponse, Group } from "@/types/Group";
+import { GetPhotoUrlResponse, GroupsPage } from "@/types/Group";
 import { AdminUsersPage, User, UserReportTypes, UserType } from "@/types/User";
 import { api } from "../axiosConfig";
 
@@ -53,7 +53,7 @@ export const UserService = {
   getUser: (userId: string) =>
     withUser(api.get<ApiResponse<User>>(`${USER_SERVICE}/admin/users/${userId}`)),
   getGroupsByUser: (userId: string) =>
-    api.get<ApiResponse<Group[]>>(`${USER_SERVICE}/admin/users/${userId}/groups`),
+    api.get<ApiResponse<GroupsPage>>(`${USER_SERVICE}/admin/users/${userId}/groups`),
   deleteUser: (userId: string) =>
     api.delete<ApiResponse<void>>(`${USER_SERVICE}/admin/users/${userId}`, {
       globalLoader: true,
@@ -90,16 +90,20 @@ export const UserService = {
     ),
   changeUserRole: (userId: string, roles: number[]) =>
     withUser(
-      api.patch<ApiResponse<User>>(
-        `${USER_SERVICE}/admin/users/${userId}/role`,
-        { roles: roles },
+      api.post<ApiResponse<User>>(
+        `${USER_SERVICE}/admin/users/${userId}/roles`,
+        { roleIds: roles },
         { globalLoader: true },
       ),
     ),
   getUserById: (userId: string) =>
     withUser(api.get<ApiResponse<User>>(`${USER_SERVICE}/users/getById/${userId}`)),
   getProfilePictureUploadUrl: () =>
-    api.post<ApiResponse<GetPhotoUrlResponse>>(`${USER_SERVICE}/users/me/profile-picture`, {}),
+    api.post<ApiResponse<GetPhotoUrlResponse>>(
+      `${USER_SERVICE}/users/me/profile-picture`,
+      {},
+      { silentSuccess: true },
+    ),
   uploadProfilePicture: (uploadUrl: string, file: File) =>
     axios.put(uploadUrl, file, {
       headers: { "Content-Type": GROUP_PHOTO_UPLOAD_CONTENT_TYPE },

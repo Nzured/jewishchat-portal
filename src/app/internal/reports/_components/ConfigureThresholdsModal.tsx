@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { Flag, Minus, Plus, Save, Unlink, X } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import {
   Modal,
@@ -124,7 +123,6 @@ export function ConfigureThresholdsModal({ open, onOpenChange }: ConfigureThresh
     setIsSaving(true);
     try {
       await GroupService.updateReportThresholds({ thresholds });
-      toast.success("Report thresholds updated.");
       onOpenChange(false);
     } catch {
       setIsSaving(false);

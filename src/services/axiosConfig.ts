@@ -7,6 +7,7 @@ declare module "axios" {
     globalLoader?: boolean;
     skipAuthRefresh?: boolean;
     silentError?: boolean;
+    silentSuccess?: boolean;
   }
 }
 
