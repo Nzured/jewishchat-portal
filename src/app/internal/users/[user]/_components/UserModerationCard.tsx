@@ -75,7 +75,7 @@ export default function UserModerationCard({
   const handleSendPasswordReset = async () => {
     if (!user) return;
     try {
-      await AuthService.forgotPassword({ email: user.email });
+      await AuthService.adminSendPasswordResetEmail(user.uuid);
     } catch (error) {
       console.error(error);
     }

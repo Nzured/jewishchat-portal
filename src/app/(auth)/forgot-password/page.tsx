@@ -13,6 +13,7 @@ import { Typography } from "@/components/ui/Typography";
 import { EMAIL_CHECK_DEBOUNCE_MS, EMAIL_REGEX } from "@/configs/const";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useTurnstile } from "@/hooks/useTurnstile";
 import { AuthService } from "@/services/auth/auth.service";
 import { UserType } from "@/types/User";
 
@@ -41,6 +42,11 @@ function ForgotPasswordContent() {
   const debouncedEmail = useDebouncedValue(email, EMAIL_CHECK_DEBOUNCE_MS);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [userType, setUserType] = useState<UserType | null>(null);
+  const {
+    token: turnstileToken,
+    widget: turnstileWidget,
+    isReady: turnstileReady,
+  } = useTurnstile();
 
   useEffect(() => {
     if (!debouncedEmail || !EMAIL_REGEX.test(debouncedEmail)) {
@@ -80,7 +86,7 @@ function ForgotPasswordContent() {
         return;
       }
 
-      await AuthService.forgotPassword(data);
+      const res = await AuthService.forgotPassword({ ...data, turnstileToken });
     } catch (error) {
       console.error(error);
     }
@@ -124,12 +130,17 @@ function ForgotPasswordContent() {
                 />
               </Field>
 
+              {turnstileWidget}
+
               <Button
                 type="submit"
                 variant="default"
                 className="w-full text-base mt-2 h-[46px]"
                 disabled={
-                  isSubmitting || userType === UserType.INTERNAL || !EMAIL_REGEX.test(email ?? "")
+                  isSubmitting ||
+                  userType === UserType.INTERNAL ||
+                  !EMAIL_REGEX.test(email ?? "") ||
+                  !turnstileReady
                 }
               >
                 Send Reset Link <ArrowRight className="ml-2 h-5 w-5" />

@@ -57,7 +57,7 @@ export const AuthService = {
     }),
   logout: async () =>
     api.post<ApiResponse<void>>(`${AUTH_SERVICE}/logout`, undefined, { globalLoader: true }),
-  forgotPassword: async (payload: { email: string }) =>
+  forgotPassword: async (payload: { email: string; turnstileToken: string }) =>
     api.post<ApiResponse<void>>(`${AUTH_SERVICE}/forgot-password`, payload, {
       globalLoader: true,
       skipAuthRefresh: true,
@@ -71,6 +71,16 @@ export const AuthService = {
     api.post<ApiResponse<User>>(`${AUTH_ADMIN_SERVICE}/invite`, payload, {
       globalLoader: true,
     }),
+  // Admin-triggered "send reset link" — same underlying email flow as the
+  // public forgot-password page, but no turnstileToken: this endpoint is
+  // already gated by admin JWT auth (@PreAuthorize on the backend), which
+  // is a stronger signal than a bot-check meant for anonymous traffic.
+  adminSendPasswordResetEmail: (userUuid: string) =>
+    api.post<ApiResponse<void>>(
+      `${AUTH_ADMIN_SERVICE}/users/${userUuid}/send-password-reset-email`,
+      undefined,
+      { globalLoader: true },
+    ),
   validateToken: (token: string) =>
     api.get<ApiResponse<InvitedUser>>(`${AUTH_ADMIN_SERVICE}/invite/validate`, {
       params: { token },
