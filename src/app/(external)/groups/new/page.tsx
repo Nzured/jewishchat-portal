@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/Skeleton";
 import StepperCard, { type StepperCardStep } from "@/components/ui/StepperCard";
 import { EXTERNAL_GROUPS_MINE_PATH } from "@/configs/const";
@@ -60,6 +61,9 @@ const DEFAULT_FORM_VALUES = {
 
 const IS_REVIEW_STEP_ENABLED = false;
 
+const TURNSTILE_REQUIRED_MESSAGE = "Please complete the verification to continue.";
+const TURNSTILE_EXPIRED_MESSAGE = "Your verification has expired. Please verify again.";
+
 function parseStepData<T>(data?: string): Partial<T> {
   if (!data) return {};
   try {
@@ -106,6 +110,7 @@ function CreateGroupFlow() {
     token: turnstileToken,
     widget: turnstileWidget,
     isReady: turnstileReady,
+    reset: resetTurnstile,
   } = useTurnstile();
 
   useEffect(
@@ -166,10 +171,7 @@ function CreateGroupFlow() {
         description:
           "Listings with a photo get opened more often. You can skip this and add one later.",
         children: (
-          <>
-            <GroupImageUploader control={control} errors={errors} uploadProgress={uploadProgress} />
-            {turnstileWidget}
-          </>
+          <GroupImageUploader control={control} errors={errors} uploadProgress={uploadProgress} />
         ),
       },
     ] satisfies Omit<StepperCardStep, "id">[]
@@ -221,8 +223,10 @@ function CreateGroupFlow() {
   const submitStep = async (
     fields: FieldPath<CreateGroupFormValues>[],
     save: (values: CreateGroupFormValues) => Promise<void>,
+    guard?: () => boolean,
   ) => {
     if (!(await trigger(fields))) return;
+    if (guard && !guard()) return;
 
     setIsSubmitting(true);
     try {
@@ -245,9 +249,22 @@ function CreateGroupFlow() {
     setShowAuthModal(true);
   };
 
+  const requireTurnstile = () => {
+    if (turnstileReady) return true;
+    toast.error(TURNSTILE_REQUIRED_MESSAGE);
+    return false;
+  };
+
+  const requireFreshTurnstile = () => {
+    if (turnstileReady) return true;
+    toast.error(TURNSTILE_EXPIRED_MESSAGE);
+    resetTurnstile();
+    return false;
+  };
+
   const handleContinue = () => {
     if (currentStep === 1) {
-      void submitStep(STEP_1_FIELDS, saveDraftStep1);
+      void submitStep(STEP_1_FIELDS, saveDraftStep1, requireTurnstile);
       return;
     }
     if (currentStep === 2) {
@@ -258,37 +275,47 @@ function CreateGroupFlow() {
       void requestAuthToContinue();
       return;
     }
-    void submitStep(["image"], async (values) => {
-      const { image } = values;
-      if (image) {
-        setUploadProgress(0);
-        try {
-          await uploadGroupImage(image, setUploadProgress);
-        } finally {
-          setUploadProgress(null);
+    void submitStep(
+      ["image"],
+      async (values) => {
+        const { image } = values;
+        if (image) {
+          setUploadProgress(0);
+          try {
+            await uploadGroupImage(image, setUploadProgress);
+          } finally {
+            setUploadProgress(null);
+          }
         }
-      }
 
-      const [draft, categories] = await Promise.all([submitDraft(turnstileToken), fetchCategories()]);
+        const [draft, categories] = await Promise.all([
+          submitDraft(turnstileToken).catch((error: unknown) => {
+            resetTurnstile();
+            throw error;
+          }),
+          fetchCategories(),
+        ]);
 
-      setSubmittedGroup({
-        slug: draft.slug,
-        whatsappLink: values.whatsappLink,
-        name: values.name,
-        shortDesc: values.shortDesc,
-        about: values.about,
-        linkVisibilityLoggedInOnly: values.linkVisibilityLoggedInOnly,
-        mainCategory: categories.find((category) => category.id === values.mainCategoryId),
-        categories: categories.filter((category) =>
-          values.additionalCategoryIds.includes(category.id),
-        ),
-        locationCity: values.locationCity,
-        locationState: values.locationState,
-        locationCountry: values.locationCountry,
-        memberCount: values.memberCount,
-        status: draft.status,
-      });
-    });
+        setSubmittedGroup({
+          slug: draft.slug,
+          whatsappLink: values.whatsappLink,
+          name: values.name,
+          shortDesc: values.shortDesc,
+          about: values.about,
+          linkVisibilityLoggedInOnly: values.linkVisibilityLoggedInOnly,
+          mainCategory: categories.find((category) => category.id === values.mainCategoryId),
+          categories: categories.filter((category) =>
+            values.additionalCategoryIds.includes(category.id),
+          ),
+          locationCity: values.locationCity,
+          locationState: values.locationState,
+          locationCountry: values.locationCountry,
+          memberCount: values.memberCount,
+          status: draft.status,
+        });
+      },
+      requireFreshTurnstile,
+    );
   };
 
   const handleViewListing = () => {
@@ -326,8 +353,13 @@ function CreateGroupFlow() {
           onContinue={handleContinue}
           isSubmitting={isSubmitting}
           submitLabel="Create group"
-          continueDisabled={currentStep === stepsLength && !turnstileReady}
         />
+      )}
+
+      {!submittedGroup && (
+        <div className="fixed right-4 bottom-4 z-50 overflow-hidden rounded-lg shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-300 motion-reduce:animate-none">
+          {turnstileWidget}
+        </div>
       )}
 
       <AuthRequiredModal

@@ -92,7 +92,7 @@ export function PlatformTraffic({ data, periodLabel, loading = false }: Platform
                   {data ? formatCount(source.value) : NOT_APPLICABLE}
                 </Typography>
                 <Typography variant="xs" as="span" className="w-10 text-right font-mono text-ink-4">
-                  {hasTraffic ? `${Math.round(source.sharePct)}%` : "—"}
+                  {hasTraffic ? `${Math.round(source.sharePct)}%` : "-"}
                 </Typography>
               </span>
             )}
@@ -118,7 +118,7 @@ export function PlatformTraffic({ data, periodLabel, loading = false }: Platform
                   {data ? formatCount(rollup.value) : NOT_APPLICABLE}
                 </Typography>
                 <Typography variant="xs" as="span" className="font-mono text-ink-4">
-                  {hasTraffic ? `${Math.round(rollup.sharePct)}%` : "—"}
+                  {hasTraffic ? `${Math.round(rollup.sharePct)}%` : "-"}
                 </Typography>
               </span>
             )}

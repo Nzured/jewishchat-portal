@@ -25,6 +25,8 @@ interface SelectDropdownProps
   extends Omit<React.ComponentProps<typeof Select>, "children">, SelectTriggerOwnProps {
   items: SelectDropdownItem[];
   placeholder?: string;
+  contentClassName?: string;
+  contentPosition?: React.ComponentProps<typeof SelectContent>["position"];
 }
 
 function SelectDropdown({
@@ -43,6 +45,8 @@ function SelectDropdown({
   form,
   placeholder = "Select...",
   className,
+  contentClassName,
+  contentPosition,
   size = "default",
   ...triggerProps
 }: SelectDropdownProps) {
@@ -64,7 +68,7 @@ function SelectDropdown({
       <SelectTrigger size={size} className={cn("w-full", className)} {...triggerProps}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent position={contentPosition} className={contentClassName}>
         {items.map((item) => (
           <SelectItem key={item.value} value={item.value} disabled={item.disabled}>
             {item.label}

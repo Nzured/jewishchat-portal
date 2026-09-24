@@ -4,7 +4,7 @@ import * as React from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { NoData } from "@/components/ui/NoData";
 import { SelectDropdown } from "@/components/ui/SelectDropdown";
 import { Skeleton } from "@/components/ui/Skeleton";
 import {
@@ -241,7 +241,7 @@ function DataTable<T>({
             ))
           ) : cardView.rows.length === 0 ? (
             <div className="rounded-xl border border-surface-line bg-surface-card">
-              {emptyState ?? <EmptyState className="py-10" />}
+              {emptyState ?? <NoData />}
             </div>
           ) : (
             cardView.rows.map((row, index) => (
@@ -304,7 +304,7 @@ function DataTable<T>({
             ) : data.length === 0 ? (
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={columns.length + (selectable ? 1 : 0)}>
-                  {emptyState ?? <EmptyState className="py-10" />}
+                  {emptyState ?? <NoData />}
                 </TableCell>
               </TableRow>
             ) : (

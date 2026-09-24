@@ -21,6 +21,7 @@ const chipVariants = cva(
         warning: "border-surface-line-strong bg-state-bg-warning text-state-warn",
         success: "border-surface-line-strong bg-state-bg-success text-state-success",
         info: "border-surface-line-strong bg-state-bg-info text-state-info",
+        active: "border-brand-green bg-brand-soft text-brand-deep",
         selected: "border-ink-1 bg-ink-1 text-surface-card",
       },
     },
@@ -39,7 +40,7 @@ interface FilterChipProps
   label: React.ReactNode;
   variant?: "filter";
   shape?: "pill" | "rounded";
-  type?: "neutral" | "error" | "warning" | "success" | "selected";
+  type?: "neutral" | "error" | "warning" | "success" | "active" | "selected";
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   rightIconLabel?: string;
@@ -52,7 +53,7 @@ interface CountChipProps
   count?: number;
   variant?: "count";
   shape?: "pill" | "rounded";
-  type?: "neutral" | "error" | "warning" | "success" | "info";
+  type?: "neutral" | "error" | "warning" | "success" | "info" | "active";
 }
 
 type ChipProps = FilterChipProps | CountChipProps;

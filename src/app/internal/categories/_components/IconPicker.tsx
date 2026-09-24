@@ -3,8 +3,8 @@
 import * as React from "react";
 import { Search } from "lucide-react";
 import { DynamicIcon, type IconName } from "lucide-react/dynamic";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
+import { NoData } from "@/components/ui/NoData";
 import { cn } from "@/lib/utils";
 import { ALL_ICON_NAMES, DEFAULT_ICON_NAMES, ICON_SEARCH_RESULTS_CAP } from "./categoryIcons";
 
@@ -48,7 +48,7 @@ export function IconPicker({ value, onChange, className }: IconPickerProps) {
 
       <div className="max-h-56 overflow-y-auto rounded-lg border border-surface-line bg-surface-bg p-2">
         {visibleIcons?.length === 0 ? (
-          <EmptyState message="No icons found." />
+          <NoData compact title="No icons found" />
         ) : (
           <div className="grid grid-cols-8 gap-1">
             {visibleIcons.map((name) => {

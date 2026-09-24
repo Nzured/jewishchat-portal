@@ -100,7 +100,7 @@ export function CookieSettingsModal() {
             icon={<ShieldCheck />}
             title="Strictly necessary"
             badge="Always on"
-            description="Required for the site to work — signing in, keeping your session, security checks and remembering this choice. These cannot be switched off."
+            description="Required for the site to work - signing in, keeping your session, security checks and remembering this choice. These cannot be switched off."
             checked
             disabled
           />

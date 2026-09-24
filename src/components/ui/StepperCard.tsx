@@ -54,6 +54,13 @@ export default function StepperCard({
   const isLastStep = currentStep >= Math.max(...steps.map((step) => step.id));
   const showBack = currentStep > 1;
 
+  const [previousStep, setPreviousStep] = React.useState(currentStep);
+  const [direction, setDirection] = React.useState<"forward" | "back">("forward");
+  if (currentStep !== previousStep) {
+    setDirection(currentStep > previousStep ? "forward" : "back");
+    setPreviousStep(currentStep);
+  }
+
   return (
     <div className={className}>
       <Stepper items={steps} currentStep={currentStep} />
@@ -63,18 +70,26 @@ export default function StepperCard({
           cardClassName,
         )}
       >
-        <CardHeader className="gap-2">
-          <CardTitle className="font-display text-2xl leading-tight font-bold text-ink-1 sm:text-[36px]">
-            {activeStep?.cardTitle ?? activeStep?.title}
-          </CardTitle>
-          {activeStep?.description && (
-            <CardDescription className="font-sans text-sm leading-normal font-normal text-ink-2 sm:text-[18px]">
-              {activeStep.description}
-            </CardDescription>
+        <div
+          key={currentStep}
+          className={cn(
+            "flex flex-col gap-(--card-spacing) animate-in fade-in fill-mode-both duration-300 ease-out motion-reduce:animate-none",
+            direction === "forward" ? "slide-in-from-right-6" : "slide-in-from-left-6",
           )}
-        </CardHeader>
+        >
+          <CardHeader className="gap-2">
+            <CardTitle className="font-display text-2xl leading-tight font-bold text-ink-1 sm:text-[36px]">
+              {activeStep?.cardTitle ?? activeStep?.title}
+            </CardTitle>
+            {activeStep?.description && (
+              <CardDescription className="font-sans text-sm leading-normal font-normal text-ink-2 sm:text-[18px]">
+                {activeStep.description}
+              </CardDescription>
+            )}
+          </CardHeader>
 
-        <CardContent className={contentClassName}>{activeStep?.children}</CardContent>
+          <CardContent className={contentClassName}>{activeStep?.children}</CardContent>
+        </div>
 
         <CardFooter className={cn("gap-3", showBack ? "justify-between" : "justify-end")}>
           {footer ?? (

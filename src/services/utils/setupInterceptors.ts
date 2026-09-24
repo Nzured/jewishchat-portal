@@ -8,6 +8,7 @@ import { trackPromise } from "react-promise-tracker";
 import { toast } from "sonner";
 import { REFRESH_TOKEN_ENDPOINT } from "@/configs/const";
 import { clearAuthSession, getAccessToken, getRefreshToken, updateAccessToken } from "@/lib/auth";
+import { reportRequestDuration, reportRequestTimeout } from "@/lib/networkHealth";
 import type { LoginData } from "@/services/auth/auth.types";
 import { ApiResponse } from "@/types/Common";
 
@@ -88,10 +89,11 @@ export const setupInterceptors = (
   instance.interceptors.response.use(
     (response) => {
       const config = response.config as RetriableConfig;
+      const elapsed = config._startedAt ? Date.now() - config._startedAt : null;
       if (logApi) {
-        const ms = config._startedAt ? Date.now() - config._startedAt : "?";
-        console.log(`[api] ← ${response.status} ${requestLabel(config)} (${ms}ms)`);
+        console.log(`[api] ← ${response.status} ${requestLabel(config)} (${elapsed ?? "?"}ms)`);
       }
+      if (!isServer && navigator.onLine && elapsed !== null) reportRequestDuration(elapsed);
 
       if (
         typeof window !== "undefined" &&
@@ -106,11 +108,15 @@ export const setupInterceptors = (
     },
     async (error: AxiosError) => {
       const config = error.config as RetriableConfig | undefined;
+      const elapsed = config?._startedAt ? Date.now() - config._startedAt : null;
       if (logApi && config) {
-        const ms = config._startedAt ? Date.now() - config._startedAt : "?";
         console.log(
-          `[api] ✗ ${error.response?.status ?? "network error"} ${requestLabel(config)} (${ms}ms)`,
+          `[api] ✗ ${error.response?.status ?? "network error"} ${requestLabel(config)} (${elapsed ?? "?"}ms)`,
         );
+      }
+      if (!isServer && navigator.onLine) {
+        if (error.code === "ECONNABORTED" || error.code === "ERR_NETWORK") reportRequestTimeout();
+        else if (elapsed !== null) reportRequestDuration(elapsed);
       }
 
       if (error.response?.status === 401) {

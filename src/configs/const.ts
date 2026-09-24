@@ -26,6 +26,10 @@ export const EXTERNAL_CATEGORIES_PATH = "/categories";
 
 export const EXTERNAL_PROFILE_PATH = "/profile";
 
+export const EXTERNAL_DASHBOARD_PATH = "/dashboard";
+
+export const OWNER_DASHBOARD_MAX_LOOKBACK_MONTHS = 16;
+
 export const RESERVED_ROUTE_SLUGS = [
   "search",
   "login",

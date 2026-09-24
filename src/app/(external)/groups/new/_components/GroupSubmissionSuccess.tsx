@@ -67,11 +67,11 @@ export default function GroupSubmissionSuccess({
   const rows = buildSummaryRows(group);
 
   return (
-    <Card className="mx-auto w-full max-w-xl [--card-spacing:--spacing(8)]">
+    <Card className="mx-auto w-full max-w-xl [--card-spacing:--spacing(8)] animate-in fade-in zoom-in-95 duration-300 motion-reduce:animate-none">
       <CardHeader className="flex flex-col items-center gap-4 text-center">
         <span
           className={cn(
-            "flex size-14 items-center justify-center rounded-full",
+            "flex size-14 items-center justify-center rounded-full animate-in zoom-in-50 fill-mode-both delay-150 duration-500 motion-reduce:animate-none",
             isPendingModeration
               ? "bg-state-bg-warning text-state-warn"
               : "bg-state-bg-success text-state-success",
@@ -113,7 +113,7 @@ export default function GroupSubmissionSuccess({
         </div>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-3">
+      <CardContent className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-2 fill-mode-both delay-300 duration-500 motion-reduce:animate-none">
         <Typography variant="tiny" className="font-mono font-medium tracking-[1.6px] text-ink-4">
           What you submitted
         </Typography>
