@@ -1,6 +1,7 @@
 import { Bricolage_Grotesque, Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { EmailVerificationGate } from "@/components/layout/app/EmailVerificationGate";
 import { GlobalLoader } from "@/components/layout/app/GlobalLoader";
+import { NetworkStatusWatcher } from "@/components/layout/app/NetworkStatusWatcher";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Toaster } from "@/components/ui/Sonner";
 import { TooltipProvider } from "@/components/ui/Tooltip";
@@ -108,6 +109,7 @@ export default function RootLayout({
           <GlobalLoader />
         </TooltipProvider>
         <Toaster />
+        <NetworkStatusWatcher />
       </body>
     </html>
   );

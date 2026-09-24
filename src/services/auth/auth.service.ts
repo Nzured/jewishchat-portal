@@ -71,7 +71,7 @@ export const AuthService = {
     api.post<ApiResponse<User>>(`${AUTH_ADMIN_SERVICE}/invite`, payload, {
       globalLoader: true,
     }),
-  // Admin-triggered "send reset link" — same underlying email flow as the
+  // Admin-triggered "send reset link" - same underlying email flow as the
   // public forgot-password page, but no turnstileToken: this endpoint is
   // already gated by admin JWT auth (@PreAuthorize on the backend), which
   // is a stronger signal than a bot-check meant for anonymous traffic.

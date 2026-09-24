@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/Sheet";
 import { Typography } from "@/components/ui/Typography";
 import {
+  EXTERNAL_DASHBOARD_PATH,
   EXTERNAL_GROUPS_PATH,
   EXTERNAL_HOME_PATH,
   EXTERNAL_PROFILE_PATH,
@@ -35,6 +36,8 @@ import { UserMenu } from "../app/UserMenu";
 const ADD_GROUP_LINK = EXTERNAL_NAV_LINKS.find((link) => link.label === "Add Group");
 const DRAWER_NAV_LINKS = EXTERNAL_NAV_LINKS.filter((link) => link !== ADD_GROUP_LINK);
 const MY_LISTINGS_LINK = { label: "My Listings", href: `${EXTERNAL_GROUPS_PATH}/mine` };
+const DASHBOARD_LINK = { label: "Dashboard", href: EXTERNAL_DASHBOARD_PATH };
+const SIGNED_IN_NAV_LINKS = [MY_LISTINGS_LINK, DASHBOARD_LINK];
 
 const STUCK_AFTER_PX = 40;
 
@@ -69,7 +72,7 @@ export function ExternalNavbar() {
   }
 
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "";
-  const desktopNavLinks = [...EXTERNAL_NAV_LINKS, ...(user ? [MY_LISTINGS_LINK] : [])];
+  const desktopNavLinks = [...EXTERNAL_NAV_LINKS, ...(user ? SIGNED_IN_NAV_LINKS : [])];
 
   return (
     <header
@@ -180,7 +183,7 @@ export function ExternalNavbar() {
                 )}
 
                 <nav className="flex flex-col divide-y divide-surface-line">
-                  {[...DRAWER_NAV_LINKS, ...(user ? [MY_LISTINGS_LINK] : [])].map((link) => (
+                  {[...DRAWER_NAV_LINKS, ...(user ? SIGNED_IN_NAV_LINKS : [])].map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}

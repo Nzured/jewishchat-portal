@@ -57,7 +57,9 @@ export default async function HomePage() {
 
         <CategoriesSection />
 
-        <CountryStrip />
+        <div className="mb-0!">
+          <CountryStrip />
+        </div>
 
         <HowItWorks />
 

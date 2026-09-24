@@ -11,13 +11,14 @@ const NoDataAnimation = createLazyLottie(() => import("@/assets/animations/NoDat
 interface NoDataProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   title?: React.ReactNode;
   description?: React.ReactNode;
-  /** Shows a "Clear filters" button that calls this when pressed. Omit to hide the button. */
+  compact?: boolean;
   onClearFilters?: () => void;
 }
 
 function NoData({
   title = "No results found",
   description,
+  compact = false,
   onClearFilters,
   className,
   ...props
@@ -25,13 +26,17 @@ function NoData({
   return (
     <div
       data-slot="no-data"
-      className={cn("flex flex-col items-center justify-center gap-1 py-10 text-center", className)}
+      className={cn(
+        "flex flex-col items-center justify-center gap-1 text-center",
+        compact ? "py-4" : "py-10",
+        className,
+      )}
       {...props}
     >
-      <div className="size-50">
+      <div className={compact ? "size-24" : "size-50"}>
         <NoDataAnimation loop className="h-full w-full" />
       </div>
-      <Typography variant="h4" className="font-semibold text-ink-1">
+      <Typography variant={compact ? "small" : "h4"} className="font-semibold text-ink-1">
         {title}
       </Typography>
       {description && (

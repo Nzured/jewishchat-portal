@@ -3,6 +3,7 @@ import { getHomePathForUserType } from "@/lib/auth";
 import { UserType } from "@/types/User";
 import {
   ACCESS_TOKEN_COOKIE,
+  EXTERNAL_DASHBOARD_PATH,
   GROUP_SERVICE,
   RESERVED_ROUTE_SLUGS,
   USER_TYPE_COOKIE,
@@ -12,6 +13,8 @@ const AUTH_PATHS = ["/login", "/signup", "/forgot-password", "/reset-password", 
 
 const ALWAYS_ACCESSIBLE_PATHS = ["/accept-invite"];
 
+const PROTECTED_EXTERNAL_PATHS = [EXTERNAL_DASHBOARD_PATH];
+
 const INTERNAL_PATH = "/internal";
 
 const matchesPath = (pathname: string, paths: string[]) =>
@@ -20,6 +23,7 @@ const matchesPath = (pathname: string, paths: string[]) =>
 const STATIC_TOP_LEVEL_SEGMENTS = new Set([
   "groups",
   "internal",
+  "dashboard",
   "home",
   "categories",
   "login",
@@ -132,10 +136,11 @@ export async function proxy(request: NextRequest) {
 
   const isAuthPath = matchesPath(pathname, AUTH_PATHS);
   const isInternalPath = matchesPath(pathname, [INTERNAL_PATH]);
+  const isProtectedExternalPath = matchesPath(pathname, PROTECTED_EXTERNAL_PATHS);
   const isPublicPath = !isAuthPath && !isInternalPath;
 
   if (!isAuthenticated) {
-    if (isAuthPath || isPublicPath) return NextResponse.next();
+    if (isAuthPath || (isPublicPath && !isProtectedExternalPath)) return NextResponse.next();
 
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
