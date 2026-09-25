@@ -54,8 +54,26 @@ jobs:
         if: steps.vercel-preview.outputs.url == ''
         run: echo "No Vercel preview URL detected within timeout - skipping SEO check for this run."
 
+      # Confirms seo-check-report.md actually exists before the comment
+      # step ever tries to read it — regardless of whether a preview URL
+      # was found, or whether seo-check.js ran to completion. Without this,
+      # a crash partway through "Run SEO check against preview" (network
+      # blip, unhandled exception) leaves no file behind, and the comment
+      # step below fails with "Either message or path input is required"
+      # even though a preview URL genuinely existed.
+      - name: Check report file exists
+        id: report-check
+        if: always()
+        run: |
+          if [ -f seo-check-report.md ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "No preview URL was available, or the SEO check did not complete - no report to post." > seo-check-report.md
+          fi
+
       - name: Comment results on PR
-        if: always() && steps.vercel-preview.outputs.url != ''
+        if: always() && steps.report-check.outputs.exists == 'true'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: seo-check
