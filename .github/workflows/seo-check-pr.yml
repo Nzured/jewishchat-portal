@@ -49,6 +49,8 @@ jobs:
             --base-url "${{ steps.vercel-preview.outputs.url }}" \
             --mode pr \
             --api-base-url "https://api.chatlist.link/group-service"
+        env:
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
 
       - name: Skip notice (no preview URL found)
         if: steps.vercel-preview.outputs.url == ''
