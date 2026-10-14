@@ -15,6 +15,7 @@ import {
   savePendingGroupDraft,
 } from "@/lib/pendingGroupDraft";
 import { getGroupPath } from "@/lib/publicPaths";
+import { cn } from "@/lib/utils";
 import { GroupService } from "@/services/group/group.service";
 import {
   type CreateGroupFormValues,
@@ -295,6 +296,7 @@ function CreateGroupFlow() {
           }),
           fetchCategories(),
         ]);
+        resetTurnstile();
 
         setSubmittedGroup({
           slug: draft.slug,
@@ -356,11 +358,15 @@ function CreateGroupFlow() {
         />
       )}
 
-      {!submittedGroup && (
-        <div className="fixed right-4 bottom-4 z-50 overflow-hidden rounded-lg shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-300 motion-reduce:animate-none">
-          {turnstileWidget}
-        </div>
-      )}
+      <div
+        inert={Boolean(submittedGroup)}
+        className={cn(
+          "fixed right-4 bottom-4 z-50 overflow-hidden rounded-lg shadow-lg transition-opacity duration-300 animate-in fade-in slide-in-from-bottom-4 motion-reduce:animate-none",
+          submittedGroup && "pointer-events-none opacity-0",
+        )}
+      >
+        {turnstileWidget}
+      </div>
 
       <AuthRequiredModal
         open={showAuthModal}

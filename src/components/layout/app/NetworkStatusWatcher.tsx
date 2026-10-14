@@ -6,6 +6,7 @@ import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 const OFFLINE_TOAST_ID = "network-offline";
 const SLOW_TOAST_ID = "network-slow";
+const SLOW_TOAST_DURATION_MS = 5000;
 
 export function NetworkStatusWatcher() {
   const { online, slow } = useNetworkStatus();
@@ -27,7 +28,7 @@ export function NetworkStatusWatcher() {
       toast.warning("Your connection is slow", {
         id: SLOW_TOAST_ID,
         description: "Images and data may take longer than usual to load.",
-        duration: Infinity,
+        duration: SLOW_TOAST_DURATION_MS,
       });
       return;
     }

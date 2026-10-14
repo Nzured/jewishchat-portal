@@ -54,6 +54,25 @@ export function UserDetailClient({ userId, initialUser, initialGroups }: UserDet
       }
     }
 
+    if (hydrated.current.user === userId) hydrated.current.user = null;
+    else void loadUser();
+
+    return () => {
+      ignore = true;
+    };
+  }, [userId, fetchUserDetails]);
+
+  const loadedUserId = user?.uuid;
+  const loadedUserType = user?.userType;
+
+  useEffect(() => {
+    if (loadedUserId !== userId || loadedUserType !== UserType.EXTERNAL) return;
+    if (hydrated.current.groups === userId) {
+      hydrated.current.groups = null;
+      return;
+    }
+    let ignore = false;
+
     async function loadGroups() {
       setGroupsLoading(true);
       try {
@@ -66,15 +85,12 @@ export function UserDetailClient({ userId, initialUser, initialGroups }: UserDet
       }
     }
 
-    if (hydrated.current.user === userId) hydrated.current.user = null;
-    else void loadUser();
-    if (hydrated.current.groups === userId) hydrated.current.groups = null;
-    else void loadGroups();
+    void loadGroups();
 
     return () => {
       ignore = true;
     };
-  }, [userId, fetchUserDetails, fetchGroupsByUser]);
+  }, [userId, loadedUserId, loadedUserType, fetchGroupsByUser]);
 
   const handleSaveRoles = async (roleIds: number[]) => {
     if (!user) return;

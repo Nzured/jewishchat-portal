@@ -20,6 +20,7 @@ import { GroupService } from "@/services/group/group.service";
 import { Group } from "@/types/Group";
 import type { FilterItem } from "@/types/Search";
 import { CategoryGroupCard } from "./CategoryGroupCard";
+import { CategorySearch } from "./CategorySearch";
 import {
   CATEGORY_GROUPS_DEFAULT_SORT,
   CATEGORY_GROUPS_PAGE_SIZE,
@@ -34,6 +35,7 @@ const LOCATION_OPTIONS = LOCATION_COUNTRIES.map(({ name }) => ({ label: name, va
 
 interface CategoryGroupsProps {
   categorySlug: string;
+  categoryName: string;
   initialGroups: Group[];
   initialTotal: number;
 }
@@ -48,7 +50,13 @@ function GroupsSkeleton({ count = PAGE_SIZE }: { count?: number }) {
   );
 }
 
-export function CategoryGroups({ categorySlug, initialGroups, initialTotal }: CategoryGroupsProps) {
+export function CategoryGroups({
+  categorySlug,
+  categoryName,
+  initialGroups,
+  initialTotal,
+}: CategoryGroupsProps) {
+  const [search, setSearch] = React.useState("");
   const [location, setLocation] = React.useState(ANY_LOCATION);
   const [sort, setSort] = React.useState(CATEGORY_GROUPS_DEFAULT_SORT);
   const [groups, setGroups] = React.useState(initialGroups);
@@ -56,7 +64,7 @@ export function CategoryGroups({ categorySlug, initialGroups, initialTotal }: Ca
   const [page, setPage] = React.useState(DEFAULT_PAGE);
   const [isLoading, setIsLoading] = React.useState(false);
   const [isLoadingMore, setIsLoadingMore] = React.useState(false);
-  const filterKey = `${categorySlug}|${location}|${sort}`;
+  const filterKey = `${categorySlug}|${search}|${location}|${sort}`;
   const loadedKey = React.useRef(filterKey);
   const hasMore = groups.length < total;
 
@@ -68,7 +76,7 @@ export function CategoryGroups({ categorySlug, initialGroups, initialTotal }: Ca
     setIsLoading(true);
 
     GroupService.getAllGroups(
-      undefined,
+      search || undefined,
       location === ANY_LOCATION ? undefined : location,
       categorySlug,
       DEFAULT_PAGE,
@@ -93,7 +101,7 @@ export function CategoryGroups({ categorySlug, initialGroups, initialTotal }: Ca
     return () => {
       ignore = true;
     };
-  }, [filterKey, categorySlug, location, sort]);
+  }, [filterKey, categorySlug, search, location, sort]);
 
   const locationFilter: FilterItem = {
     key: "location",
@@ -110,7 +118,7 @@ export function CategoryGroups({ categorySlug, initialGroups, initialTotal }: Ca
     setIsLoadingMore(true);
 
     GroupService.getAllGroups(
-      undefined,
+      search || undefined,
       location === ANY_LOCATION ? undefined : location,
       categorySlug,
       nextPage,
@@ -131,70 +139,75 @@ export function CategoryGroups({ categorySlug, initialGroups, initialTotal }: Ca
   };
 
   return (
-    <section className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center gap-3">
-        <SearchFilterChip
-          filter={locationFilter}
-          onApply={(value) =>
-            setLocation((Array.isArray(value) ? value[0] : value) ?? ANY_LOCATION)
-          }
-          onClear={() => setLocation(ANY_LOCATION)}
-        />
+    <div className="flex flex-col gap-6">
+      <CategorySearch categoryName={categoryName} onSearch={setSearch} />
+      <section className="flex flex-col gap-5">
+        <div className="flex flex-wrap items-center gap-3">
+          <SearchFilterChip
+            filter={locationFilter}
+            onApply={(value) =>
+              setLocation((Array.isArray(value) ? value[0] : value) ?? ANY_LOCATION)
+            }
+            onClear={() => setLocation(ANY_LOCATION)}
+          />
 
-        <Typography as="span" variant="xs" className="text-ink-4">
-          {isLoading
-            ? "Loading groups..."
-            : `Showing ${groups.length.toLocaleString()} of ${total.toLocaleString()} ${total === 1 ? "group" : "groups"}`}
-        </Typography>
+          <Typography as="span" variant="xs" className="text-ink-4">
+            {isLoading
+              ? "Loading groups..."
+              : `Showing ${groups.length.toLocaleString()} of ${total.toLocaleString()} ${total === 1 ? "group" : "groups"}`}
+          </Typography>
 
-        <Select value={sort} onValueChange={setSort}>
-          <SelectTrigger size="sm" className="ml-auto">
-            <ArrowUpDown className="size-3.5 text-ink-3" />
-            <SelectValue placeholder="Sort" />
-          </SelectTrigger>
-          <SelectContent>
-            {SORT_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+          <Select value={sort} onValueChange={setSort}>
+            <SelectTrigger size="sm" className="ml-auto">
+              <ArrowUpDown className="size-3.5 text-ink-3" />
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              {SORT_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      {isLoading ? (
-        <GroupsSkeleton />
-      ) : groups.length === 0 ? (
-        <NoData
-          title="No groups here yet"
-          description={
-            location === ANY_LOCATION
-              ? "Nothing has been listed in this category so far."
-              : "No groups in this category for that location yet."
-          }
-        />
-      ) : (
-        <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {groups.map((group) => (
-              <CategoryGroupCard key={group.uuid} group={group} />
-            ))}
-          </div>
+        {isLoading ? (
+          <GroupsSkeleton />
+        ) : groups.length === 0 ? (
+          <NoData
+            title={search ? "No matching groups" : "No groups here yet"}
+            description={
+              search
+                ? `No groups in ${categoryName} match "${search}". Try a different search.`
+                : location === ANY_LOCATION
+                  ? "Nothing has been listed in this category so far."
+                  : "No groups in this category for that location yet."
+            }
+          />
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {groups.map((group) => (
+                <CategoryGroupCard key={group.uuid} group={group} />
+              ))}
+            </div>
 
-          {isLoadingMore && <GroupsSkeleton count={3} />}
+            {isLoadingMore && <GroupsSkeleton count={3} />}
 
-          {hasMore && (
-            <Button
-              variant="outline"
-              className="self-center"
-              onClick={loadMore}
-              disabled={isLoadingMore}
-            >
-              {isLoadingMore ? "Loading..." : "Load more groups"}
-            </Button>
-          )}
-        </>
-      )}
-    </section>
+            {hasMore && (
+              <Button
+                variant="outline"
+                className="self-center"
+                onClick={loadMore}
+                disabled={isLoadingMore}
+              >
+                {isLoadingMore ? "Loading..." : "Load more groups"}
+              </Button>
+            )}
+          </>
+        )}
+      </section>
+    </div>
   );
 }

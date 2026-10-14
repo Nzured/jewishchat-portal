@@ -144,7 +144,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         ]}
       />
       <CategoryHeader category={category} />
-      <CategoryGroups categorySlug={slug} initialGroups={groups} initialTotal={total} />
+      <CategoryGroups
+        categorySlug={slug}
+        categoryName={category.name}
+        initialGroups={groups}
+        initialTotal={total}
+      />
       <BrowseOtherCategories currentSlug={slug} />
     </div>
   );

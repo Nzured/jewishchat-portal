@@ -6,11 +6,11 @@ import { ConversationalSearchBar } from "@/components/ui/ConversationalSearchBar
 import { NoData } from "@/components/ui/NoData";
 import { Skeleton } from "@/components/ui/Skeleton";
 import {
+  AUTOCOMPLETE_MIN_LENGTH,
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
   EXTERNAL_GROUPS_PATH,
   HERO_SEARCH_DEBOUNCE_MS,
-  SEARCH_MIN_LENGTH,
 } from "@/configs/const";
 import { LOCATION_COUNTRIES } from "@/configs/locations";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
@@ -83,7 +83,7 @@ export function GroupsDirectory({ initialKey, initialResults, categories }: Grou
   const debouncedPrefix = useDebouncedValue(value.trim(), HERO_SEARCH_DEBOUNCE_MS);
 
   React.useEffect(() => {
-    if (debouncedPrefix.length < SEARCH_MIN_LENGTH) return;
+    if (debouncedPrefix.length < AUTOCOMPLETE_MIN_LENGTH) return;
 
     let ignore = false;
 
@@ -100,7 +100,7 @@ export function GroupsDirectory({ initialKey, initialResults, categories }: Grou
     };
   }, [debouncedPrefix]);
 
-  const suggestedTerms = value.trim().length >= SEARCH_MIN_LENGTH ? autoCompleteResults : [];
+  const suggestedTerms = value.trim().length >= AUTOCOMPLETE_MIN_LENGTH ? autoCompleteResults : [];
 
   React.useEffect(() => {
     const key = searchKey({ q: query, category, city, country, sort });

@@ -45,8 +45,8 @@ export default function SignupPage() {
   return (
     <div className="grid min-h-screen lg:h-screen w-full overflow-x-hidden overflow-y-auto lg:overflow-hidden lg:grid-cols-2">
       <AuthIllustration />
-      <div className="flex h-full flex-col items-center justify-center px-6 py-8 lg:py-0 overflow-x-hidden [view-transition-name:auth-form]">
-        <div className="w-full max-w-[480px]">
+      <div className="flex h-full flex-col items-center px-6 py-8 lg:py-6overflow-x-hidden lg:overflow-y-auto [view-transition-name:auth-form]">
+        <div className="my-auto w-full max-w-[480px]">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsHeader items={SIGNUP_STEPS} variant="steps" />
 

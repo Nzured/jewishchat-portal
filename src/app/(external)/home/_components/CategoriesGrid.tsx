@@ -7,6 +7,12 @@ import { Category } from "./Category";
 import { useHome } from "../_context/HomeContext";
 
 const MAX_VISIBLE_CATEGORIES = 12;
+const CATEGORIES_PER_ROW = 4;
+
+function visibleCategoryCount(total: number) {
+  if (total < CATEGORIES_PER_ROW) return total;
+  return Math.min(MAX_VISIBLE_CATEGORIES, total - (total % CATEGORIES_PER_ROW));
+}
 
 function CategoriesRevealGrid({ categories }: { categories: CategoryType[] }) {
   const gridRef = useReveal<HTMLDivElement>({ selector: ":scope > *", y: 28, stagger: 0.045 });
@@ -39,7 +45,7 @@ export function CategoriesGrid() {
     const described = (category: CategoryType) => (category.description?.trim() ? 0 : 1);
     return [...categories]
       .sort((a, b) => described(a) - described(b))
-      .slice(0, MAX_VISIBLE_CATEGORIES);
+      .slice(0, visibleCategoryCount(categories.length));
   }, [categories]);
 
   return <CategoriesRevealGrid categories={visibleCategories} />;

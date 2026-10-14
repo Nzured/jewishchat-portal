@@ -30,6 +30,7 @@ import {
 import { EXTERNAL_NAV_LINKS } from "@/configs/externalNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUser } from "@/contexts/UserContext";
+import { getActiveHref } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { UserMenu } from "../app/UserMenu";
 
@@ -73,6 +74,11 @@ export function ExternalNavbar() {
 
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : "";
   const desktopNavLinks = [...EXTERNAL_NAV_LINKS, ...(user ? SIGNED_IN_NAV_LINKS : [])];
+  const drawerNavLinks = [...DRAWER_NAV_LINKS, ...(user ? SIGNED_IN_NAV_LINKS : [])];
+  const activeHref = getActiveHref(
+    pathname,
+    desktopNavLinks.map((link) => link.href),
+  );
 
   return (
     <header
@@ -101,11 +107,12 @@ export function ExternalNavbar() {
 
       <nav className="hidden items-center gap-6 lg:flex">
         {desktopNavLinks.map((link) => {
-          const isActive = pathname === link.href;
+          const isActive = activeHref === link.href;
           return (
             <Link
               key={link.href}
               href={link.href}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
                 "text-sm font-medium text-ink-2 no-underline transition-colors hover:text-ink-1 hover:no-underline",
                 isActive && "text-brand-green",
@@ -183,11 +190,15 @@ export function ExternalNavbar() {
                 )}
 
                 <nav className="flex flex-col divide-y divide-surface-line">
-                  {[...DRAWER_NAV_LINKS, ...(user ? SIGNED_IN_NAV_LINKS : [])].map((link) => (
+                  {drawerNavLinks.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="flex items-center justify-between py-3 text-base font-semibold text-ink-1 no-underline transition-colors hover:text-brand-green hover:no-underline"
+                      aria-current={activeHref === link.href ? "page" : undefined}
+                      className={cn(
+                        "flex items-center justify-between py-3 text-base font-semibold text-ink-1 no-underline transition-colors hover:text-brand-green hover:no-underline",
+                        activeHref === link.href && "text-brand-green",
+                      )}
                     >
                       {link.label}
                       <ChevronRight className="size-4 shrink-0 text-ink-3" />

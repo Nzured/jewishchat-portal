@@ -54,6 +54,11 @@ export default function CategoryTable({ onEdit, data, loading }: CategoryTablePr
     setPage(1);
   }
 
+  const lastPage = Math.max(FIRST_PAGE, Math.ceil(filteredCategories.length / pageSize));
+  if (page > lastPage) {
+    setPage(lastPage);
+  }
+
   const pageData = React.useMemo(() => {
     const start = (page - 1) * pageSize;
     return filteredCategories.slice(start, start + pageSize);

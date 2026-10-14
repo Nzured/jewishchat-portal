@@ -1,6 +1,9 @@
 export const PASSWORD_REQUIREMENTS = [
   { id: "length", label: "At least 8 characters", regex: /.{8,}/ },
+  { id: "uppercase", label: "One uppercase letter", regex: /[A-Z]/ },
+  { id: "lowercase", label: "One lowercase letter", regex: /[a-z]/ },
   { id: "number", label: "One number", regex: /[0-9]/ },
+  { id: "special", label: "One special character", regex: /[^A-Za-z0-9\s]/ },
 ];
 
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -9,6 +12,7 @@ export const EMAIL_CHECK_DEBOUNCE_MS = 400;
 export const EMAIL_EXISTS_MESSAGE = "An account with this email already exists.";
 
 export const SEARCH_MIN_LENGTH = 4;
+export const AUTOCOMPLETE_MIN_LENGTH = 2;
 
 export const HERO_SEARCH_DEBOUNCE_MS = 300;
 
