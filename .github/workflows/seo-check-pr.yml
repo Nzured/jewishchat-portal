@@ -49,6 +49,8 @@ jobs:
             --base-url "${{ steps.vercel-preview.outputs.url }}" \
             --mode pr \
             --api-base-url "https://api.chatlist.link/group-service"
+        env:
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
 
       - name: Skip notice (no preview URL found)
         if: steps.vercel-preview.outputs.url == ''
@@ -88,5 +90,3 @@ jobs:
           path: seo-check-report.json
           retention-days: 30
 
-    # No `if: failure()` gate anywhere above, and seo-check.js itself always
-    # exits 0 - this job cannot fail the PR's required-checks status by design.
