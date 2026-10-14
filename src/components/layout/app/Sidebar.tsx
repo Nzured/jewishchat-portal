@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/Separator";
 import { Typography } from "@/components/ui/Typography";
 import { NAME_PART_ONE, NAME_PART_TWO } from "@/configs/const";
 import { SIDEBAR_NAV_BY_USER_TYPE } from "@/configs/sidebarNav";
+import { getActiveHref } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import type { UserType } from "@/types/User";
 
@@ -24,6 +25,10 @@ export function Sidebar({ userType, mobileOpen, onMobileOpenChange }: SidebarPro
   const pathname = usePathname();
   const [collapsed, setCollapsed] = React.useState(false);
   const sections = SIDEBAR_NAV_BY_USER_TYPE[userType];
+  const activeHref = getActiveHref(
+    pathname,
+    sections.flatMap((section) => section.items.map((item) => item.href)),
+  );
 
   React.useEffect(() => {
     onMobileOpenChange(false);
@@ -100,12 +105,13 @@ export function Sidebar({ userType, mobileOpen, onMobileOpenChange }: SidebarPro
                 </Typography>
               )}
               {section.items.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive = activeHref === item.href;
                 const Icon = item.icon;
                 return (
                   <NextLink
                     key={item.href}
                     href={item.href}
+                    aria-current={isActive ? "page" : undefined}
                     className={cn(
                       "flex items-center gap-2.5 rounded-lg border-l-2 border-transparent px-3 py-2 text-sm font-medium text-ink-2 transition-colors hover:bg-brand-soft hover:text-ink-1",
                       isActive && " bg-brand-soft text-brand-green",

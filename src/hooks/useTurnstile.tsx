@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactElement, useCallback, useRef, useState } from "react";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { Turnstile, type TurnstileInstance, type TurnstileProps } from "@marsidev/react-turnstile";
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
@@ -11,7 +11,7 @@ interface UseTurnstileResult {
   isReady: boolean;
   reset: () => void;
 }
-export function useTurnstile(): UseTurnstileResult {
+export function useTurnstile(options?: TurnstileProps["options"]): UseTurnstileResult {
   const [token, setToken] = useState("");
   const widgetRef = useRef<TurnstileInstance>(null);
 
@@ -24,6 +24,7 @@ export function useTurnstile(): UseTurnstileResult {
     <Turnstile
       ref={widgetRef}
       siteKey={TURNSTILE_SITE_KEY}
+      options={options}
       onSuccess={(newToken) => setToken(newToken)}
       onExpire={() => setToken("")}
       onError={() => setToken("")}

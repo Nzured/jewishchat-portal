@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, ExternalLink, Image as ImageIcon, Link2 } from "lucide-react";
+import { ArrowLeft, ExternalLink, Globe, Image as ImageIcon, Link2 } from "lucide-react";
 import NextLink from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -19,11 +19,11 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { SwitchBanner } from "@/components/ui/SwitchBanner";
 import { Textarea } from "@/components/ui/Textarea";
 import { Typography } from "@/components/ui/Typography";
-import { EXTERNAL_GROUPS_MINE_PATH } from "@/configs/const";
+import { CANONICAL_SITE_URL, EXTERNAL_GROUPS_MINE_PATH } from "@/configs/const";
 import { useUser } from "@/contexts/UserContext";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { getGroupPath } from "@/lib/publicPaths";
-import { cn } from "@/lib/utils";
+import { getGroupEditPath, getGroupPath } from "@/lib/publicPaths";
+import { cn, slugify } from "@/lib/utils";
 import { normalizeWhatsappGroupLink, validateWhatsappGroupLink } from "@/lib/whatsapp";
 import { GroupService } from "@/services/group/group.service";
 import { checkWhatsappLink } from "@/services/group/whatsappLink";
@@ -87,6 +87,11 @@ function toFormValues(group: Group): CreateGroupFormValues {
     memberCount: group.memberCount,
     image: null,
   };
+}
+
+function slugFor(name: string, group: Group) {
+  if (name.trim() === group.name?.trim()) return group.slug;
+  return slugify(name) || group.slug;
 }
 
 function photoFileName(url?: string | null) {
@@ -199,7 +204,9 @@ export default function EditGroupPage() {
     };
   }, [debouncedLink, group?.whatsappLink, trigger]);
 
-  const nameLength = (useWatch({ control, name: "name" }) ?? "").length;
+  const nameValue = useWatch({ control, name: "name" }) ?? "";
+  const nameLength = nameValue.length;
+  const slug = group ? slugFor(nameValue, group) : "";
   const shortDescLength = (useWatch({ control, name: "shortDesc" }) ?? "").length;
 
   const onSubmit = async (values: CreateGroupFormValues) => {
@@ -211,6 +218,7 @@ export default function EditGroupPage() {
       const res = await GroupService.updateGroup(group.uuid, {
         whatsappLink: values.whatsappLink,
         name: values.name,
+        slug: slugFor(values.name, group),
         shortDesc: values.shortDesc,
         about: values.about,
         linkVisibilityLoggedInOnly: values.linkVisibilityLoggedInOnly,
@@ -227,6 +235,9 @@ export default function EditGroupPage() {
       setGroup(updated);
       reset(toFormValues(updated));
       setResubmissionMessage("");
+
+      const updatedEditPath = getGroupEditPath(updated);
+      if (updatedEditPath !== getGroupEditPath(group)) router.replace(updatedEditPath);
     } finally {
       setIsSaving(false);
     }
@@ -314,7 +325,7 @@ export default function EditGroupPage() {
           >
             Discard changes
           </Button>
-          <Button size={"lg"} type="submit" color="primary" disabled={!isDirty || isSaving}>
+          <Button size={"lg"} type="submit" color="primary" disabled={isSaving}>
             {isSaving ? "Saving..." : "Save changes"}
           </Button>
         </div>
@@ -385,6 +396,10 @@ export default function EditGroupPage() {
                   showCounter={false}
                   {...register("name", { required: "Group name is required" })}
                 />
+                <FieldDescription icon={<Globe />} className="break-all">
+                  {CANONICAL_SITE_URL}
+                  {getGroupPath({ slug, mainCategory: group.mainCategory })}
+                </FieldDescription>
                 <FieldError errors={[errors.name]} />
               </Field>
 

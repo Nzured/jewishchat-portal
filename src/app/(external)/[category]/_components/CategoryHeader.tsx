@@ -3,7 +3,6 @@ import { Icon } from "@/components/ui/Icon";
 import { Typography } from "@/components/ui/Typography";
 import { categoryColorClasses } from "@/lib/categoryColor";
 import { CategoryDetail } from "@/types/Category";
-import { CategorySearch } from "./CategorySearch";
 
 function formatCount(count: number, singular: string, plural: string) {
   return `${count.toLocaleString()} ${count === 1 ? singular : plural}`;
@@ -68,8 +67,6 @@ export function CategoryHeader({ category }: { category: CategoryDetail }) {
           )}
         </div>
       </div>
-
-      <CategorySearch categoryName={category.name} categorySlug={category.slug} />
     </div>
   );
 }

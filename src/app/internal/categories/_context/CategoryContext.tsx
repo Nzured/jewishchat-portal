@@ -70,10 +70,13 @@ export function CategoryProvider({ children }: { children: React.ReactNode }) {
     return res.data;
   }, []);
 
-  const deleteCategory = React.useCallback(async (id: number) => {
-    await CategoryService.deleteCategory(id);
-    setCategories((prev) => prev.filter((category) => category.id !== id));
-  }, []);
+  const deleteCategory = React.useCallback(
+    async (id: number) => {
+      await CategoryService.deleteCategory(id);
+      await refetchCategories();
+    },
+    [refetchCategories],
+  );
 
   return (
     <CategoryContext.Provider

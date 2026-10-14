@@ -18,6 +18,7 @@ import {
 import { Textarea } from "@/components/ui/Textarea";
 import { Typography } from "@/components/ui/Typography";
 import { RESERVED_ROUTE_SLUGS, URL } from "@/configs/const";
+import { slugify } from "@/lib/utils";
 import { Category } from "@/types/Category";
 import { IconPicker } from "./IconPicker";
 import { useCategories } from "../_context/CategoryContext";
@@ -33,14 +34,6 @@ interface AddCategoryModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   category?: Category | null;
-}
-
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
 }
 
 function defaultValuesFor(category?: Category | null): CategoryFormValues {

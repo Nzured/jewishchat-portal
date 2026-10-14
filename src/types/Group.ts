@@ -114,6 +114,7 @@ export interface WhatsappUrlCheckResponse {
 }
 
 export interface UpdateGroupPayload extends GroupDraftStep1Payload, GroupDraftStep2Payload {
+  slug: string;
   resubmissionMessage?: string;
 }
 export interface GroupDraft extends GroupDraftRef {

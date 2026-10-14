@@ -65,7 +65,7 @@ export default function Form({ onSuccess }: FormProps) {
     token: turnstileToken,
     widget: turnstileWidget,
     isReady: turnstileReady,
-  } = useTurnstile();
+  } = useTurnstile({ size: "flexible", appearance: "interaction-only" });
 
   const checkEmailExists = async (email: string): Promise<boolean> => {
     if (emailExistsCacheRef.current?.email === email) return emailExistsCacheRef.current.exists;
@@ -197,7 +197,7 @@ export default function Form({ onSuccess }: FormProps) {
               error={errors.password?.message}
               {...register("password", passwordRules)}
             />
-            <div className=" grid grid-cols-2 gap-x-4 gap-y-1.5 text-[12px] text-ink-3">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[12px] text-ink-3 sm:grid-cols-3">
               {PASSWORD_REQUIREMENTS.map((req) => {
                 const isMet = req.regex.test(passwordValue);
                 return (
@@ -219,10 +219,16 @@ export default function Form({ onSuccess }: FormProps) {
           <Button
             type="submit"
             variant="default"
-            className="w-full text-base mt-4"
+            className="w-full text-base mt-1"
             disabled={isSubmitting || !turnstileReady}
           >
-            Continue <ArrowRight className="ml-2 h-5 w-5" />
+            {turnstileReady ? (
+              <>
+                Continue <ArrowRight className="ml-2 h-5 w-5" />
+              </>
+            ) : (
+              "Verifying you're human..."
+            )}
           </Button>
 
           <div className="flex flex-row items-center justify-center gap-1 text-sm text-ink-3">
