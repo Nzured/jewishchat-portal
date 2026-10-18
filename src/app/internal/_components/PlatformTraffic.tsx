@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
 import { NOT_APPLICABLE } from "@/configs/const";
 import { TrafficStats } from "@/types/Dashboard";
+import { AnimatedValue } from "./AnimatedValue";
 import { capitalize, formatCount } from "./format";
 
 const TRAFFIC_SOURCES = [
@@ -54,7 +55,11 @@ export function PlatformTraffic({ data, periodLabel, loading = false }: Platform
         {loading ? (
           <Skeleton className="h-8 w-full" />
         ) : hasTraffic ? (
-          <div className="flex h-8 gap-0.5" role="img" aria-label="Page views by source">
+          <div
+            className="flex h-8 animate-reveal-x gap-0.5 motion-reduce:animate-none"
+            role="img"
+            aria-label="Page views by source"
+          >
             {sources
               .filter((source) => source.value > 0)
               .map((source) => (
@@ -89,10 +94,10 @@ export function PlatformTraffic({ data, periodLabel, loading = false }: Platform
             ) : (
               <span className="flex shrink-0 items-baseline gap-3">
                 <Typography variant="small" as="span" className="font-medium text-ink-1">
-                  {data ? formatCount(source.value) : NOT_APPLICABLE}
+                  <AnimatedValue value={data ? formatCount(source.value) : NOT_APPLICABLE} />
                 </Typography>
                 <Typography variant="xs" as="span" className="w-10 text-right font-mono text-ink-4">
-                  {hasTraffic ? `${Math.round(source.sharePct)}%` : "-"}
+                  <AnimatedValue value={hasTraffic ? `${Math.round(source.sharePct)}%` : "-"} />
                 </Typography>
               </span>
             )}
@@ -115,10 +120,10 @@ export function PlatformTraffic({ data, periodLabel, loading = false }: Platform
             ) : (
               <span className="flex items-baseline gap-2">
                 <Typography variant="small" as="span" className="font-medium text-ink-1">
-                  {data ? formatCount(rollup.value) : NOT_APPLICABLE}
+                  <AnimatedValue value={data ? formatCount(rollup.value) : NOT_APPLICABLE} />
                 </Typography>
                 <Typography variant="xs" as="span" className="font-mono text-ink-4">
-                  {hasTraffic ? `${Math.round(rollup.sharePct)}%` : "-"}
+                  <AnimatedValue value={hasTraffic ? `${Math.round(rollup.sharePct)}%` : "-"} />
                 </Typography>
               </span>
             )}
@@ -134,7 +139,7 @@ export function PlatformTraffic({ data, periodLabel, loading = false }: Platform
           <Skeleton className="h-6 w-20" />
         ) : (
           <Typography variant="large" as="span" className="text-xl leading-none text-ink-1">
-            {data ? formatCount(total) : NOT_APPLICABLE}
+            <AnimatedValue value={data ? formatCount(total) : NOT_APPLICABLE} />
           </Typography>
         )}
       </div>

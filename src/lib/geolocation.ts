@@ -35,6 +35,9 @@ export async function fetchIpLocation(): Promise<IpLocation | null> {
 let cachedLookup: Promise<IpLocation | null> | null = null;
 
 export function fetchIpLocationCached(): Promise<IpLocation | null> {
-  cachedLookup ??= fetchIpLocation();
+  cachedLookup ??= fetchIpLocation().then((location) => {
+    if (!location) cachedLookup = null;
+    return location;
+  });
   return cachedLookup;
 }

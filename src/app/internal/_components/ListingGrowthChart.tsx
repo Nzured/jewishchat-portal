@@ -18,6 +18,7 @@ export const SERIES = {
   submitted: { key: "submitted", label: "Listings submitted", color: "#3FB39A" },
 } as const;
 
+const CHART_ANIMATION_MS = 900;
 const AXIS_TICK = { fontSize: 11, fill: "#9AA8A2" };
 
 interface ListingGrowthChartProps {
@@ -92,7 +93,8 @@ export function ListingGrowthChart({ data }: ListingGrowthChartProps) {
           fill="none"
           dot={{ r: 3, fill: "#ffffff", strokeWidth: 2 }}
           activeDot={{ r: 5, strokeWidth: 2, stroke: "#ffffff" }}
-          isAnimationActive={false}
+          animationDuration={CHART_ANIMATION_MS}
+          animationEasing="ease-out"
         />
         <Area
           type="monotone"
@@ -103,7 +105,8 @@ export function ListingGrowthChart({ data }: ListingGrowthChartProps) {
           fill="url(#listing-published-fill)"
           dot={{ r: 3, fill: "#ffffff", strokeWidth: 2 }}
           activeDot={{ r: 5, strokeWidth: 2, stroke: "#ffffff" }}
-          isAnimationActive={false}
+          animationDuration={CHART_ANIMATION_MS}
+          animationEasing="ease-out"
         />
       </AreaChart>
     </ResponsiveContainer>

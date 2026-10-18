@@ -36,6 +36,9 @@ function sendCheck(
       const data = error?.response?.data;
       if (!data) return { available: true };
       return { available: false, message: data.message };
+    })
+    .finally(() => {
+      inFlight.delete(key);
     });
 
   inFlight.set(key, request);

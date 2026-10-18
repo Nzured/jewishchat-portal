@@ -17,6 +17,7 @@ import {
 import { getGroupPath } from "@/lib/publicPaths";
 import { cn } from "@/lib/utils";
 import { GroupService } from "@/services/group/group.service";
+import type { Category } from "@/types/Category";
 import {
   type CreateGroupFormValues,
   type GroupDraftStep1Payload,
@@ -294,7 +295,7 @@ function CreateGroupFlow() {
             resetTurnstile();
             throw error;
           }),
-          fetchCategories(),
+          fetchCategories().catch((): Category[] => []),
         ]);
         resetTurnstile();
 

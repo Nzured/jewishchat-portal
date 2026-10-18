@@ -68,13 +68,14 @@ export function OtpInput({
     if (!val) return;
 
     const char = val.slice(-1);
+    const target = Math.min(index, value.length);
     const newValue = [...items];
-    newValue[index] = char;
+    newValue[target] = char;
     onChange(newValue.join(""));
 
     // Focus next input
-    if (index < length - 1) {
-      focusInput(index + 1);
+    if (target < length - 1) {
+      focusInput(target + 1);
     }
   };
 

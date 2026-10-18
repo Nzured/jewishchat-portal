@@ -22,7 +22,7 @@ import { Typography } from "@/components/ui/Typography";
 import { CANONICAL_SITE_URL, EXTERNAL_GROUPS_MINE_PATH } from "@/configs/const";
 import { useUser } from "@/contexts/UserContext";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { getGroupEditPath, getGroupPath } from "@/lib/publicPaths";
+import { getGroupPath } from "@/lib/publicPaths";
 import { cn, slugify } from "@/lib/utils";
 import { normalizeWhatsappGroupLink, validateWhatsappGroupLink } from "@/lib/whatsapp";
 import { GroupService } from "@/services/group/group.service";
@@ -215,7 +215,7 @@ export default function EditGroupPage() {
     setIsSaving(true);
     try {
       const message = resubmissionMessage.trim();
-      const res = await GroupService.updateGroup(group.uuid, {
+      await GroupService.updateGroup(group.uuid, {
         whatsappLink: values.whatsappLink,
         name: values.name,
         slug: slugFor(values.name, group),
@@ -231,13 +231,7 @@ export default function EditGroupPage() {
         ...(message ? { resubmissionMessage: message } : {}),
       });
 
-      const updated = res.data ?? group;
-      setGroup(updated);
-      reset(toFormValues(updated));
-      setResubmissionMessage("");
-
-      const updatedEditPath = getGroupEditPath(updated);
-      if (updatedEditPath !== getGroupEditPath(group)) router.replace(updatedEditPath);
+      router.push(EXTERNAL_GROUPS_MINE_PATH);
     } finally {
       setIsSaving(false);
     }

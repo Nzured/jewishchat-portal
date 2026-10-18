@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
+import { AnimatedValue } from "./AnimatedValue";
 
 export interface MiniStatProps {
   label: string;
@@ -21,7 +22,7 @@ export function MiniStat({ label, value, loading }: MiniStatProps) {
         <Skeleton className="h-6 w-14" />
       ) : (
         <Typography variant="large" as="span" className="text-xl leading-none text-ink-1">
-          {value}
+          <AnimatedValue value={value} />
         </Typography>
       )}
     </div>

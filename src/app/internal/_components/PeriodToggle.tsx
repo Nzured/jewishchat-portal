@@ -13,9 +13,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/Popover";
 import { Typography } from "@/components/ui/Typography";
-import { formatDate, parseDateKey } from "@/lib/date";
+import { formatDate, parseDateKey, toDateKey } from "@/lib/date";
 import { cn } from "@/lib/utils";
-import { PERIOD_OPTIONS, type PeriodSelection } from "./dashboardPeriod";
+import {
+  PERIOD_OPTIONS,
+  PERIOD_RANGE_ERROR_MESSAGE,
+  type PeriodSelection,
+  validatePeriodRange,
+} from "./dashboardPeriod";
 
 export {
   PERIOD_HINT_LABEL,
@@ -44,7 +49,7 @@ function customLabel(value: PeriodSelection) {
 export function PeriodToggle({ value, onChange, className }: PeriodToggleProps) {
   const [draftStart, setDraftStart] = useState("");
   const [draftEnd, setDraftEnd] = useState("");
-  const rangeInvalid = Boolean(draftStart && draftEnd && draftStart > draftEnd);
+  const rangeError = validatePeriodRange(draftStart, draftEnd);
 
   return (
     <div
@@ -93,6 +98,7 @@ export function PeriodToggle({ value, onChange, className }: PeriodToggleProps) 
                     <DateRangeFields
                       start={draftStart}
                       end={draftEnd}
+                      maxDate={toDateKey(new Date())}
                       onChange={(start, end) => {
                         setDraftStart(start);
                         setDraftEnd(end);
@@ -100,16 +106,16 @@ export function PeriodToggle({ value, onChange, className }: PeriodToggleProps) 
                     />
                   </div>
                 </div>
-                {rangeInvalid && (
+                {rangeError && (
                   <Typography variant="xs" as="p" className="mt-2 text-state-danger">
-                    Start date must not be after end date.
+                    {PERIOD_RANGE_ERROR_MESSAGE[rangeError]}
                   </Typography>
                 )}
                 <PopoverClose asChild>
                   <Button
                     className="mt-2"
                     variant="default"
-                    disabled={!draftStart || !draftEnd || rangeInvalid}
+                    disabled={!draftStart || !draftEnd || Boolean(rangeError)}
                     onClick={() =>
                       onChange({ period: "custom", startDate: draftStart, endDate: draftEnd })
                     }

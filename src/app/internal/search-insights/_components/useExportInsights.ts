@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { downloadBlob } from "@/lib/download";
 import { DashboardService } from "@/services/dashboard/dashboard.service";
 import { SearchInsightsSortBy, SortDirection } from "@/types/SearchInsights";
-import { downloadBlob } from "./InsightsToolbar";
 import { type PeriodSelection, PERIOD_TO_API } from "../../_components/PeriodToggle";
 
 interface UseExportInsightsOptions {

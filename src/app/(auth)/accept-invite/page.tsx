@@ -173,7 +173,7 @@ function AcceptInviteContent() {
                           "Password does not meet all requirements",
                       })}
                     />
-                    <div className="flex flex-col gap-1.5 text-[12px] text-ink-3">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[12px] text-ink-3">
                       {PASSWORD_REQUIREMENTS.map((req) => {
                         const isMet = req.regex.test(passwordValue);
                         return (

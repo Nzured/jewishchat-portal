@@ -23,7 +23,9 @@ import {
   ALL_GROUPS,
   CUSTOM_RANGE_ERROR_MESSAGE,
   type DashboardFilters as Filters,
+  earliestCustomDateKey,
   PERIOD_OPTIONS,
+  todayDateKey,
   validateCustomRange,
 } from "./dashboardFilters";
 
@@ -93,6 +95,8 @@ export function FiltersBar({ value, groups, onChange, className }: FiltersBarPro
                   <DateRangeFields
                     start={draftStart}
                     end={draftEnd}
+                    minDate={earliestCustomDateKey()}
+                    maxDate={todayDateKey()}
                     onChange={(start, end) => {
                       setDraftStart(start);
                       setDraftEnd(end);

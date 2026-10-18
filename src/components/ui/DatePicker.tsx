@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "./Button";
 import { Calendar } from "./Calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./Popover";
+import type { Matcher } from "react-day-picker";
 
 interface DatePickerProps {
   value?: Date;
@@ -14,6 +15,7 @@ interface DatePickerProps {
   placeholder?: string;
   align?: "start" | "end";
   className?: string;
+  disabled?: Matcher | Matcher[];
 }
 
 function DatePicker({
@@ -22,6 +24,7 @@ function DatePicker({
   placeholder = "Pick a date",
   align = "start",
   className,
+  disabled,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   const label = value ? formatDate(value) : placeholder;
@@ -46,6 +49,7 @@ function DatePicker({
         <Calendar
           mode="single"
           selected={value}
+          disabled={disabled}
           onSelect={(date) => {
             onChange(date);
             setOpen(false);

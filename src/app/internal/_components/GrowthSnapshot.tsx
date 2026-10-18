@@ -5,6 +5,8 @@ import { formatCount } from "./format";
 import { SectionBadge, SectionHeader } from "./SectionHeader";
 import { StatTile, type StatTileProps } from "./StatTile";
 
+const TILE_STAGGER_MS = 70;
+
 interface GrowthSnapshotProps {
   data?: GrowthSnapshotStats;
   publishedInPeriod?: number;
@@ -73,8 +75,13 @@ export function GrowthSnapshot({
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {tiles.map((tile) => (
-          <StatTile key={tile.label} {...tile} loading={loading} />
+        {tiles.map((tile, index) => (
+          <StatTile
+            key={tile.label}
+            {...tile}
+            loading={loading}
+            style={{ animationDelay: `${index * TILE_STAGGER_MS}ms` }}
+          />
         ))}
       </div>
     </section>

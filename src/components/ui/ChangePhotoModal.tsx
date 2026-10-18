@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/Modal";
 import { Typography } from "@/components/ui/Typography";
 import { IMAGE_ACCEPTED_TYPES, IMAGE_MAX_FILE_SIZE } from "@/configs/const";
+import { canvasToPngFile } from "@/lib/image";
 import { cn } from "@/lib/utils";
 
 const PREVIEW_HEIGHT = 260;
@@ -124,12 +125,7 @@ export function ChangePhotoModal({
       outputHeight,
     );
 
-    const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, source.type, 0.92),
-    );
-    if (!blob) return source;
-
-    return new File([blob], source.name, { type: source.type });
+    return canvasToPngFile(canvas, source.name);
   };
 
   const handleSave = async () => {

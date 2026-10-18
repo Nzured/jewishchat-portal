@@ -124,7 +124,8 @@ export function PhoneInput({
 
   const emit = (nextCountry: CountryCode, nextNational: string) => {
     const digits = nextNational.replace(/\D/g, "");
-    const next = digits ? `+${getCountryCallingCode(nextCountry)}${digits}` : "";
+    const raw = digits ? `+${getCountryCallingCode(nextCountry)}${digits}` : "";
+    const next = (digits && parsePhoneNumberFromString(digits, nextCountry)?.number) || raw;
     emittedRef.current = next;
     onValueChange(next);
   };

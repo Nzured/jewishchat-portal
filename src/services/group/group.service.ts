@@ -6,6 +6,7 @@ import {
   GROUP_PHOTO_UPLOAD_CONTENT_TYPE,
   GROUP_SERVICE,
 } from "@/configs/const";
+import { toPngFile } from "@/lib/image";
 import { Category, CategoryDetail } from "@/types/Category";
 import { ApiResponse } from "@/types/Common";
 import {
@@ -119,8 +120,8 @@ export const GroupService = {
       {},
       { silentSuccess: true },
     ),
-  uploadGroupPhoto: (uploadUrl: string, file: File, onProgress?: (percent: number) => void) =>
-    axios.put(uploadUrl, file, {
+  uploadGroupPhoto: async (uploadUrl: string, file: File, onProgress?: (percent: number) => void) =>
+    axios.put(uploadUrl, await toPngFile(file), {
       headers: { "Content-Type": GROUP_PHOTO_UPLOAD_CONTENT_TYPE },
       onUploadProgress: ({ loaded, total }) =>
         onProgress?.(total ? Math.round((loaded / total) * 100) : 0),

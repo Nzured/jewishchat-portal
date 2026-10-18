@@ -15,6 +15,7 @@ interface ModerationOperationsProps {
 }
 
 const BADGE_TICK_MS = 60 * 1000;
+const TILE_STAGGER_MS = 70;
 
 function oldestHint(age?: string | null) {
   return age ? `Oldest: ${age}` : undefined;
@@ -89,8 +90,13 @@ export function ModerationOperations({
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {tiles.map((tile) => (
-          <StatTile key={tile.label} {...tile} loading={loading} />
+        {tiles.map((tile, index) => (
+          <StatTile
+            key={tile.label}
+            {...tile}
+            loading={loading}
+            style={{ animationDelay: `${index * TILE_STAGGER_MS}ms` }}
+          />
         ))}
       </div>
     </section>

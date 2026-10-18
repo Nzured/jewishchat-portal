@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getHomePathForUserType } from "@/lib/auth";
+import { decodeRouteParam } from "@/lib/publicPaths";
 import { UserType } from "@/types/User";
 import {
   ACCESS_TOKEN_COOKIE,
@@ -113,7 +114,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url), 308);
   }
 
-  const segments = pathname.split("/").filter(Boolean);
+  const segments = pathname.split("/").filter(Boolean).map(decodeRouteParam);
   if (
     segments.length === 2 &&
     !STATIC_TOP_LEVEL_SEGMENTS.has(segments[0]) &&

@@ -49,6 +49,9 @@ export function updateAccessToken(accessToken: string, refreshToken: string) {
 
   const userType = getStoredAuth()?.userType;
   document.cookie = `${ACCESS_TOKEN_COOKIE}=${accessToken}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+  if (userType) {
+    document.cookie = `${USER_TYPE_COOKIE}=${userType}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+  }
   localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ accessToken, refreshToken, userType }));
 }
 

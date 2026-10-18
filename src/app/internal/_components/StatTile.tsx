@@ -1,9 +1,10 @@
-import { ReactNode } from "react";
+import { CSSProperties, ReactNode } from "react";
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/components/ui/Link";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Typography } from "@/components/ui/Typography";
 import { cn } from "@/lib/utils";
+import { AnimatedValue } from "./AnimatedValue";
 
 export type StatTone = "success" | "warning" | "danger" | "info";
 
@@ -24,6 +25,7 @@ export interface StatTileProps {
   action?: { label: string; href: string };
   loading?: boolean;
   className?: string;
+  style?: CSSProperties;
 }
 
 export function StatTile({
@@ -36,16 +38,24 @@ export function StatTile({
   action,
   loading = false,
   className,
+  style,
 }: StatTileProps) {
   const resolvedHintTone = hintTone ?? tone;
   const hintClass = resolvedHintTone === "muted" ? "text-ink-3" : toneStyles[resolvedHintTone].hint;
 
   return (
-    <Card className={cn("gap-0 py-5", className)}>
+    <Card
+      style={style}
+      className={cn(
+        "group/tile gap-0 py-5 transition-[translate,box-shadow] duration-300 ease-out hover:-translate-y-0.5 hover:shadow-md",
+        "animate-in fade-in zoom-in-95 animation-duration-500 fill-mode-both motion-reduce:animate-none motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+        className,
+      )}
+    >
       <div className="flex items-center gap-3 px-5">
         <span
           className={cn(
-            "flex size-8 shrink-0 items-center justify-center rounded-full [&_svg]:size-4",
+            "flex size-8 shrink-0 items-center justify-center rounded-full transition-transform duration-300 group-hover/tile:scale-110 motion-reduce:transition-none [&_svg]:size-4",
             toneStyles[tone].icon,
           )}
         >
@@ -65,7 +75,7 @@ export function StatTile({
         as="div"
         className="mt-4 px-5 text-[32px] leading-none font-semibold tracking-tight text-ink-1"
       >
-        {loading ? <Skeleton className="h-8 w-16" /> : value}
+        {loading ? <Skeleton className="h-8 w-16" /> : <AnimatedValue value={value} />}
       </Typography>
 
       {(hint || action) && (

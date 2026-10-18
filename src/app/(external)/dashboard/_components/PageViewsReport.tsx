@@ -11,6 +11,7 @@ import { NoData } from "@/components/ui/NoData";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { Typography } from "@/components/ui/Typography";
+import { downloadBlob } from "@/lib/download";
 import { cn } from "@/lib/utils";
 import { OwnerDashboardService } from "@/services/dashboard/ownerDashboard.service";
 import {
@@ -19,7 +20,6 @@ import {
   PageViewsByGroup,
   TrafficSource,
 } from "@/types/OwnerDashboard";
-import { downloadBlob } from "./csv";
 import { formatCount, toApiSources, TRAFFIC_SOURCES } from "./format";
 import { ReportCard } from "./ReportCard";
 

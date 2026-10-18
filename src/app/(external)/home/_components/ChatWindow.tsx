@@ -8,8 +8,10 @@ import NextLink from "next/link";
 import { LatticeBackdrop } from "@/components/ui/LatticeBackdrop";
 import { Link } from "@/components/ui/Link";
 import { EXTERNAL_GROUPS_PATH } from "@/configs/const";
+import { formatLocation } from "@/lib/location";
 import { gsap, registerGsap, useIsomorphicLayoutEffect } from "@/lib/motion/gsap";
 import { getGroupPath } from "@/lib/publicPaths";
+import { cn } from "@/lib/utils";
 import type { SearchGroupResult } from "@/services/search/search.service";
 import { trackSearchClick } from "@/services/search/searchClick";
 import { useHeroSearch } from "../_context/HeroSearchContext";
@@ -50,6 +52,10 @@ function replyText(count: number): string {
 
 function nowLabel(): string {
   return new Date().toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+}
+
+function tileLocation(group: SearchGroupResult): string {
+  return formatLocation(group, ["city", "country"]);
 }
 
 function initialsOf(name: string): string {
@@ -404,7 +410,7 @@ function Bubble({
             <div
               className="mt-2.5 grid gap-1.5"
               style={{
-                gridTemplateColumns: `repeat(${message.tiles.length + (message.overflow > 0 ? 1 : 0)}, 1fr)`,
+                gridTemplateColumns: `repeat(${message.tiles.length + (message.overflow > 0 ? 1 : 0)}, minmax(0, 1fr))`,
               }}
             >
               {message.tiles.map((group, index) => (
@@ -421,13 +427,43 @@ function Bubble({
                       position: index + 1,
                     })
                   }
-                  className="flex aspect-square flex-col items-center justify-center gap-1 rounded-[11px] border border-brand-green/15 bg-brand-soft transition-colors hover:border-brand-green/40"
+                  className="group/tile relative isolate flex aspect-square min-w-0 flex-col overflow-hidden rounded-[11px] border border-brand-green/15 bg-brand-soft transition-colors hover:border-brand-green/40"
                 >
-                  <span className="font-display text-sm leading-none tracking-tight text-brand-deep">
-                    {initialsOf(group.name)}
-                  </span>
-                  <span className="w-full truncate px-1 text-center text-[7.5px] leading-none text-ink-3">
-                    {group.locationCity || group.locationCountry}
+                  {group.thumbnailUrl ? (
+                    <>
+                      <Image
+                        src={group.thumbnailUrl}
+                        alt=""
+                        fill
+                        sizes="96px"
+                        className="-z-10 object-cover transition-transform duration-300 group-hover/tile:scale-105 motion-reduce:transition-none"
+                      />
+                      <span className="absolute inset-0 -z-10 bg-gradient-to-t from-ink-1/85 via-ink-1/25 to-transparent" />
+                    </>
+                  ) : (
+                    <span className="flex flex-1 items-center justify-center font-display text-sm leading-none tracking-tight text-brand-deep">
+                      {initialsOf(group.name)}
+                    </span>
+                  )}
+                  <span className="mt-auto flex w-full flex-col gap-0.5 px-1 pb-1.5 text-center">
+                    <span
+                      className={cn(
+                        "truncate text-[8.5px] leading-tight font-medium",
+                        group.thumbnailUrl ? "text-white" : "text-ink-1",
+                      )}
+                    >
+                      {group.name}
+                    </span>
+                    {tileLocation(group) ? (
+                      <span
+                        className={cn(
+                          "truncate text-[7.5px] leading-none",
+                          group.thumbnailUrl ? "text-white/80" : "text-ink-3",
+                        )}
+                      >
+                        {tileLocation(group)}
+                      </span>
+                    ) : null}
                   </span>
                 </NextLink>
               ))}
