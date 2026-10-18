@@ -120,7 +120,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const hasPermission = React.useCallback(
-    (permission: string) => Boolean(user?.superAdmin || user?.permissions.includes(permission)),
+    (permission: string) => Boolean(user?.superAdmin || user?.permissions?.includes(permission)),
     [user],
   );
 

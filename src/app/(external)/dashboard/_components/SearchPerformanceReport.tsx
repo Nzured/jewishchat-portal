@@ -8,6 +8,7 @@ import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
 import { LoadFailed } from "@/components/ui/LoadFailed";
 import { NoData } from "@/components/ui/NoData";
 import { Typography } from "@/components/ui/Typography";
+import { downloadBlob } from "@/lib/download";
 import { cn } from "@/lib/utils";
 import { OwnerDashboardService } from "@/services/dashboard/ownerDashboard.service";
 import {
@@ -16,7 +17,6 @@ import {
   SearchQueryPerformance,
 } from "@/types/OwnerDashboard";
 import { SortDirection } from "@/types/SearchInsights";
-import { downloadBlob } from "./csv";
 import { formatCount, formatDecimal, formatPct } from "./format";
 import { ReportCard } from "./ReportCard";
 import { SEARCH_PAGE_SIZE_OPTIONS, useSearchPerformance } from "./useSearchPerformance";

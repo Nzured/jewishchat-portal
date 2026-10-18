@@ -9,7 +9,7 @@ import {
   EXTERNAL_HOME_PATH,
   RESERVED_ROUTE_SLUGS,
 } from "@/configs/const";
-import { getCategoryPath } from "@/lib/publicPaths";
+import { decodeRouteParam, getCategoryPath } from "@/lib/publicPaths";
 import { getCachedCategories } from "@/services/group/categories";
 import { GroupServer } from "@/services/group/group.server";
 import { isCategoryIndexable, resolveSeoRedirect } from "@/services/seo/seo.service";
@@ -55,7 +55,7 @@ const loadGroups = cache(async (slug: string) => {
 });
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-  const { category: slug } = await params;
+  const slug = decodeRouteParam((await params).category);
   if (RESERVED_ROUTE_SLUGS.includes(slug)) return {};
 
   const category = await findCategory(slug).catch(() => null);
@@ -88,7 +88,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const { category: slug } = await params;
+  const slug = decodeRouteParam((await params).category);
 
   if (RESERVED_ROUTE_SLUGS.includes(slug)) {
     notFound();

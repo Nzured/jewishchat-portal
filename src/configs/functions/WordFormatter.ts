@@ -11,6 +11,9 @@ export const wordFormatter = (str: string | null | undefined): string => {
     if (!isNaN(parseFloat(word))) {
       return word;
     }
+    if (/[a-z]/.test(word) && /[A-Z]/.test(word)) {
+      return word;
+    }
     return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
   });
 

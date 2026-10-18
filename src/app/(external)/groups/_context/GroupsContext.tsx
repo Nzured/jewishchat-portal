@@ -39,7 +39,7 @@ export function GroupsProvider({ children }: { children: React.ReactNode }) {
   const saveDraftStep1 = React.useCallback(
     async (values: CreateGroupFormValues) => {
       let id = draftId;
-      if (!id || status !== GroupStatus.IN_PROGRESS) {
+      if (!id || (status !== GroupStatus.IN_PROGRESS && status !== GroupStatus.STARTED)) {
         const created = await GroupService.getDraftId();
         id = created.data.draftId;
         setDraftId(id);

@@ -6,6 +6,14 @@ interface GroupPathInput {
   mainCategorySlug?: string;
 }
 
+export function decodeRouteParam(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 export function getCategoryPath(categorySlug: string): string {
   return `/${encodeURIComponent(categorySlug)}`;
 }

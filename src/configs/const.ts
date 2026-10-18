@@ -49,6 +49,13 @@ export const RESERVED_ROUTE_SLUGS = [
   "about",
   "contact",
   "policies",
+  "groups",
+  "home",
+  "internal",
+  "signup",
+  "forgot-password",
+  "reset-password",
+  "accept-invite",
 ];
 
 export const HOME_PAGE_TITLE = "ChatList - Find Jewish Community WhatsApp Groups";

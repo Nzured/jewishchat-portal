@@ -13,7 +13,7 @@ import {
   RESERVED_ROUTE_SLUGS,
 } from "@/configs/const";
 import { formatLocation } from "@/lib/location";
-import { getCategoryPath, getGroupPath } from "@/lib/publicPaths";
+import { decodeRouteParam, getCategoryPath, getGroupPath } from "@/lib/publicPaths";
 import { GroupServer } from "@/services/group/group.server";
 import { resolveSeoRedirect } from "@/services/seo/seo.service";
 import { Group, GroupStatus } from "@/types/Group";
@@ -55,7 +55,9 @@ async function RelatedGroupsSection({ group }: { group: Group }) {
 }
 
 export async function generateMetadata({ params }: GroupPageProps): Promise<Metadata> {
-  const { category, group: slug } = await params;
+  const { category: rawCategory, group: rawSlug } = await params;
+  const category = decodeRouteParam(rawCategory);
+  const slug = decodeRouteParam(rawSlug);
   if (RESERVED_ROUTE_SLUGS.includes(category)) return {};
   const group = await findGroup(category, slug);
   if (!group) return {};
@@ -91,7 +93,9 @@ export async function generateMetadata({ params }: GroupPageProps): Promise<Meta
 }
 
 export default async function GroupPage({ params }: GroupPageProps) {
-  const { category, group: slug } = await params;
+  const { category: rawCategory, group: rawSlug } = await params;
+  const category = decodeRouteParam(rawCategory);
+  const slug = decodeRouteParam(rawSlug);
 
   if (RESERVED_ROUTE_SLUGS.includes(category)) {
     notFound();

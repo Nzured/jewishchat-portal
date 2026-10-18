@@ -1,5 +1,6 @@
 import axios from "axios";
 import { GROUP_PHOTO_UPLOAD_CONTENT_TYPE } from "@/configs/const";
+import { toPngFile } from "@/lib/image";
 import { ApiResponse } from "@/types/Common";
 import { GetPhotoUrlResponse, GroupsPage } from "@/types/Group";
 import { AdminUsersPage, User, UserReportTypes, UserType } from "@/types/User";
@@ -104,8 +105,8 @@ export const UserService = {
       {},
       { silentSuccess: true },
     ),
-  uploadProfilePicture: (uploadUrl: string, file: File) =>
-    axios.put(uploadUrl, file, {
+  uploadProfilePicture: async (uploadUrl: string, file: File) =>
+    axios.put(uploadUrl, await toPngFile(file), {
       headers: { "Content-Type": GROUP_PHOTO_UPLOAD_CONTENT_TYPE },
     }),
   requestWhatsappVerification: () =>

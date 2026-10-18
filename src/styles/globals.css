@@ -89,8 +89,18 @@
   --radius-xl: calc(var(--radius) * 1.4);
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6); 
- 
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  --animate-reveal-x: reveal-x 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes reveal-x {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
 }
 
 :root {

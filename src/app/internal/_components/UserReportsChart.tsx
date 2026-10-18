@@ -10,6 +10,8 @@ export const REPORT_SERIES = {
   resolved: { key: "resolved", label: "Resolved", color: "#3FB39A" },
 } as const;
 
+const CHART_ANIMATION_MS = 800;
+const SERIES_STAGGER_MS = 150;
 const AXIS_TICK = { fontSize: 11, fill: "#9AA8A2" };
 
 interface UserReportsChartProps {
@@ -68,7 +70,7 @@ export function UserReportsChart({ data }: UserReportsChartProps) {
           width={48}
         />
         <Tooltip content={<ChartTooltip />} cursor={{ fill: "#0F1E1908" }} />
-        {Object.values(REPORT_SERIES).map((series) => (
+        {Object.values(REPORT_SERIES).map((series, index) => (
           <Bar
             key={series.key}
             dataKey={series.key}
@@ -76,7 +78,9 @@ export function UserReportsChart({ data }: UserReportsChartProps) {
             fill={series.color}
             radius={[4, 4, 0, 0]}
             maxBarSize={14}
-            isAnimationActive={false}
+            animationBegin={index * SERIES_STAGGER_MS}
+            animationDuration={CHART_ANIMATION_MS}
+            animationEasing="ease-out"
           />
         ))}
       </BarChart>

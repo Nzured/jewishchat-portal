@@ -59,14 +59,12 @@ export function useInsightsPage<T, S extends string>({
     sort.sortDir,
     pageSize,
   ].join("|");
-  const lastBaseKey = React.useRef(baseKey);
-
-  React.useEffect(() => {
-    if (lastBaseKey.current === baseKey) return;
-    lastBaseKey.current = baseKey;
+  const [lastBaseKey, setLastBaseKey] = React.useState(baseKey);
+  if (lastBaseKey !== baseKey) {
+    setLastBaseKey(baseKey);
     setPage(FIRST_PAGE);
     setMobileRows([]);
-  }, [baseKey]);
+  }
 
   const params = React.useMemo<(InsightsPageParams & SortState<S>) | null>(() => {
     if (selection.period === "custom" && (!selection.startDate || !selection.endDate)) return null;

@@ -1,3 +1,4 @@
+import { toDateKey } from "@/lib/date";
 import type { DashboardPeriod } from "@/types/Dashboard";
 
 export const PERIOD_OPTIONS = [
@@ -32,6 +33,20 @@ export interface PeriodSelection {
   period: Period;
   startDate?: string;
   endDate?: string;
+}
+
+export type PeriodRangeError = "order" | "future";
+
+export const PERIOD_RANGE_ERROR_MESSAGE: Record<PeriodRangeError, string> = {
+  order: "Start date must not be after end date.",
+  future: "End date cannot be in the future.",
+};
+
+export function validatePeriodRange(start: string, end: string): PeriodRangeError | null {
+  if (!start || !end) return null;
+  if (start > end) return "order";
+  if (end > toDateKey(new Date())) return "future";
+  return null;
 }
 
 export function overviewRequestKey(params: {

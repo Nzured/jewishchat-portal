@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Typography } from "@/components/ui/Typography";
 import { formatDate } from "@/lib/date";
+import { cn } from "@/lib/utils";
 import { DashboardService } from "@/services/dashboard/dashboard.service";
 import {
   DashboardOverview,
@@ -25,6 +26,13 @@ import { PlatformTraffic } from "./PlatformTraffic";
 import { UserReports } from "./UserReports";
 
 const MODERATION_REFRESH_MS = 5 * 60 * 1000;
+const SECTION_STAGGER_MS = 90;
+const SECTION_REVEAL_CLASS =
+  "animate-in fade-in slide-in-from-bottom-3 animation-duration-600 ease-out fill-mode-both motion-reduce:animate-none";
+
+function revealStyle(order: number) {
+  return { animationDelay: `${order * SECTION_STAGGER_MS}ms` };
+}
 
 interface DashboardClientProps {
   initialOverview: DashboardOverview | null;
@@ -144,20 +152,27 @@ export function DashboardClient({ initialOverview }: DashboardClientProps) {
         onSelectionChange={setSelection}
       />
 
-      <ModerationOperations
-        data={overview?.moderationOperations}
-        dataAsOf={overview?.moderationDataAsOf}
-        loading={loading}
-      />
+      <div className={SECTION_REVEAL_CLASS} style={revealStyle(0)}>
+        <ModerationOperations
+          data={overview?.moderationOperations}
+          dataAsOf={overview?.moderationDataAsOf}
+          loading={loading}
+        />
+      </div>
 
-      <GrowthSnapshot
-        data={overview?.growthSnapshot}
-        publishedInPeriod={overview?.growthTrends?.listingsPublished}
-        periodLabel={periodLabel}
-        loading={loading}
-      />
+      <div className={SECTION_REVEAL_CLASS} style={revealStyle(1)}>
+        <GrowthSnapshot
+          data={overview?.growthSnapshot}
+          publishedInPeriod={overview?.growthTrends?.listingsPublished}
+          periodLabel={periodLabel}
+          loading={loading}
+        />
+      </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2fr_1fr]">
+      <div
+        className={cn("grid grid-cols-1 gap-4 xl:grid-cols-[2fr_1fr]", SECTION_REVEAL_CLASS)}
+        style={revealStyle(2)}
+      >
         <ListingGrowth
           data={listingTrends}
           periodLabel={periodLabel}
@@ -169,7 +184,10 @@ export function DashboardClient({ initialOverview }: DashboardClientProps) {
         <LiveGroupsByCategory data={overview?.growthSnapshot} loading={loading} />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2fr_1fr]">
+      <div
+        className={cn("grid grid-cols-1 gap-4 xl:grid-cols-[2fr_1fr]", SECTION_REVEAL_CLASS)}
+        style={revealStyle(3)}
+      >
         <UserReports data={overview?.reports} periodLabel={periodLabel} loading={loading} />
         <PlatformTraffic data={overview?.traffic} periodLabel={periodLabel} loading={loading} />
       </div>

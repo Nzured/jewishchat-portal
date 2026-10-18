@@ -22,7 +22,11 @@ function load(): WhatsappOtpRequest | null {
 export function markWhatsappOtpRequested(mobile: string) {
   if (typeof window === "undefined") return;
   const entry: WhatsappOtpRequest = { mobile, requestedAt: Date.now() };
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(entry));
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(entry));
+  } catch {
+    return;
+  }
 }
 
 export function getWhatsappOtpCooldownSeconds(mobile: string): number {

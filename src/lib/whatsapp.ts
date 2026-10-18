@@ -35,7 +35,7 @@ export function normalizeWhatsappGroupLink(value: string): string | null {
 
   const segments = url.pathname.split("/").filter(Boolean);
   const code =
-    segments.length === 1
+    segments.length === 1 && segments[0] !== "invite"
       ? segments[0]
       : segments.length === 2 && segments[0] === "invite"
         ? segments[1]

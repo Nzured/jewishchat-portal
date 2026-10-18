@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from "node:crypto";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { CACHE_TAGS } from "@/services/group/group.server";
@@ -9,6 +10,14 @@ interface RevalidateBody {
   tags?: unknown;
 }
 
+function digest(value: string) {
+  return createHash("sha256").update(value).digest();
+}
+
+function secretsMatch(provided: string, secret: string) {
+  return timingSafeEqual(digest(provided), digest(secret));
+}
+
 export async function POST(request: NextRequest) {
   const secret = process.env.REVALIDATE_SECRET;
   if (!secret) {
@@ -16,7 +25,7 @@ export async function POST(request: NextRequest) {
   }
 
   const provided = request.headers.get("x-revalidate-secret");
-  if (provided !== secret) {
+  if (provided === null || !secretsMatch(provided, secret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

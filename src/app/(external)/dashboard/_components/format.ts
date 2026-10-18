@@ -54,7 +54,7 @@ export function sumSources(row: PageViewsByGroup, sources: TrafficSource[]) {
 }
 
 export function formatCount(value?: number | null) {
-  return value == null ? NO_VALUE : value.toLocaleString();
+  return value == null || !Number.isFinite(value) ? NO_VALUE : value.toLocaleString();
 }
 
 export function formatPct(value?: number | null, digits = 1) {
