@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { clearAuthSession, setAuthSession } from "@/lib/auth";
+import { stubAuthApi } from "@/test/fakeAuthApi";
 import type { FilterItem } from "@/types/Search";
 import { User, UserType } from "@/types/User";
 import { SearchFilterProvider, useSearchFilter } from "./SearchFilterContext";
@@ -83,10 +84,11 @@ describe("UserContext", () => {
     return <UserProvider>{children}</UserProvider>;
   }
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    stubAuthApi();
     localStorage.clear();
     sessionStorage.clear();
-    clearAuthSession();
+    await clearAuthSession();
     myProfile.mockReset();
   });
 
@@ -98,7 +100,7 @@ describe("UserContext", () => {
   });
 
   it("loads the profile when logged in and caches it per token", async () => {
-    setAuthSession("token-1", "r", UserType.INTERNAL);
+    await setAuthSession("token-1", "r", UserType.INTERNAL);
     myProfile.mockResolvedValue({ data: baseUser });
 
     const first = renderHook(() => useUser(), { wrapper });
@@ -111,20 +113,20 @@ describe("UserContext", () => {
   });
 
   it("does not reuse a cached profile for a different token", async () => {
-    setAuthSession("token-1", "r", UserType.INTERNAL);
+    await setAuthSession("token-1", "r", UserType.INTERNAL);
     myProfile.mockResolvedValue({ data: baseUser });
     const first = renderHook(() => useUser(), { wrapper });
     await waitFor(() => expect(first.result.current.user).not.toBeNull());
     first.unmount();
 
-    setAuthSession("token-2", "r", UserType.INTERNAL);
+    await setAuthSession("token-2", "r", UserType.INTERNAL);
     const second = renderHook(() => useUser(), { wrapper });
     await waitFor(() => expect(second.result.current.isLoading).toBe(false));
     expect(myProfile).toHaveBeenCalledTimes(2);
   });
 
   it("checks permissions, with super admins allowed everything", async () => {
-    setAuthSession("token-1", "r", UserType.INTERNAL);
+    await setAuthSession("token-1", "r", UserType.INTERNAL);
     myProfile.mockResolvedValue({ data: baseUser });
     const { result } = renderHook(() => useUser(), { wrapper });
     await waitFor(() => expect(result.current.user).not.toBeNull());
@@ -134,7 +136,7 @@ describe("UserContext", () => {
   });
 
   it("does not crash when the profile has no permissions list", async () => {
-    setAuthSession("token-1", "r", UserType.EXTERNAL);
+    await setAuthSession("token-1", "r", UserType.EXTERNAL);
     myProfile.mockResolvedValue({ data: { ...baseUser, permissions: null } });
     const { result } = renderHook(() => useUser(), { wrapper });
     await waitFor(() => expect(result.current.user).not.toBeNull());
@@ -144,7 +146,7 @@ describe("UserContext", () => {
   });
 
   it("clears the user when the profile request fails", async () => {
-    setAuthSession("token-1", "r", UserType.INTERNAL);
+    await setAuthSession("token-1", "r", UserType.INTERNAL);
     myProfile.mockRejectedValue(new Error("401"));
     const { result } = renderHook(() => useUser(), { wrapper });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -152,7 +154,7 @@ describe("UserContext", () => {
   });
 
   it("clearUser drops the user and the cache", async () => {
-    setAuthSession("token-1", "r", UserType.INTERNAL);
+    await setAuthSession("token-1", "r", UserType.INTERNAL);
     myProfile.mockResolvedValue({ data: baseUser });
     const { result } = renderHook(() => useUser(), { wrapper });
     await waitFor(() => expect(result.current.user).not.toBeNull());

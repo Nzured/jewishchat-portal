@@ -43,7 +43,7 @@ describe("proxy auth routing", () => {
     expect(res.headers.get("location")).toBe("http://localhost/");
   });
 
-  it.each(["/", "/groups", "/categories", "/login", "/signup"])(
+  it.each(["/", "/groups", "/groups/new", "/categories", "/profile/abc", "/login", "/signup"])(
     "lets anonymous visitors open %s",
     async (path) => {
       const proxy = await loadProxy();
@@ -51,7 +51,15 @@ describe("proxy auth routing", () => {
     },
   );
 
-  it.each(["/dashboard", "/dashboard/x", "/internal", "/internal/users"])(
+  it.each([
+    "/dashboard",
+    "/dashboard/x",
+    "/profile",
+    "/groups/mine",
+    "/groups/mine/food/my-group",
+    "/internal",
+    "/internal/users",
+  ])(
     "sends anonymous visitors from %s to login",
     async (path) => {
       const proxy = await loadProxy();
@@ -90,9 +98,11 @@ describe("proxy auth routing", () => {
     expect(res.headers.get("location")).toBe("http://localhost/");
   });
 
-  it("lets external users open the dashboard and public pages", async () => {
+  it("lets external users open member pages and public pages", async () => {
     const proxy = await loadProxy();
     expect(isPassThrough(await proxy(request("/dashboard", external)))).toBe(true);
+    expect(isPassThrough(await proxy(request("/profile", external)))).toBe(true);
+    expect(isPassThrough(await proxy(request("/groups/mine", external)))).toBe(true);
     expect(isPassThrough(await proxy(request("/groups", external)))).toBe(true);
   });
 

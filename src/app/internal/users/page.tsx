@@ -59,29 +59,35 @@ export default function UserListing() {
         buttonLabel={"Add new Admin"}
         onButtonPress={() => setAddUserModalOpen(true)}
         filters={filters}
+        toolbar={
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as UserType)}
+            className="w-full md:w-auto"
+          >
+            <TabsHeader
+              variant="pills"
+              items={[
+                {
+                  value: UserType.EXTERNAL,
+                  label: UserType.EXTERNAL,
+                  icon: <UserCircle className="size-4" />,
+                  count: externalCount,
+                },
+                {
+                  value: UserType.INTERNAL,
+                  label: UserType.INTERNAL,
+                  icon: <UserStar className="size-4" />,
+                  count: internalCount,
+                },
+              ]}
+            />
+          </Tabs>
+        }
       />
-      <div className="my-6">
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as UserType)}>
-          <TabsHeader
-            variant="pills"
-            items={[
-              {
-                value: UserType.EXTERNAL,
-                label: UserType.EXTERNAL,
-                icon: <UserCircle className="size-4" />,
-                count: externalCount,
-              },
-              {
-                value: UserType.INTERNAL,
-                label: UserType.INTERNAL,
-                icon: <UserStar className="size-4" />,
-                count: internalCount,
-              },
-            ]}
-          />
-        </Tabs>
+      <div className="mt-6">
+        <UserTable tab={activeTab} onCountChange={handleCountChange} refreshToken={refreshToken} />
       </div>
-      <UserTable tab={activeTab} onCountChange={handleCountChange} refreshToken={refreshToken} />
       <AddInternalUserModal
         open={addUserModalOpen}
         setOpen={setAddUserModalOpen}

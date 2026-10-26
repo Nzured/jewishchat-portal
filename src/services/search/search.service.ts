@@ -66,10 +66,12 @@ export const SearchService = {
     page: number = DEFAULT_PAGE,
     pageSize: number = DEFAULT_PAGE_SIZE,
     sort?: string,
+    name?: string,
   ) =>
     api.get<ApiResponse<GroupSearchResults>>(`${SEARCH_SERVICE}/search`, {
       params: {
         q: search || undefined,
+        name: name || undefined,
         category: category || undefined,
         city: city || undefined,
         country: country || undefined,

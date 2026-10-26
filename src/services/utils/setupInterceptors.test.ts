@@ -1,12 +1,10 @@
-import axios, {
-  AxiosError,
-  type AxiosAdapter,
-  type InternalAxiosRequestConfig,
-} from "axios";
+import axios, { AxiosError, type AxiosAdapter, type InternalAxiosRequestConfig } from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { trackPromise } from "react-promise-tracker";
 import { toast } from "sonner";
+import { REFRESH_API_PATH } from "@/configs/const";
 import { clearAuthSession, getAccessToken, setAuthSession } from "@/lib/auth";
+import { stubAuthApi } from "@/test/fakeAuthApi";
 import { UserType } from "@/types/User";
 import { setupInterceptors } from "./setupInterceptors";
 
@@ -24,9 +22,7 @@ function createInstance(handler: Handler) {
     const { status, data } = handler(config);
     const response = { data, status, statusText: "", headers: {}, config };
     if (status >= 400) {
-      return Promise.reject(
-        new AxiosError("failed", undefined, config, undefined, response),
-      );
+      return Promise.reject(new AxiosError("failed", undefined, config, undefined, response));
     }
     return Promise.resolve(response);
   };
@@ -41,11 +37,12 @@ function authHeader(config: InternalAxiosRequestConfig) {
 }
 
 describe("setupInterceptors", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.spyOn(console, "log").mockImplementation(() => {});
     vi.spyOn(console, "error").mockImplementation(() => {});
+    stubAuthApi();
     localStorage.clear();
-    clearAuthSession();
+    await clearAuthSession();
     vi.mocked(toast.success).mockClear();
     vi.mocked(trackPromise).mockClear();
   });
@@ -56,10 +53,21 @@ describe("setupInterceptors", () => {
   });
 
   it("adds the bearer token when logged in", async () => {
-    setAuthSession("access-1", "refresh-1", UserType.EXTERNAL);
+    await setAuthSession("access-1", "refresh-1", UserType.EXTERNAL);
     const { instance, seen } = createInstance(() => ({ status: 200 }));
     await instance.get("/x");
     expect(seen[0]).toBe("Bearer access-1");
+  });
+
+  it("restores the token before the first request after a reload", async () => {
+    const api = stubAuthApi({ refresh: () => "restored" });
+    api.setUserTypeCookie(UserType.EXTERNAL);
+    const { instance, seen } = createInstance(() => ({ status: 200 }));
+
+    await Promise.all([instance.get("/a"), instance.get("/b")]);
+
+    expect(seen).toEqual(["Bearer restored", "Bearer restored"]);
+    expect(api.callsTo(REFRESH_API_PATH)).toHaveLength(1);
   });
 
   it("sends no auth header when logged out", async () => {
@@ -96,66 +104,63 @@ describe("setupInterceptors", () => {
   });
 
   it("does not try to refresh a 401 when logged out", async () => {
-    const refresh = vi.spyOn(axios, "post");
+    const api = stubAuthApi();
     const { instance, errorHandler } = createInstance(() => ({ status: 401 }));
     await expect(instance.get("/x")).rejects.toBeInstanceOf(AxiosError);
-    expect(refresh).not.toHaveBeenCalled();
+    expect(api.callsTo(REFRESH_API_PATH)).toHaveLength(0);
     expect(errorHandler).toHaveBeenCalledTimes(1);
   });
 
   it("refreshes the token once and retries a 401 with the new token", async () => {
-    setAuthSession("old", "refresh-1", UserType.EXTERNAL);
-    const refresh = vi.spyOn(axios, "post").mockResolvedValue({
-      data: { data: { accessToken: "new", refreshToken: "refresh-2" } },
-    });
+    const api = stubAuthApi({ refresh: () => "new" });
+    await setAuthSession("old", "refresh-1", UserType.EXTERNAL);
     const { instance, seen } = createInstance((config) =>
       authHeader(config) === "Bearer new" ? { status: 200, data: "ok" } : { status: 401 },
     );
 
     await expect(instance.get("/x")).resolves.toBe("ok");
 
-    expect(refresh).toHaveBeenCalledTimes(1);
-    expect(refresh.mock.calls[0][2]).toMatchObject({ headers: { Authorization: "refresh-1" } });
+    expect(api.callsTo(REFRESH_API_PATH)).toHaveLength(1);
     expect(seen).toEqual(["Bearer old", "Bearer new"]);
     expect(getAccessToken()).toBe("new");
   });
 
   it("shares a single refresh between concurrent 401s", async () => {
-    setAuthSession("old", "refresh-1", UserType.EXTERNAL);
-    let resolveRefresh!: (value: unknown) => void;
-    const refresh = vi.spyOn(axios, "post").mockReturnValue(
-      new Promise((resolve) => {
-        resolveRefresh = resolve;
-      }),
-    );
+    let resolveRefresh!: (token: string) => void;
+    const api = stubAuthApi({
+      refresh: () =>
+        new Promise((resolve) => {
+          resolveRefresh = resolve;
+        }),
+    });
+    await setAuthSession("old", "refresh-1", UserType.EXTERNAL);
     const { instance } = createInstance((config) =>
       authHeader(config) === "Bearer new" ? { status: 200, data: "ok" } : { status: 401 },
     );
 
     const requests = Promise.all([instance.get("/a"), instance.get("/b"), instance.get("/c")]);
-    await vi.waitFor(() => expect(refresh).toHaveBeenCalled());
-    resolveRefresh({ data: { data: { accessToken: "new", refreshToken: "refresh-2" } } });
+    await vi.waitFor(() => expect(api.callsTo(REFRESH_API_PATH)).toHaveLength(1));
+    resolveRefresh("new");
 
     await expect(requests).resolves.toEqual(["ok", "ok", "ok"]);
-    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(api.callsTo(REFRESH_API_PATH)).toHaveLength(1);
   });
 
   it("logs out when the refresh fails", async () => {
-    setAuthSession("old", "refresh-1", UserType.EXTERNAL);
-    vi.spyOn(axios, "post").mockRejectedValue(new Error("expired"));
+    const api = stubAuthApi({ refresh: () => null });
+    await setAuthSession("old", "refresh-1", UserType.EXTERNAL);
     const { instance } = createInstance(() => ({ status: 401 }));
 
     await expect(instance.get("/x")).rejects.toBeInstanceOf(AxiosError);
     expect(getAccessToken()).toBeNull();
+    expect(api.callsTo("/api/auth/session", "DELETE")).toHaveLength(1);
   });
 
   it("does not refresh when the request opted out", async () => {
-    setAuthSession("old", "refresh-1", UserType.EXTERNAL);
-    const refresh = vi.spyOn(axios, "post");
+    const api = stubAuthApi();
+    await setAuthSession("old", "refresh-1", UserType.EXTERNAL);
     const { instance } = createInstance(() => ({ status: 401 }));
-    await expect(instance.get("/x", { skipAuthRefresh: true })).rejects.toBeInstanceOf(
-      AxiosError,
-    );
-    expect(refresh).not.toHaveBeenCalled();
+    await expect(instance.get("/x", { skipAuthRefresh: true })).rejects.toBeInstanceOf(AxiosError);
+    expect(api.callsTo(REFRESH_API_PATH)).toHaveLength(0);
   });
 });

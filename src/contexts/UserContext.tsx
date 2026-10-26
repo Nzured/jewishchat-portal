@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { getAccessToken } from "@/lib/auth";
+import { ensureAccessToken } from "@/lib/auth";
 import { UserService } from "@/services/user/user.service";
 import { User } from "@/types/User";
 
@@ -64,7 +64,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     let ignore = false;
 
     async function fetchUser() {
-      const token = getAccessToken();
+      const token = await ensureAccessToken();
       if (!token) {
         if (!ignore) setIsLoading(false);
         return;
@@ -99,7 +99,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const refetchUser = React.useCallback(async () => {
-    const token = getAccessToken();
+    const token = await ensureAccessToken();
     if (!token) {
       clearCachedProfile();
       setUser(null);

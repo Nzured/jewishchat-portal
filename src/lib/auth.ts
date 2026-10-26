@@ -1,62 +1,110 @@
 import {
-  ACCESS_TOKEN_COOKIE,
-  COOKIE_MAX_AGE,
   EXTERNAL_HOME_PATH,
+  REFRESH_API_PATH,
+  SESSION_API_PATH,
   USER_TYPE_COOKIE,
 } from "@/configs/const";
 import { UserType } from "@/types/User";
 
-const AUTH_STORAGE_KEY = "auth";
+const LEGACY_AUTH_STORAGE_KEY = "auth";
 
-interface StoredAuth {
+interface SessionPayload {
   accessToken: string;
   refreshToken: string;
   userType: UserType;
 }
 
-function getStoredAuth(): StoredAuth | null {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as StoredAuth) : null;
-  } catch {
-    return null;
-  }
-}
+let accessToken: string | null = null;
+let refreshPromise: Promise<string | null> | null = null;
 
 export function getHomePathForUserType(userType: UserType) {
   return userType === UserType.INTERNAL ? "/internal" : EXTERNAL_HOME_PATH;
 }
 
 export function getAccessToken(): string | null {
-  return getStoredAuth()?.accessToken ?? null;
+  return accessToken;
 }
 
-export function getRefreshToken(): string | null {
-  return getStoredAuth()?.refreshToken ?? null;
+export function hasSession(): boolean {
+  if (typeof document === "undefined") return false;
+
+  return document.cookie
+    .split("; ")
+    .some((entry) => entry.startsWith(`${USER_TYPE_COOKIE}=`) && entry !== `${USER_TYPE_COOKIE}=`);
 }
 
-export function setAuthSession(accessToken: string, refreshToken: string, userType: UserType) {
-  document.cookie = `${ACCESS_TOKEN_COOKIE}=${accessToken}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
-  document.cookie = `${USER_TYPE_COOKIE}=${userType}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
-  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ accessToken, refreshToken, userType }));
+async function storeSession(payload: SessionPayload) {
+  const res = await fetch(SESSION_API_PATH, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to store session");
 }
 
-// Called after a silent refresh: keeps the existing userType, only rotates tokens.
-export function updateAccessToken(accessToken: string, refreshToken: string) {
+function takeLegacySession(): SessionPayload | null {
+  try {
+    const raw = localStorage.getItem(LEGACY_AUTH_STORAGE_KEY);
+    localStorage.removeItem(LEGACY_AUTH_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as SessionPayload) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function migrateLegacySession() {
+  const legacy = takeLegacySession();
+  if (!legacy?.accessToken || !legacy.refreshToken || !legacy.userType) return;
+  await storeSession(legacy).catch(() => undefined);
+}
+
+async function requestRefresh(): Promise<string | null> {
+  await migrateLegacySession();
+
+  try {
+    const res = await fetch(REFRESH_API_PATH, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (res.status === 401) accessToken = null;
+    if (!res.ok) return null;
+
+    const body = (await res.json()) as { accessToken?: string };
+    accessToken = body.accessToken ?? null;
+    return accessToken;
+  } catch {
+    return null;
+  }
+}
+
+export function refreshAccessToken(): Promise<string | null> {
+  if (typeof window === "undefined") return Promise.resolve(null);
+
+  refreshPromise ??= requestRefresh().finally(() => {
+    refreshPromise = null;
+  });
+  return refreshPromise;
+}
+
+export async function ensureAccessToken(): Promise<string | null> {
+  if (accessToken) return accessToken;
+  if (!hasSession()) return null;
+  return refreshAccessToken();
+}
+
+export async function setAuthSession(
+  newAccessToken: string,
+  refreshToken: string,
+  userType: UserType,
+) {
+  await storeSession({ accessToken: newAccessToken, refreshToken, userType });
+  accessToken = newAccessToken;
+}
+
+export async function clearAuthSession() {
+  accessToken = null;
   if (typeof window === "undefined") return;
 
-  const userType = getStoredAuth()?.userType;
-  document.cookie = `${ACCESS_TOKEN_COOKIE}=${accessToken}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
-  if (userType) {
-    document.cookie = `${USER_TYPE_COOKIE}=${userType}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
-  }
-  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ accessToken, refreshToken, userType }));
-}
-
-export function clearAuthSession() {
-  document.cookie = `${ACCESS_TOKEN_COOKIE}=; path=/; max-age=0`;
-  document.cookie = `${USER_TYPE_COOKIE}=; path=/; max-age=0`;
-  localStorage.removeItem(AUTH_STORAGE_KEY);
+  takeLegacySession();
+  await fetch(SESSION_API_PATH, { method: "DELETE" }).catch(() => undefined);
 }

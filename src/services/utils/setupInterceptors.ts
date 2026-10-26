@@ -1,42 +1,20 @@
-import axios, {
-  AxiosError,
-  AxiosInstance,
-  AxiosRequestConfig,
-  InternalAxiosRequestConfig,
-} from "axios";
+import { AxiosError, AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
 import { trackPromise } from "react-promise-tracker";
 import { toast } from "sonner";
-import { REFRESH_TOKEN_ENDPOINT } from "@/configs/const";
-import { clearAuthSession, getAccessToken, getRefreshToken, updateAccessToken } from "@/lib/auth";
+import {
+  clearAuthSession,
+  ensureAccessToken,
+  getAccessToken,
+  hasSession,
+  refreshAccessToken,
+} from "@/lib/auth";
 import { reportRequestDuration, reportRequestTimeout } from "@/lib/networkHealth";
-import type { LoginData } from "@/services/auth/auth.types";
-import { ApiResponse } from "@/types/Common";
 
-const handleUnauthorized = () => {
+const handleUnauthorized = async () => {
   if (typeof window === "undefined") return;
 
-  clearAuthSession();
+  await clearAuthSession();
   window.location.href = "/login";
-};
-
-let refreshPromise: Promise<string | null> | null = null;
-
-const refreshAccessToken = async (): Promise<string | null> => {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) return null;
-
-  try {
-    const response = await axios.post<ApiResponse<LoginData>>(
-      `${process.env.NEXT_PUBLIC_API_URL || "/api"}${REFRESH_TOKEN_ENDPOINT}`,
-      undefined,
-      { headers: { Authorization: refreshToken } },
-    );
-    const { accessToken, refreshToken: newRefreshToken } = response.data.data;
-    updateAccessToken(accessToken, newRefreshToken);
-    return accessToken;
-  } catch {
-    return null;
-  }
 };
 
 interface RetriableConfig extends InternalAxiosRequestConfig {
@@ -74,8 +52,8 @@ export const setupInterceptors = (
     };
   });
 
-  instance.interceptors.request.use((config) => {
-    const token = getAccessToken();
+  instance.interceptors.request.use(async (config) => {
+    const token = config.skipAuthRefresh ? getAccessToken() : await ensureAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -120,24 +98,20 @@ export const setupInterceptors = (
       }
 
       if (error.response?.status === 401) {
-        if (config?.skipAuthRefresh || !getAccessToken()) {
+        if (config?.skipAuthRefresh || !hasSession()) {
           return errorHandler(error);
         }
 
         if (config && !config._retry) {
           config._retry = true;
 
-          refreshPromise ??= refreshAccessToken().finally(() => {
-            refreshPromise = null;
-          });
-
-          const newAccessToken = await refreshPromise;
+          const newAccessToken = await refreshAccessToken();
           if (newAccessToken) {
             config.headers.Authorization = `Bearer ${newAccessToken}`;
             return instance.request(config);
           }
 
-          handleUnauthorized();
+          await handleUnauthorized();
           return Promise.reject(error);
         }
         return Promise.reject(error);

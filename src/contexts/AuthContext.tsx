@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const establishSession = React.useCallback(
     async (data: LoginData) => {
-      setAuthSession(data.accessToken, data.refreshToken, data.user.userType);
+      await setAuthSession(data.accessToken, data.refreshToken, data.user.userType);
 
       try {
         await refetchUser();
@@ -113,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = React.useCallback(async () => {
     await AuthService.logout().catch(() => {});
-    clearAuthSession();
+    await clearAuthSession();
     clearUser();
     router.push("/login");
     router.refresh();

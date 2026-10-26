@@ -4,8 +4,8 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Typography } from "@/components/ui/Typography";
-import { EXTERNAL_PROFILE_PATH } from "@/configs/const";
 import { formatDate } from "@/lib/date";
+import { getMemberProfilePath } from "@/lib/publicPaths";
 import { cn } from "@/lib/utils";
 import { Group } from "@/types/Group";
 
@@ -18,7 +18,7 @@ export function GroupAdminCard({ group, className }: GroupAdminCardProps) {
   const owner = group.owner;
   const ownerName = owner ? `${owner.firstName} ${owner.lastName}`.trim() : "";
   const ownerUuid = owner?.uuid ?? group.submittedByUuid;
-  const ownerProfilePath = ownerUuid ? `${EXTERNAL_PROFILE_PATH}/${ownerUuid}` : null;
+  const ownerProfilePath = ownerUuid ? getMemberProfilePath(ownerUuid, group) : null;
 
   if (!ownerName) return null;
 

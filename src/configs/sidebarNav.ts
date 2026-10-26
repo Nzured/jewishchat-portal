@@ -2,7 +2,7 @@ import { Flag, LayoutGrid, MessageSquare, Search, Tag, UserCog, Users } from "lu
 import type { SidebarNavSection } from "@/types/Navigation";
 import { UserType } from "@/types/User";
 
-const ADMIN_NAV_SECTIONS: SidebarNavSection[] = [
+const INTERNAL_NAV_SECTIONS: SidebarNavSection[] = [
   {
     items: [
       { label: "Dashboard", href: "/internal", icon: LayoutGrid },
@@ -30,13 +30,7 @@ const ADMIN_NAV_SECTIONS: SidebarNavSection[] = [
   // },
 ];
 
-const INTERNAL_NAV_SECTIONS: SidebarNavSection[] = [
-  {
-    items: [{ label: "Dashboard", href: "/internal", icon: LayoutGrid }],
-  },
-];
-
 export const SIDEBAR_NAV_BY_USER_TYPE: Record<UserType, SidebarNavSection[]> = {
-  [UserType.EXTERNAL]: ADMIN_NAV_SECTIONS,
   [UserType.INTERNAL]: INTERNAL_NAV_SECTIONS,
+  [UserType.EXTERNAL]: [],
 };

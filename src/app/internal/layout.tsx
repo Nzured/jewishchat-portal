@@ -8,14 +8,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-export default function ExternalLayout({
+export default function InternalLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <SearchFilterProvider>
-      <AppShell title={NAME_PART_ONE + NAME_PART_TWO} userType={UserType.EXTERNAL}>
+      <AppShell title={NAME_PART_ONE + NAME_PART_TWO} userType={UserType.INTERNAL}>
         {children}
       </AppShell>
     </SearchFilterProvider>

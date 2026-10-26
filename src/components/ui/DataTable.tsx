@@ -63,6 +63,7 @@ interface DataTableProps<T> {
   loading?: boolean;
   /** Number of skeleton rows to render while `loading`. Defaults to the page size, or 5. */
   skeletonRowCount?: number;
+  stickyHeader?: boolean;
 }
 
 function getPageNumbers(current: number, totalPages: number) {
@@ -202,6 +203,7 @@ function DataTable<T>({
   infiniteScroll,
   loading = false,
   skeletonRowCount,
+  stickyHeader = false,
 }: DataTableProps<T>) {
   const rowIds = React.useMemo(
     () => data?.map((row, index) => getRowId(row, index)),
@@ -266,8 +268,13 @@ function DataTable<T>({
           cardView && "hidden md:block",
         )}
       >
-        <Table>
-          <TableHeader>
+        <Table containerClassName={cn(stickyHeader && "md:overflow-x-visible")}>
+          <TableHeader
+            className={cn(
+              stickyHeader &&
+                "z-10 md:sticky md:top-[var(--app-toolbar-height,0px)] [&_th]:bg-surface-card [&_th]:shadow-[inset_0_-1px_0_var(--color-surface-line)] [&_th:first-child]:rounded-tl-xl [&_th:last-child]:rounded-tr-xl",
+            )}
+          >
             <TableRow className="hover:bg-transparent">
               {selectable && (
                 <TableHead className="w-10">

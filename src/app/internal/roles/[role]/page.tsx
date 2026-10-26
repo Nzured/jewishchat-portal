@@ -52,7 +52,7 @@ export default function RolePage() {
         subtitle={role?.description ?? ""}
         count={role?.permissions.length}
         countLabel="Roles"
-        stickyTop="top-21"
+        className="pt-4"
       />
       {isLoading ? (
         <RoleWorkspaceSkeleton />

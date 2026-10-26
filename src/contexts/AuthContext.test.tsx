@@ -2,6 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { clearAuthSession, getAccessToken } from "@/lib/auth";
+import { stubAuthApi } from "@/test/fakeAuthApi";
 import { UserType } from "@/types/User";
 import { AuthProvider, useAuth } from "./AuthContext";
 
@@ -31,14 +32,15 @@ function loginData(userType: UserType) {
 }
 
 describe("AuthContext", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    stubAuthApi();
     Object.values(auth).forEach((fn) => fn.mockReset());
     router.push.mockReset();
     router.refresh.mockReset();
     userCtx.refetchUser.mockReset().mockResolvedValue(undefined);
     userCtx.clearUser.mockReset();
     localStorage.clear();
-    clearAuthSession();
+    await clearAuthSession();
   });
 
   it("logs external users in through the external endpoint", async () => {

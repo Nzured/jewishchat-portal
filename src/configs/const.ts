@@ -68,6 +68,10 @@ export const SITE_NAME = "ChatList";
 
 export const ACCESS_TOKEN_COOKIE = "accessToken";
 export const USER_TYPE_COOKIE = "userType";
+export const REFRESH_TOKEN_COOKIE = "refreshToken";
+
+export const SESSION_API_PATH = "/api/auth/session";
+export const REFRESH_API_PATH = "/api/auth/refresh";
 
 export const REFRESH_TOKEN_ENDPOINT = "auth-service/api/v1/auth/refresh-token";
 
