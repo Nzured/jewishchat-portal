@@ -1,10 +1,11 @@
-import { cache } from "react";
+import { cache, Suspense } from "react";
 import { notFound } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Typography } from "@/components/ui/Typography";
 import { EXTERNAL_HOME_PATH } from "@/configs/const";
 import { UserServer } from "@/services/user/user.server";
+import { MemberBreadcrumbs } from "./_components/MemberBreadcrumbs";
 import { MemberProfileClient } from "./_components/MemberProfileClient";
 import type { Metadata } from "next";
 
@@ -39,7 +40,13 @@ export default async function MemberProfilePage({ params }: MemberProfilePagePro
 
   return (
     <div className="flex w-full flex-col gap-8">
-      <Breadcrumbs items={[{ label: "Home", href: EXTERNAL_HOME_PATH }, { label: name }]} />
+      <Suspense
+        fallback={
+          <Breadcrumbs items={[{ label: "Home", href: EXTERNAL_HOME_PATH }, { label: name }]} />
+        }
+      >
+        <MemberBreadcrumbs memberName={name} />
+      </Suspense>
 
       <div className="flex items-center gap-4">
         <Avatar src={member.profilePic} name={name} size="xl" />

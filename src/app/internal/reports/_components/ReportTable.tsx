@@ -144,6 +144,7 @@ export function ReportsTable({ onCountChange }: { onCountChange?: (total: number
 
   return (
     <DataTable
+      stickyHeader
       columns={columns}
       data={reports}
       cardData={mobileReports}

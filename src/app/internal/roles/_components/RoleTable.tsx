@@ -60,6 +60,7 @@ export default function RoleTable({ data, loading }: { data: Role[]; loading?: b
 
   return (
     <DataTable
+      stickyHeader
       columns={columns}
       data={pageData}
       cardData={mobileData}

@@ -127,6 +127,7 @@ export default function UserTable({
 
   return (
     <DataTable
+      stickyHeader
       columns={columns}
       data={filteredUsers}
       cardData={filteredMobileUsers}

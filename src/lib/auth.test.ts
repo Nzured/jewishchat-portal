@@ -1,39 +1,22 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ACCESS_TOKEN_COOKIE, COOKIE_MAX_AGE, USER_TYPE_COOKIE } from "@/configs/const";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { REFRESH_API_PATH, SESSION_API_PATH } from "@/configs/const";
+import { stubAuthApi } from "@/test/fakeAuthApi";
 import { UserType } from "@/types/User";
 import {
   clearAuthSession,
+  ensureAccessToken,
   getAccessToken,
   getHomePathForUserType,
-  getRefreshToken,
+  hasSession,
+  refreshAccessToken,
   setAuthSession,
-  updateAccessToken,
 } from "./auth";
 
-function cookieValue(name: string) {
-  return document.cookie
-    .split("; ")
-    .find((entry) => entry.startsWith(`${name}=`))
-    ?.slice(name.length + 1);
-}
-
-function captureCookieWrites() {
-  const writes: string[] = [];
-  const descriptor = Object.getOwnPropertyDescriptor(Document.prototype, "cookie")!;
-  vi.spyOn(document, "cookie", "set").mockImplementation((value: string) => {
-    writes.push(value);
-    descriptor.set!.call(document, value);
-  });
-  return writes;
-}
-
 describe("auth session", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    stubAuthApi();
     localStorage.clear();
-    clearAuthSession();
-  });
-  afterEach(() => {
-    clearAuthSession();
+    await clearAuthSession();
   });
 
   it("routes users to the right home", () => {
@@ -41,54 +24,100 @@ describe("auth session", () => {
     expect(getHomePathForUserType(UserType.EXTERNAL)).toBe("/");
   });
 
-  it("has no tokens before login", () => {
+  it("has no token or session before login", async () => {
     expect(getAccessToken()).toBeNull();
-    expect(getRefreshToken()).toBeNull();
+    expect(hasSession()).toBe(false);
+    await expect(ensureAccessToken()).resolves.toBeNull();
   });
 
-  it("stores tokens and cookies on login", () => {
-    setAuthSession("access-1", "refresh-1", UserType.EXTERNAL);
-    expect(getAccessToken()).toBe("access-1");
-    expect(getRefreshToken()).toBe("refresh-1");
-    expect(cookieValue(ACCESS_TOKEN_COOKIE)).toBe("access-1");
-    expect(cookieValue(USER_TYPE_COOKIE)).toBe(UserType.EXTERNAL);
-  });
+  it("hands the tokens to the session route and keeps only the access token in memory", async () => {
+    const api = stubAuthApi();
+    await setAuthSession("access-1", "refresh-1", UserType.EXTERNAL);
 
-  it("rotates tokens on refresh and keeps the user type", () => {
-    setAuthSession("access-1", "refresh-1", UserType.INTERNAL);
-    updateAccessToken("access-2", "refresh-2");
-    expect(getAccessToken()).toBe("access-2");
-    expect(getRefreshToken()).toBe("refresh-2");
-    expect(JSON.parse(localStorage.getItem("auth")!)).toMatchObject({
-      userType: UserType.INTERNAL,
+    const [[, init]] = api.callsTo(SESSION_API_PATH);
+    expect(JSON.parse(String(init?.body))).toEqual({
+      accessToken: "access-1",
+      refreshToken: "refresh-1",
+      userType: UserType.EXTERNAL,
     });
-    expect(cookieValue(ACCESS_TOKEN_COOKIE)).toBe("access-2");
+    expect(getAccessToken()).toBe("access-1");
+    expect(hasSession()).toBe(true);
+    expect(localStorage.length).toBe(0);
+    expect(document.cookie).not.toContain("access-1");
+    expect(document.cookie).not.toContain("refresh-1");
   });
 
-  it("extends the user type cookie together with the access token cookie on refresh", () => {
-    setAuthSession("access-1", "refresh-1", UserType.EXTERNAL);
-    const writes = captureCookieWrites();
+  it("does not keep a token when the session route rejects it", async () => {
+    const { fetchMock } = stubAuthApi();
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 400 }));
 
-    updateAccessToken("access-2", "refresh-2");
-
-    const accessWrite = writes.find((w) => w.startsWith(`${ACCESS_TOKEN_COOKIE}=`));
-    const userTypeWrite = writes.find((w) => w.startsWith(`${USER_TYPE_COOKIE}=`));
-    expect(accessWrite).toContain(`max-age=${COOKIE_MAX_AGE}`);
-    expect(userTypeWrite).toBeDefined();
-    expect(userTypeWrite).toContain(`${USER_TYPE_COOKIE}=${UserType.EXTERNAL};`);
-    expect(userTypeWrite).toContain(`max-age=${COOKIE_MAX_AGE}`);
-  });
-
-  it("clears everything on logout", () => {
-    setAuthSession("access-1", "refresh-1", UserType.EXTERNAL);
-    clearAuthSession();
+    await expect(setAuthSession("a", "r", UserType.EXTERNAL)).rejects.toThrow();
     expect(getAccessToken()).toBeNull();
-    expect(cookieValue(ACCESS_TOKEN_COOKIE)).toBeUndefined();
-    expect(cookieValue(USER_TYPE_COOKIE)).toBeUndefined();
   });
 
-  it("treats corrupt stored auth as logged out", () => {
+  it("restores the access token through the refresh route after a reload", async () => {
+    const api = stubAuthApi({ refresh: () => "restored" });
+    api.setUserTypeCookie(UserType.EXTERNAL);
+
+    await expect(ensureAccessToken()).resolves.toBe("restored");
+    await expect(ensureAccessToken()).resolves.toBe("restored");
+    expect(api.callsTo(REFRESH_API_PATH)).toHaveLength(1);
+  });
+
+  it("shares one refresh between concurrent callers", async () => {
+    let resolve!: (token: string) => void;
+    const api = stubAuthApi({ refresh: () => new Promise((r) => (resolve = r)) });
+    api.setUserTypeCookie(UserType.EXTERNAL);
+
+    const pending = Promise.all([refreshAccessToken(), refreshAccessToken(), ensureAccessToken()]);
+    await vi.waitFor(() => expect(api.callsTo(REFRESH_API_PATH)).toHaveLength(1));
+    resolve("new");
+
+    await expect(pending).resolves.toEqual(["new", "new", "new"]);
+  });
+
+  it("drops the session when the refresh is rejected", async () => {
+    const api = stubAuthApi({ refresh: () => null });
+    await setAuthSession("old", "r", UserType.EXTERNAL);
+
+    await expect(refreshAccessToken()).resolves.toBeNull();
+    expect(getAccessToken()).toBeNull();
+    expect(hasSession()).toBe(false);
+    expect(api.callsTo(REFRESH_API_PATH)).toHaveLength(1);
+  });
+
+  it("moves a session stored by the old version out of localStorage", async () => {
+    const api = stubAuthApi({ refresh: () => "fresh" });
+    api.setUserTypeCookie(UserType.INTERNAL);
+    localStorage.setItem(
+      "auth",
+      JSON.stringify({ accessToken: "a", refreshToken: "r", userType: UserType.INTERNAL }),
+    );
+
+    await expect(ensureAccessToken()).resolves.toBe("fresh");
+
+    const [[, init]] = api.callsTo(SESSION_API_PATH);
+    expect(JSON.parse(String(init?.body))).toMatchObject({ refreshToken: "r" });
+    expect(localStorage.getItem("auth")).toBeNull();
+  });
+
+  it("ignores a corrupt legacy session", async () => {
+    const api = stubAuthApi({ refresh: () => null });
+    api.setUserTypeCookie(UserType.EXTERNAL);
     localStorage.setItem("auth", "{broken");
+
+    await expect(ensureAccessToken()).resolves.toBeNull();
+    expect(api.callsTo(SESSION_API_PATH)).toHaveLength(0);
+    expect(localStorage.getItem("auth")).toBeNull();
+  });
+
+  it("clears everything on logout", async () => {
+    const api = stubAuthApi();
+    await setAuthSession("access-1", "refresh-1", UserType.EXTERNAL);
+    await clearAuthSession();
+
     expect(getAccessToken()).toBeNull();
+    expect(hasSession()).toBe(false);
+    expect(api.callsTo(SESSION_API_PATH, "DELETE")).toHaveLength(1);
   });
 });

@@ -56,6 +56,7 @@ export interface GroupsDirectoryProps {
 export function GroupsDirectory({ initialKey, initialResults, categories }: GroupsDirectoryProps) {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") ?? "";
+  const name = searchParams.get("name") ?? "";
   const category = searchParams.get("category") ?? "";
   const city = searchParams.get("city") ?? "";
   const country = searchParams.get("country") ?? "";
@@ -103,7 +104,7 @@ export function GroupsDirectory({ initialKey, initialResults, categories }: Grou
   const suggestedTerms = value.trim().length >= AUTOCOMPLETE_MIN_LENGTH ? autoCompleteResults : [];
 
   React.useEffect(() => {
-    const key = searchKey({ q: query, category, city, country, sort });
+    const key = searchKey({ q: query, name, category, city, country, sort });
     if (loadedFilters.current === key) return;
     loadedFilters.current = key;
 
@@ -120,6 +121,7 @@ export function GroupsDirectory({ initialKey, initialResults, categories }: Grou
       DEFAULT_PAGE,
       DEFAULT_PAGE_SIZE,
       sortParam,
+      name,
     )
       .then((res) => {
         if (loadedFilters.current !== key) return;
@@ -135,7 +137,7 @@ export function GroupsDirectory({ initialKey, initialResults, categories }: Grou
         setSearchId(undefined);
         setIsLoading(false);
       });
-  }, [query, category, city, country, sort, sortParam]);
+  }, [query, name, category, city, country, sort, sortParam]);
 
   const loadMore = React.useCallback(() => {
     if (isLoading || isLoadingMore || !hasMore) return;
@@ -152,6 +154,7 @@ export function GroupsDirectory({ initialKey, initialResults, categories }: Grou
       nextPage,
       DEFAULT_PAGE_SIZE,
       sortParam,
+      name,
     )
       .then((res) => {
         if (loadedFilters.current !== key) return;
@@ -169,7 +172,7 @@ export function GroupsDirectory({ initialKey, initialResults, categories }: Grou
         if (loadedFilters.current !== key) return;
         setIsLoadingMore(false);
       });
-  }, [isLoading, isLoadingMore, hasMore, query, category, city, country, sortParam]);
+  }, [isLoading, isLoadingMore, hasMore, query, name, category, city, country, sortParam]);
 
   const loadMoreRef = React.useRef(loadMore);
   React.useEffect(() => {
@@ -244,10 +247,10 @@ export function GroupsDirectory({ initialKey, initialResults, categories }: Grou
 
   const filters: FilterItem[] = [
     {
-      key: "q",
+      key: "name",
       label: "Group name",
       component: "TEXT_INPUT",
-      value: query || null,
+      value: name || null,
     },
     {
       key: "category",

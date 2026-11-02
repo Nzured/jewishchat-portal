@@ -5,6 +5,8 @@ import { UserType } from "@/types/User";
 import {
   ACCESS_TOKEN_COOKIE,
   EXTERNAL_DASHBOARD_PATH,
+  EXTERNAL_GROUPS_MINE_PATH,
+  EXTERNAL_PROFILE_PATH,
   GROUP_SERVICE,
   RESERVED_ROUTE_SLUGS,
   USER_TYPE_COOKIE,
@@ -14,7 +16,9 @@ const AUTH_PATHS = ["/login", "/signup", "/forgot-password", "/reset-password", 
 
 const ALWAYS_ACCESSIBLE_PATHS = ["/accept-invite"];
 
-const PROTECTED_EXTERNAL_PATHS = [EXTERNAL_DASHBOARD_PATH];
+const PROTECTED_EXTERNAL_PATHS = [EXTERNAL_DASHBOARD_PATH, EXTERNAL_GROUPS_MINE_PATH];
+
+const PROTECTED_EXTERNAL_EXACT_PATHS = [EXTERNAL_PROFILE_PATH];
 
 const INTERNAL_PATH = "/internal";
 
@@ -137,7 +141,9 @@ export async function proxy(request: NextRequest) {
 
   const isAuthPath = matchesPath(pathname, AUTH_PATHS);
   const isInternalPath = matchesPath(pathname, [INTERNAL_PATH]);
-  const isProtectedExternalPath = matchesPath(pathname, PROTECTED_EXTERNAL_PATHS);
+  const isProtectedExternalPath =
+    matchesPath(pathname, PROTECTED_EXTERNAL_PATHS) ||
+    PROTECTED_EXTERNAL_EXACT_PATHS.includes(pathname);
   const isPublicPath = !isAuthPath && !isInternalPath;
 
   if (!isAuthenticated) {

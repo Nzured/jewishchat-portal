@@ -15,6 +15,7 @@ const first = (value: SearchParamValue) => (Array.isArray(value) ? value[0] : va
 export default async function GroupsPage({ searchParams }: GroupsPageProps) {
   const params = await searchParams;
   const q = first(params.q);
+  const name = first(params.name);
   const category = first(params.category);
   const city = first(params.city);
   const country = first(params.country);
@@ -23,6 +24,7 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
   const [results, categories] = await Promise.all([
     SearchServer.searchGroups({
       q,
+      name,
       category,
       city,
       country,
@@ -35,7 +37,7 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
 
   return (
     <GroupsDirectory
-      initialKey={searchKey({ q, category, city, country, sort })}
+      initialKey={searchKey({ q, name, category, city, country, sort })}
       initialResults={results}
       categories={categories}
     />

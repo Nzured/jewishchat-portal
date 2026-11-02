@@ -85,6 +85,7 @@ export default function CategoryTable({ onEdit, data, loading }: CategoryTablePr
   return (
     <>
       <DataTable
+        stickyHeader
         columns={columns}
         data={pageData}
         cardData={mobileData}

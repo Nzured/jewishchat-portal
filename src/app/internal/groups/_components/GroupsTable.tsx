@@ -254,6 +254,7 @@ export function GroupsTable({ onCountChange }: { onCountChange?: (total: number)
   return (
     <>
       <DataTable
+        stickyHeader
         columns={columns}
         data={filteredGroups}
         cardData={filteredMobileGroups}

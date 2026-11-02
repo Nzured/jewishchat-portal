@@ -5,6 +5,7 @@ import { GroupSearchResults, SEARCH_SERVICE } from "./search.service";
 
 export interface GroupSearchQuery {
   q?: string;
+  name?: string;
   category?: string;
   city?: string;
   country?: string;
@@ -16,6 +17,7 @@ export interface GroupSearchQuery {
 export const SearchServer = {
   searchGroups: ({
     q,
+    name,
     category,
     city,
     country,
@@ -24,7 +26,7 @@ export const SearchServer = {
     pageSize = DEFAULT_PAGE_SIZE,
   }: GroupSearchQuery) =>
     serverGet<ApiResponse<GroupSearchResults>>(`${SEARCH_SERVICE}/search`, {
-      params: { q, category, city, country, sort, page, pageSize },
+      params: { q, name, category, city, country, sort, page, pageSize },
       revalidate: 0,
     }),
 };

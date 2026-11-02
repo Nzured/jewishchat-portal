@@ -35,10 +35,6 @@ export interface LoginData {
 
 export type LoginResponse = ApiResponse<LoginData>;
 
-export interface RefreshTokenPayload {
-  refreshToken: string;
-}
-
 export type RefreshTokenResponse = LoginResponse;
 
 export type VerifyEmailResponse = LoginResponse;

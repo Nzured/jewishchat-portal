@@ -1,4 +1,3 @@
-import { REFRESH_TOKEN_ENDPOINT } from "@/configs/const";
 import { api } from "@/services/axiosConfig";
 import { ApiResponse } from "@/types/Common";
 import { InviteInternalUserPayload, User } from "@/types/User";
@@ -6,8 +5,6 @@ import type {
   InvitedUser,
   LoginPayload,
   LoginResponse,
-  RefreshTokenPayload,
-  RefreshTokenResponse,
   ResetPasswordPayload,
   SignupRequest,
   SignupResponse,
@@ -33,13 +30,6 @@ export const AuthService = {
     api.post<LoginResponse>(`${AUTH_ADMIN_SERVICE}/login`, payload, {
       globalLoader: true,
       skipAuthRefresh: true,
-    }),
-  refreshToken: async (payload: RefreshTokenPayload) =>
-    api.post<RefreshTokenResponse>(REFRESH_TOKEN_ENDPOINT, undefined, {
-      headers: { Authorization: payload.refreshToken },
-      globalLoader: true,
-      skipAuthRefresh: true,
-      silentSuccess: true,
     }),
   getUserType: async (payload: { email: string }) =>
     api.get<UserTypeResponse>(`${AUTH_SERVICE}/user-type`, {
